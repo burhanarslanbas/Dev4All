@@ -36,10 +36,10 @@ Persistence  ──►  Application  ──►  Domain
 
 | İçerik | Açıklama |
 |--------|----------|
-| **Entity'ler** | `User`, `ProjectRequest`, `Bid`, `GitHubLog` — saf POCO sınıfları. |
+| **Entity'ler** | `User`, `ProjectRequest`, `Bid`, `GitHubLog` — `BaseEntity`'den türeyen POCO sınıfları. |
 | **Enum'lar** | `ProjectStatus`, `BidStatus`, `UserRole` |
-| **Domain Interface'leri** | `IRepository<T>`, `IUnitOfWork` gibi soyutlamalar burada tanımlanır. |
-| **Bağımlılık** | Sıfır dış bağımlılık. NuGet paketi dahi referans alınmaz. DataAnnotation içermez. |
+| **Exception'lar** | `DomainException`, `ResourceNotFoundException`, `BusinessRuleViolationException` vb. |
+| **Bağımlılık** | **Sıfır** dış bağımlılık. NuGet paketi, interface veya DataAnnotation içermez. |
 
 ### 3.2. Application Katmanı
 
@@ -50,8 +50,10 @@ Persistence  ──►  Application  ──►  Domain
 | **Command'lar** | `CreateProjectRequestCommand`, `PlaceBidCommand`, `AcceptBidCommand` |
 | **Query'ler** | `GetProjectRequestsQuery`, `GetProjectBidsQuery`, `GetGitHubLogsByProjectQuery` |
 | **Handler'lar** | Her Command/Query için `IRequestHandler<TRequest, TResponse>` implementasyonu. |
-| **DTO'lar** | Request ve Response veri transfer nesneleri. |
-| **Validator'lar** | FluentValidation tabanlı; her Command/Query için ayrı validator sınıfı. |
+| **DTO'lar** | Request ve Response — `sealed record` tipinde veri transfer nesneleri. |
+| **Validator'lar** | FluentValidation tabanlı; her Command/Query ile aynı klasörde ayrı validator sınıfı. |
+| **Persistence Soyutlamaları** | `IReadRepository<T>`, `IWriteRepository<T>`, `IUnitOfWork` — Persistence'a karşı soyutlama. |
+| **Entity Repository Interface'leri** | `IProjectRequestRepository`, `IBidRepository`, `IGitHubLogRepository` — entity bazlı özelleşmiş interface'ler. |
 | **Servis Interface'leri** | `IEmailService`, `IGitHubService` — Infrastructure'a karşı soyutlama. |
 | **Bağımlılık** | Yalnızca Domain katmanına bağımlıdır. `MediatR`, `FluentValidation` referansları. |
 
@@ -64,7 +66,7 @@ Persistence  ──►  Application  ──►  Domain
 | **EmailService** | `IEmailService` implementasyonu — MailKit ile SMTP gönderimi. |
 | **GitHubService** | `IGitHubService` implementasyonu — GitHub Webhook payload işleme. |
 | **Background Jobs** | Quartz.NET tabanlı zamanlayıcı görevler (`ExpiredBidJob`, `EmailDispatchJob`). |
-| **Bağımlılık** | Application ve Domain katmanlarına bağımlıdır. `MailKit`, `Quartz` referansları. |
+| **Bağımlılık** | **Yalnızca Application** katmanına bağımlıdır. Domain'e transitif erişim Application üzerinden sağlanır. `MailKit`, `Quartz` referansları. |
 
 ### 3.4. Persistence Katmanı
 
@@ -72,12 +74,12 @@ Persistence  ──►  Application  ──►  Domain
 
 | İçerik | Açıklama |
 |--------|----------|
-| **DbContext** | `Dev4AllDbContext` — EF Core DbSet tanımları ve model konfigürasyonları. |
-| **Repository'ler** | `IRepository<T>` implementasyonları — Generic ve özelleştirilmiş sorgular. |
-| **Unit of Work** | `IUnitOfWork` implementasyonu — transaction yönetimi. |
-| **Migration'lar** | EF Core migration dosyaları. |
-| **Seed Verileri** | Geliştirme ortamı için başlangıç verileri. |
-| **Bağımlılık** | Application ve Domain katmanlarına bağımlıdır. `EF Core`, `Npgsql` referansları. |
+| **DbContext** | `Dev4AllDbContext` — EF Core DbSet tanımları; her entity için ayrı `IEntityTypeConfiguration<T>`. |
+| **Repository'ler** | `IProjectRequestRepository`, `IBidRepository` vb. entity-specific interface implementasyonları. Soft delete için `MarkAsDeleted()` çağrılır. |
+| **Unit of Work** | `IUnitOfWork` implementasyonu — `BeginTransactionAsync / CommitTransactionAsync / RollbackTransactionAsync`. |
+| **Migration'lar** | EF Core migration dosyaları (`dotnet ef migrations add`). |
+| **Seed Verileri** | Geliştirme ortamı için başlangıç verileri (Admin kullanıcısı vb.). |
+| **Bağımlılık** | **Yalnızca Application** katmanına bağımlıdır. Domain'e transitif erişim Application üzerinden sağlanır. `EF Core`, `Npgsql` referansları. |
 
 ### 3.5. Web API Katmanı (Presentation)
 
@@ -98,8 +100,8 @@ Persistence  ──►  Application  ──►  Domain
 Dev4All.sln
 │
 ├── src/
-│   ├── Dev4All.Domain/               # Entity, Enum, Interface
-│   ├── Dev4All.Application/          # CQRS, DTO, Validator, Servis Interface
+│   ├── Dev4All.Domain/               # Entity, Enum, Exception (Interface YOK — sıfır bağımlılık)
+│   ├── Dev4All.Application/          # CQRS, DTO, Validator, Abstractions (IRepository, IUnitOfWork, IEmailService...)
 │   ├── Dev4All.Infrastructure/       # Email, GitHub, Background Jobs
 │   ├── Dev4All.Persistence/          # DbContext, Repository, Migration
 │   └── Dev4All.WebAPI/               # Controller, Middleware, Program.cs
