@@ -29,7 +29,7 @@ sequenceDiagram
     participant S as Dev4All Platform
     participant G as GitHub
 
-    C->>S: Yeni bir Proje Talebi (ProjectRequest) oluşturur
+    C->>S: Yeni bir Proje (Project) oluşturur
     S-->>D: Açık ilanları listeler
     D->>S: Proje talebine Teklif (Bid) verir
     S-->>C: Gelen teklifleri (Bid listesi) gösterir
@@ -51,7 +51,7 @@ sequenceDiagram
 | ID | Kullanıcı Hikayesi |
 |----|-------------------|
 | `US-C01` | Bir müşteri olarak platforma **kayıt olabilmeli** (e-posta + şifre ile) ve ardından **giriş yapabilmeliyim**. Hesabıma ait bir profil sayfasına erişebilmeliyim. |
-| `US-C02` | Yeni bir **Proje İlanı (ProjectRequest)** açabilmeliyim; başlık, açıklama, bütçe, teslim tarihi (deadline), teklif bitiş tarihi (BidEndDate) ve beklenen teknoloji yığınını belirtebilmeliyim. |
+| `US-C02` | Yeni bir **Proje İlanı (Project)** açabilmeliyim; başlık, açıklama, bütçe, teslim tarihi (deadline), teklif bitiş tarihi (BidEndDate) ve beklenen teknoloji yığınını belirtebilmeliyim. |
 | `US-C03` | Oluşturduğum ilanı **güncelleyebilmeli** (başlık, açıklama, bütçe vb.) veya yayından kaldırabilmeliyim; ancak teklife açık bir ilana teklif geldikten sonra bütçeyi düşürememek gibi kısıtlamalar uygulanmalıdır. |
 | `US-C04` | Açtığım ilana gelen tüm teklifleri (Bid) **fiyat ve süre bazında listeleyebilmeli**, Developer profil bilgilerini (ad, öneri notu) inceleyebilmeliyim. |
 | `US-C05` | Uygun gördüğüm teklifi **"Kabul Et (Accept)"** butonuyla onaylayabilmeliyim. Kabul işlemi sonrası proje otomatik olarak "Aktif/Ongoing" durumuna geçmelidir. |
@@ -96,26 +96,28 @@ sequenceDiagram
 
 ---
 
-### 5.2. Proje Talebi Yönetimi (ProjectRequest Management)
+### 5.2. Proje Yönetimi (Project Management)
 
 | ID | Gereksinim |
 |----|-----------|
-| `FR-PR-01` | **Yalnızca `Customer` rolündeki** kullanıcılar proje talebi (ProjectRequest) oluşturabilir. |
+| `FR-PR-01` | **Yalnızca `Customer` rolündeki** kullanıcılar proje (Project) oluşturabilir. |
 | `FR-PR-02` | Proje talebi oluştururken aşağıdaki alanlar zorunludur: `Title` (3–100 karakter), `Description` (10–2000 karakter), `Budget` (pozitif ondalık sayı), `Deadline` (gelecek tarih), `BidEndDate` (Deadline'dan önce, gelecek tarih). |
 | `FR-PR-03` | Opsiyonel alan: `Technologies` (etiket listesi, örn. "React, .NET, PostgreSQL"). |
-| `FR-PR-04` | Oluşturulan proje talebi varsayılan olarak **`Open` (Açık)** statüsüyle kaydedilir. |
+| `FR-PR-04` | Oluşturulan proje varsayılan olarak **`Open` (Açık)** statüsüyle kaydedilir. |
 | `FR-PR-05` | `Customer` kendi ilanını **düzenleyebilir**; ancak ilana en az bir teklif geldikten sonra `Budget` yalnızca **artırılabilir**, azaltılamaz. |
 | `FR-PR-06` | `Customer` kendi ilanını **silebilir (soft delete)**; ancak `Ongoing` veya `Completed` durumdaki projeler silinemez. |
 | `FR-PR-07` | **Tüm kullanıcılar** (giriş yapmış Developer ve Customer) `Open` durumdaki ilanları listeleyebilir; sayfalama (pagination) ile sunulur. |
 | `FR-PR-08` | **Yalnızca ilan sahibi Customer**, kendi ilanına gelen tüm teklifleri (Bid listesi) görebilir. |
 | `FR-PR-09` | `BidEndDate` geçen ve hâlâ `Open` olan ilanlar **Quartz.NET arka plan servisi** tarafından otomatik olarak **`Expired` (Süresi Dolmuş)** statüsüne alınır. |
 
-**ProjectRequest Durum Makinesi:**
+**Project Durum Makinesi:**
 
 ```
-Open ──(BidEndDate geçerse)──► Expired
-Open ──(Teklif Kabul edilirse)──► Ongoing
-Ongoing ──(Proje tamamlanırsa)──► Completed
+Open ──(BidEndDate geçerse)──────────────────► Expired
+Open ──(Teklif Kabul edilirse)───────────────► AwaitingContract
+AwaitingContract ──(İki Taraf Onayı)─────────► Ongoing
+AwaitingContract ──(Bir Taraf İptal ederse)──► Cancelled
+Ongoing ──(Proje tamamlanırsa)───────────────► Completed
 ```
 
 ---
@@ -129,7 +131,7 @@ Ongoing ──(Proje tamamlanırsa)──► Completed
 | `FR-BID-03` | Teklif verme işleminde aşağıdaki alanlar zorunludur: `BidAmount` (pozitif ondalık, > 0), `ProposalNote` (10–1000 karakter). |
 | `FR-BID-04` | Developer, verdiği teklifin `BidAmount` ve `ProposalNote` alanlarını ilanın durumu `Open` olduğu süre içinde **güncelleyebilir**. |
 | `FR-BID-05` | `BidEndDate` geçmiş veya `Ongoing`/`Expired` durumdaki ilanlar için yeni teklif **verilemez** ve mevcut teklifler **güncellenemez**. |
-| `FR-BID-06` | Müşteri bir teklifi kabul ettiğinde (`AcceptBidCommand`): ilanın durumu `Ongoing` olur, kabul edilen teklifin `IsAccepted = true` olarak işaretlenir, ilandaki diğer tüm teklifler otomatik olarak `Rejected` statüsüne alınır. |
+| `FR-BID-06` | Müşteri bir teklifi kabul ettiğinde (`AcceptBidCommand`): ilanın durumu **`AwaitingContract`** olur, kabul edilen teklifin `IsAccepted = true` olarak işaretlenir, ilandaki diğer tüm teklifler otomatik olarak `Rejected` statüsüne alınır. Sistem otomatik olarak sözleşme taslağını (`Contract`) oluşturur. |
 | `FR-BID-07` | Developer, kendi verdiği teklifin durumunu (Pending / Accepted / Rejected) görebilir. |
 | `FR-BID-08` | Teklif veren Developer sayısı (`BidCount`) proje ilanı detay ekranında toplam bilgi olarak gösterilir. |
 
@@ -147,11 +149,25 @@ Pending ──(Developer geri çekerse)──► Withdrawn (Opsiyonel, MVP sonra
 
 | ID | Gereksinim |
 |----|-----------|
-| `FR-PROJ-01` | Bir teklif kabul edildiğinde, sistem otomatik olarak `ProjectRequest` üzerindeki `AssignedDeveloperId` alanını günceller ve `Status` değerini `Ongoing` olarak ayarlar. |
+| `FR-PROJ-01` | Bir teklif kabul edildiğinde, sistem otomatik olarak `Project` üzerindeki `AssignedDeveloperId` alanını güncellerke ve `Status` değerini `AwaitingContract` olarak ayarlar. |
 | `FR-PROJ-02` | `Ongoing` durumdaki proje, ilan sahibi Customer ve atanan Developer tarafından detay ekranıyla görüntülenebilir. |
 | `FR-PROJ-03` | Atanan Developer, proje detay sayfasından ilgili **GitHub Repository URL'sini ve Branch bilgisini** ekleyebilir. |
 | `FR-PROJ-04` | Customer kendi projelerini, Developer ise atandığı projeleri ilgili dashboard ekranlarında listeleyebilir. |
 | `FR-PROJ-05` | Proje tamamlandığında `Status` değeri `Completed` olarak güncellenir. Bu işlem geçici olarak yalnızca Developer veya Admin tarafından yapılabilir (MVP). |
+
+---
+
+### 5.4b. Sözleşme Yönetimi (Contract Management)
+
+| ID | Gereksinim |
+|----|-----------|
+| `FR-CONTRACT-01` | Teklif kabul edildiği anda sistem, proje başlık/açıklama/bütçe/deadline bilgilerini kullanarak **otomatik bir sözleşme taslağı** (`Contract`) oluşturur. |
+| `FR-CONTRACT-02` | Sözleşme varsayılan olarak `Draft` statüsünde oluşturulur; her iki tarafın onayı beklenmektedir. |
+| `FR-CONTRACT-03` | Customer veya Developer sözleşme metnini **revize edebilir**. Bir taraf revize ettiğinde: `RevisionNumber` artar, revizyon öncesi metin `ContractRevision` tablosuna snapshot olarak kaydedilir, diğer tarafın onay durumu sıfırlanır (`IsCustomerApproved` veya `IsDeveloperApproved` → `false`), diğer tarafa e-posta bildirimi gönderilir. |
+| `FR-CONTRACT-04` | Her iki taraf onayladığında (`IsCustomerApproved = true` **ve** `IsDeveloperApproved = true`): `Contract.Status` → `BothApproved`, `Project.Status` → `Ongoing`. |
+| `FR-CONTRACT-05` | Taraflardan biri sözleşmeyi **iptal ettiğinde**: `Contract.Status` → `Cancelled`, `Project.Status` → `Cancelled`. Her iki tarafa bildirim gönderilir. |
+| `FR-CONTRACT-06` | Yalnızca projeye ait Customer ve Developer sözleşmeyi görüntüleyebilir, düzenleyebilir veya onaylayabilir. Admin her sözleşmeyi görüntüleyebilir. |
+| `FR-CONTRACT-07` | Sözleşme revizyon geçmişi (`ContractRevision`) korunur; kim, ne zaman, ne numaralı revizyon yaptığı izlenebilir. |
 
 ---
 
@@ -175,9 +191,12 @@ Pending ──(Developer geri çekerse)──► Withdrawn (Opsiyonel, MVP sonra
 |----|-----------|-------------|
 | `FR-MAIL-01` | Hoş geldin & e-posta doğrulama maili | Kayıt sonrası |
 | `FR-MAIL-02` | Customer'a yeni teklif bildirimi | Developer yeni Bid eklediğinde |
-| `FR-MAIL-03` | Developer'a teklif kabul bildirimi | Customer "Accept" ettiğinde |
+| `FR-MAIL-03` | Developer'a teklif kabul bildirimi & sözleşme taslağı hazır | Customer "Accept" ettiğinde |
 | `FR-MAIL-04` | Developer'a teklif red bildirimi | Başka bir teklif kabul edildiğinde |
 | `FR-MAIL-05` | Customer'a proje başladı bildirimi | Developer GitHub repo bağladığında |
+| `FR-MAIL-06` | Karşı tarafa sözleşme revize edildi bildirimi | Taraflardan biri sözleşmeyi düzenlediğinde |
+| `FR-MAIL-07` | Her iki tarafa sözleşme onaylandı & proje başladı bildirimi | İki taraf da sözleşmeyi onayladığında |
+| `FR-MAIL-08` | Her iki tarafa sözleşme iptal edildi bildirimi | Taraflardan biri sözleşmeyi iptal ettiğinde |
 
 > Tüm e-posta gönderimleri, **Quartz.NET** tabanlı bir arka plan kuyruğu (Background Job Queue) üzerinden asenkron olarak işlenir; API yanıt süresi etkilenmez.
 
@@ -219,19 +238,69 @@ Pending ──(Developer geri çekerse)──► Withdrawn (Opsiyonel, MVP sonra
 ### UC-03 — Teklif Kabul Etme
 
 **Aktör:** Customer  
-**Ön Koşul:** Customer giriş yapmış, ilanın durumu `Open` veya `Ongoing` değil (yani hâlâ `Open`).  
+**Ön Koşul:** Customer giriş yapmış, ilanın durumu `Open`.  
 **Ana Akış:**
 1. Customer kendi ilanına ait teklif listesini açar.
 2. Bir teklifi seçerek "Kabul Et" butonuna tıklar.
 3. Sistem bir transaction içinde:
-   - `ProjectRequest.Status` → `Ongoing`
-   - Seçilen `Bid.IsAccepted` → `true`
-   - Diğer tüm `Bid`'ler → `Rejected`
+   - `ProjectRequest.Status` → **`AwaitingContract`**
+   - Seçilen `Bid.IsAccepted` → `true`, `Bid.Status` → `Accepted`
+   - Diğer tüm `Bid`'ler → `Status = Rejected`
    - `ProjectRequest.AssignedDeveloperId` → kabul edilen Developer'ın Id'si
-4. Kabul edilen Developer'a e-posta bildirimi gönderilir.
+   - Sistem otomatik `Contract` taslağı oluşturur (`Status = Draft`)
+4. Kabul edilen Developer'a e-posta bildirimi + "Sözleşme taslağı hazır" bildirimi gönderilir.
 5. Reddedilen Developer'lara toplu bildirim kuyruğa eklenir.
 
 **İş Kuralı (UC-03-BR01):** Bir proje için yalnızca bir teklif kabul edilebilir. İkinci bir kabul işlemi engellenmelidir.
+
+---
+
+### UC-03b — Sözleşme Revizyonu
+
+**Aktör:** Customer veya Developer  
+**Ön Koşul:** `Contract.Status = Draft` veya `UnderReview`, kullanıcı projenin tarafı.  
+**Ana Akış:**
+1. Taraf sözleşme metnini düzenleyerek "Kaydet" butonuna tıklar.
+2. Sistem bir transaction içinde:
+   - Mevcut `Contract.Content` snapshot'ı `ContractRevision` tablosuna kaydeder.
+   - `Contract.Content` → yeni metin, `Contract.RevisionNumber` artar.
+   - `Contract.LastRevisedById` → düzenleyen kullanıcı Id'si.
+   - Düzenleyen **Customer** ise: `Contract.IsDeveloperApproved` → `false`.
+   - Düzenleyen **Developer** ise: `Contract.IsCustomerApproved` → `false`.
+   - `Contract.Status` → `UnderReview`.
+3. Diğer tarafa e-posta bildirimi gönderilir.
+
+**İş Kuralı (UC-03b-BR01):** İptal edilmiş veya her iki tarafça onaylanmış sözleşme düzenlenemez.
+
+---
+
+### UC-03c — Sözleşme Onaylama
+
+**Aktör:** Customer veya Developer  
+**Ön Koşul:** `Contract.Status = Draft` veya `UnderReview`, kullanıcı projenin tarafı, sözleşme içeriğini inceledi.  
+**Ana Akış:**
+1. Taraf "Onayla" butonuna tıklar.
+2. Sistem ilgili onay bayrağını `true` yapar (`IsCustomerApproved` veya `IsDeveloperApproved`).
+3. Her iki bayrak da `true` ise:
+   - `Contract.Status` → `BothApproved`.
+   - `Project.Status` → `Ongoing`.
+   - Her iki tarafa "Proje Başladı" e-postası gönderilir.
+4. Yalnızca bir bayrak `true` ise sözleşme `UnderReview` durumunda bekler.
+
+---
+
+### UC-03d — Sözleşme İptali
+
+**Aktör:** Customer veya Developer  
+**Ön Koşul:** `Contract.Status = Draft` veya `UnderReview`.  
+**Ana Akış:**
+1. Taraf "İptal Et" butonuna tıklar.
+2. Sistem bir transaction içinde:
+   - `Contract.Status` → `Cancelled`.
+   - `Project.Status` → `Cancelled`.
+3. Her iki tarafa "Sözleşme İptal Edildi" e-postası gönderilir.
+
+**İş Kuralı (UC-03d-BR01):** `Cancelled` duruma geçen proje tekrar `Open` veya başka bir duruma alınamaz.
 
 ---
 
@@ -284,6 +353,10 @@ Pending ──(Developer geri çekerse)──► Withdrawn (Opsiyonel, MVP sonra
 | Teklif Güncelleme (Kendi) | ❌ | ✅ | ❌ |
 | İlan Tekliflerini Görme | ✅ (Kendi ilanı) | ✅ (Kendi teklifi) | ✅ |
 | Teklif Kabul Etme | ✅ (Kendi ilanı) | ❌ | ✅ |
+| **Sözleşme Görüntüleme** | ✅ (Kendi projesi) | ✅ (Atandığı proje) | ✅ |
+| **Sözleşme Düzenleme** | ✅ (Kendi projesi) | ✅ (Atandığı proje) | ❌ |
+| **Sözleşme Onaylama** | ✅ (Kendi projesi) | ✅ (Atandığı proje) | ❌ |
+| **Sözleşme İptal Etme** | ✅ (Kendi projesi) | ✅ (Atandığı proje) | ✅ |
 | GitHub Repo Bağlama | ❌ | ✅ (Atandığı proje) | ✅ |
 | Aktivite Timeline Görme | ✅ (Kendi projesi) | ✅ (Atandığı proje) | ✅ |
 | Kullanıcı Yönetimi | ❌ | ❌ | ✅ |
@@ -301,7 +374,7 @@ Pending ──(Developer geri çekerse)──► Withdrawn (Opsiyonel, MVP sonra
 | `Name` | 2–100 karakter, boş olamaz |
 | `Role` | `Customer` veya `Developer` değerlerinden biri |
 
-### 8.2. Proje Talebi (ProjectRequest)
+### 8.2. Proje (Project)
 | Alan | Kural |
 |------|-------|
 | `Title` | 3–100 karakter, boş olamaz |
@@ -321,6 +394,12 @@ Pending ──(Developer geri çekerse)──► Withdrawn (Opsiyonel, MVP sonra
 |------|-------|
 | `RepoUrl` | Geçerli URL formatı, `github.com` domain'i içermeli |
 
+### 8.5. Sözleşme (Contract)
+| Alan | Kural |
+|------|-------|
+| `Content` | Boş olamaz, en az 50 karakter |
+| `RevisionNote` | Opsiyonel, maksimum 500 karakter |
+
 ---
 
 ## 9. API Endpoint Özeti
@@ -330,15 +409,20 @@ Pending ──(Developer geri çekerse)──► Withdrawn (Opsiyonel, MVP sonra
 | `POST` | `/api/auth/register` | Kullanıcı kaydı | Public |
 | `POST` | `/api/auth/login` | Kullanıcı girişi, JWT döner | Public |
 | `GET` | `/api/users/me` | Giriş yapan kullanıcının profili | Auth |
-| `GET` | `/api/project-requests` | Açık ilanları listele (sayfalı) | Auth |
-| `POST` | `/api/project-requests` | Yeni ilan oluştur | Customer |
-| `GET` | `/api/project-requests/{id}` | İlan detayı | Auth |
-| `PUT` | `/api/project-requests/{id}` | İlan güncelle | Customer (Sahip) |
-| `DELETE` | `/api/project-requests/{id}` | İlan sil (soft delete) | Customer (Sahip) |
-| `GET` | `/api/project-requests/{id}/bids` | İlana ait teklifleri listele | Customer (Sahip) |
-| `POST` | `/api/project-requests/{id}/bids` | Teklif ver | Developer |
+| `GET` | `/api/projects` | Açık projeleri listele (sayfalı) | Auth |
+| `POST` | `/api/projects` | Yeni proje oluştur | Customer |
+| `GET` | `/api/projects/{id}` | Proje detayı | Auth |
+| `PUT` | `/api/projects/{id}` | Proje güncelle | Customer (Sahip) |
+| `DELETE` | `/api/projects/{id}` | Proje sil (soft delete) | Customer (Sahip) |
+| `GET` | `/api/projects/{id}/bids` | Projeye ait teklifleri listele | Customer (Sahip) |
+| `POST` | `/api/projects/{id}/bids` | Teklif ver | Developer |
 | `PUT` | `/api/bids/{id}` | Teklif güncelle | Developer (Sahip) |
 | `POST` | `/api/bids/{id}/accept` | Teklif kabul et | Customer (İlan Sahibi) |
+| `GET` | `/api/contracts/{projectId}` | Sözleşmeyi görüntüle | Auth (Proje Tarafı) |
+| `PUT` | `/api/contracts/{projectId}` | Sözleşmeyi revize et | Customer/Developer (Proje Tarafı) |
+| `POST` | `/api/contracts/{projectId}/approve` | Sözleşmeyi onayla | Customer/Developer (Proje Tarafı) |
+| `POST` | `/api/contracts/{projectId}/cancel` | Sözleşmeyi iptal et | Customer/Developer (Proje Tarafı) |
+| `GET` | `/api/contracts/{projectId}/revisions` | Revizyon geçmişi | Auth (Proje Tarafı) |
 | `GET` | `/api/projects/{id}` | Aktif proje detayı | Auth (Proje Tarafı) |
 | `PUT` | `/api/projects/{id}/repo` | GitHub repo bağla | Developer (Atanmış) |
 | `GET` | `/api/projects/{id}/github-logs` | Aktivite timeline | Auth (Proje Tarafı) |
@@ -364,13 +448,16 @@ Aşağıdaki özellikler MVP kapsamında **geliştirilmeyecektir**:
 
 | Terim | Açıklama |
 |-------|----------|
-| **ProjectRequest** | Müşterinin sisteme açtığı yazılım proje ilanı. |
+| **Project** | Müşterinin sisteme açtığı yazılım proje ilanı. |
 | **Bid** | Developer'ın bir proje ilanına verdiği fiyat ve süre teklifi. |
 | **BidEndDate** | İlanın teklif almaya kapandığı tarih. |
 | **Deadline** | Projenin müşteri tarafından belirlenmiş teslim tarihi. |
 | **AssignedDeveloperId** | Teklifi kabul edilen Developer'ın sisteme kaydedilen benzersiz kimliği. |
+| **Contract** | Teklif kabul edildiğinde sistem tarafından otomatik oluşturulan, iki tarafın müzakere edip onayladığı dijital sözleşme. |
+| **ContractRevision** | Her sözleşme düzenlemesinin metin snapshot'ı ve meta verisi. |
+| **AwaitingContract** | Teklif kabul edilmiş ancak sözleşme henüz iki tarafça onaylanmamış proje durumu. |
 | **GitHubLog** | GitHub Webhook aracılığıyla sisteme aktarılan commit ve push aktivite kaydı. |
-| **Ongoing** | Teklif kabul edilmiş, geliştirme sürecinde olan proje durumu. |
+| **Ongoing** | Her iki tarafın sözleşmeyi onaylamasıyla geliştirme sürecine giren proje durumu. |
 | **CQRS** | Command Query Responsibility Segregation — yazma ve okuma işlemlerinin ayrılması deseni. |
 | **JWT** | JSON Web Token — kimlik doğrulama ve yetkilendirme için kullanılan token standardı. |
 | **Webhook** | GitHub'ın belirli olaylar gerçekleştiğinde (push, merge vb.) dış bir URL'ye otomatik olarak HTTP isteği göndermesi mekanizması. |

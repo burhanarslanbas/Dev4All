@@ -36,7 +36,7 @@ Persistence  ──►  Application  ──►  Domain
 
 | İçerik | Açıklama |
 |--------|----------|
-| **Entity'ler** | `User`, `ProjectRequest`, `Bid`, `GitHubLog` — `BaseEntity`'den türeyen POCO sınıfları. |
+| **Entity'ler** | `User`, `Project`, `Bid`, `GitHubLog`, `Contract`, `ContractRevision` — `BaseEntity`'den türeyen POCO sınıfları. |
 | **Enum'lar** | `ProjectStatus`, `BidStatus`, `UserRole` |
 | **Exception'lar** | `DomainException`, `ResourceNotFoundException`, `BusinessRuleViolationException` vb. |
 | **Bağımlılık** | **Sıfır** dış bağımlılık. NuGet paketi, interface veya DataAnnotation içermez. |
@@ -47,13 +47,13 @@ Persistence  ──►  Application  ──►  Domain
 
 | İçerik | Açıklama |
 |--------|----------|
-| **Command'lar** | `CreateProjectRequestCommand`, `PlaceBidCommand`, `AcceptBidCommand` |
-| **Query'ler** | `GetProjectRequestsQuery`, `GetProjectBidsQuery`, `GetGitHubLogsByProjectQuery` |
+| **Command'lar** | `CreateProjectCommand`, `PlaceBidCommand`, `AcceptBidCommand`, `ReviseContractCommand`, `ApproveContractCommand` |
+| **Query'ler** | `GetProjectsQuery`, `GetProjectBidsQuery`, `GetContractQuery`, `GetGitHubLogsByProjectQuery` |
 | **Handler'lar** | Her Command/Query için `IRequestHandler<TRequest, TResponse>` implementasyonu. |
 | **DTO'lar** | Request ve Response — `sealed record` tipinde veri transfer nesneleri. |
 | **Validator'lar** | FluentValidation tabanlı; her Command/Query ile aynı klasörde ayrı validator sınıfı. |
 | **Persistence Soyutlamaları** | `IReadRepository<T>`, `IWriteRepository<T>`, `IUnitOfWork` — Persistence'a karşı soyutlama. |
-| **Entity Repository Interface'leri** | `IProjectRequestRepository`, `IBidRepository`, `IGitHubLogRepository` — entity bazlı özelleşmiş interface'ler. |
+| **Entity Repository Interface'leri** | `IProjectRepository`, `IBidRepository`, `IGitHubLogRepository`, `IContractRepository` — entity bazlı özelleşmiş interface'ler. |
 | **Servis Interface'leri** | `IEmailService`, `IGitHubService` — Infrastructure'a karşı soyutlama. |
 | **Bağımlılık** | Yalnızca Domain katmanına bağımlıdır. `MediatR`, `FluentValidation` referansları. |
 
@@ -75,7 +75,7 @@ Persistence  ──►  Application  ──►  Domain
 | İçerik | Açıklama |
 |--------|----------|
 | **DbContext** | `Dev4AllDbContext` — EF Core DbSet tanımları; her entity için ayrı `IEntityTypeConfiguration<T>`. |
-| **Repository'ler** | `IProjectRequestRepository`, `IBidRepository` vb. entity-specific interface implementasyonları. Soft delete için `MarkAsDeleted()` çağrılır. |
+| **Repository'ler** | `IProjectRepository`, `IBidRepository` vb. entity-specific interface implementasyonları. Soft delete için `MarkAsDeleted()` çağrılır. |
 | **Unit of Work** | `IUnitOfWork` implementasyonu — `BeginTransactionAsync / CommitTransactionAsync / RollbackTransactionAsync`. |
 | **Migration'lar** | EF Core migration dosyaları (`dotnet ef migrations add`). |
 | **Seed Verileri** | Geliştirme ortamı için başlangıç verileri (Admin kullanıcısı vb.). |
@@ -87,7 +87,7 @@ Persistence  ──►  Application  ──►  Domain
 
 | İçerik | Açıklama |
 |--------|----------|
-| **Controller'lar** | `AuthController`, `ProjectRequestController`, `BidController`, `ProjectController`, `WebhookController` |
+| **Controller'lar** | `AuthController`, `ProjectsController`, `BidsController`, `ContractsController`, `WebhookController` |
 | **Middleware'ler** | Global Exception Handler, JWT Authentication Middleware. |
 | **Program.cs** | Dependency Injection kayıtları, Swagger konfigürasyonu, middleware pipeline. |
 | **Bağımlılık** | Yalnızca Application katmanına bağımlıdır. MediatR üzerinden Command/Query gönderir. |
@@ -117,7 +117,7 @@ Dev4All.sln
 
 ```mermaid
 erDiagram
-    User ||--o{ ProjectRequest : "oluşturur"
+    User ||--o{ Project : "oluşturur"
     User ||--o{ Bid : "verir"
 
     User {
@@ -130,39 +130,66 @@ erDiagram
         datetime CreatedAt
     }
 
-    ProjectRequest ||--o{ Bid : "alır"
-    ProjectRequest ||--o| GitHubLog : "üretir"
+    Project ||--o{ Bid : "alır"
+    Project ||--o| GitHubLog : "üretir"
+    Project ||--o| Contract : "sahiptir"
 
-    ProjectRequest {
-        uuid    Id              PK
-        uuid    CustomerId      FK
+    Project {
+        uuid    Id                  PK
+        uuid    CustomerId          FK
         uuid    AssignedDeveloperId FK "NULL: atanmamış"
         string  Title
         string  Description
         decimal Budget
         datetime Deadline
         datetime BidEndDate
-        int     Status          "0:Open 1:Ongoing 2:Completed 3:Expired"
+        int     Status              "0:Open 1:AwaitingContract 2:Ongoing 3:Completed 4:Expired 5:Cancelled"
+        string  Technologies        "Opsiyonel"
         datetime CreatedAt
         datetime UpdatedAt
-        bool    IsDeleted       "Soft Delete"
+        bool    IsDeleted           "Soft Delete"
     }
 
     Bid {
-        uuid    Id                PK
-        uuid    ProjectRequestId  FK
-        uuid    DeveloperId       FK
+        uuid    Id          PK
+        uuid    ProjectId   FK
+        uuid    DeveloperId FK
         decimal BidAmount
         string  ProposalNote
-        int     Status            "0:Pending 1:Accepted 2:Rejected"
+        int     Status      "0:Pending 1:Accepted 2:Rejected"
         bool    IsAccepted
         datetime CreatedAt
         datetime UpdatedAt
     }
 
+    Contract ||--o{ ContractRevision : "revize edilir"
+
+    Contract {
+        uuid    Id                  PK
+        uuid    ProjectId           FK
+        string  Content             "Sözleşme metni"
+        int     RevisionNumber      "Her düzenlemede artar"
+        uuid    LastRevisedById     "Kimin düzenlediği"
+        int     Status              "0:Draft 1:UnderReview 2:BothApproved 3:Cancelled"
+        bool    IsCustomerApproved
+        bool    IsDeveloperApproved
+        datetime CustomerApprovedAt
+        datetime DeveloperApprovedAt
+    }
+
+    ContractRevision {
+        uuid    Id              PK
+        uuid    ContractId      FK
+        uuid    RevisedById     "Hangi kullanıcı"
+        string  ContentSnapshot "O anki sözleşme metni"
+        int     RevisionNumber
+        string  RevisionNote    "Opsiyonel açıklama"
+        datetime CreatedAt
+    }
+
     GitHubLog {
-        uuid    Id                PK
-        uuid    ProjectRequestId  FK
+        uuid    Id          PK
+        uuid    ProjectId   FK
         string  RepoUrl
         string  Branch
         string  CommitHash
@@ -187,7 +214,7 @@ erDiagram
 | `IsEmailConfirmed` | `bool` | Varsayılan: `false`. |
 | `CreatedAt` | `DateTime` | UTC, otomatik. |
 
-### 6.2. ProjectRequest
+### 6.2. Project
 | Alan | Tip | Kural |
 |------|-----|-------|
 | `Id` | `Guid` | PK, otomatik üretilir. |
@@ -198,14 +225,15 @@ erDiagram
 | `Budget` | `decimal` | > 0. |
 | `Deadline` | `DateTime` | UTC, gelecek tarih. |
 | `BidEndDate` | `DateTime` | UTC, Deadline'dan önce. |
-| `Status` | `enum ProjectStatus` | `Open → Ongoing → Completed / Expired` |
+| `Technologies` | `string?` | Opsiyonel etiket listesi. |
+| `Status` | `enum ProjectStatus` | `Open → AwaitingContract → Ongoing → Completed / Expired / Cancelled` |
 | `IsDeleted` | `bool` | Soft Delete; varsayılan `false`. |
 
 ### 6.3. Bid
 | Alan | Tip | Kural |
 |------|-----|-------|
 | `Id` | `Guid` | PK, otomatik üretilir. |
-| `ProjectRequestId` | `Guid` | FK → ProjectRequest. |
+| `ProjectId` | `Guid` | FK → Project. |
 | `DeveloperId` | `Guid` | FK → User. |
 | `BidAmount` | `decimal` | > 0. |
 | `ProposalNote` | `string` | 10–1000 karakter. |
@@ -216,13 +244,37 @@ erDiagram
 | Alan | Tip | Kural |
 |------|-----|-------|
 | `Id` | `Guid` | PK, otomatik üretilir. |
-| `ProjectRequestId` | `Guid` | FK → ProjectRequest. |
+| `ProjectId` | `Guid` | FK → Project. |
 | `RepoUrl` | `string` | Geçerli GitHub URL formatı. |
 | `Branch` | `string` | Varsayılan: `"main"`. |
 | `CommitHash` | `string` | 40 karakter SHA-1 hash. |
 | `CommitMessage` | `string` | Boş olamaz. |
 | `AuthorName` | `string` | GitHub commit author. |
 | `PushedAt` | `DateTime` | UTC, GitHub'dan gelen zaman. |
+
+### 6.5. Contract
+| Alan | Tip | Kural |
+|------|-----|-------|
+| `Id` | `Guid` | PK, otomatik üretilir. |
+| `ProjectId` | `Guid` | FK → Project (1-1). |
+| `Content` | `string` | Sözleşme metni; boş olamaz, min 50 karakter. |
+| `RevisionNumber` | `int` | Başlangıç: 1; her düzenlemede artar. |
+| `LastRevisedById` | `string` | Son düzenlemeyi yapan kullanıcı Id'si. |
+| `Status` | `enum ContractStatus` | `Draft → UnderReview → BothApproved / Cancelled` |
+| `IsCustomerApproved` | `bool` | Customer onay durumu; varsayılan `false`. |
+| `IsDeveloperApproved` | `bool` | Developer onay durumu; varsayılan `false`. |
+| `CustomerApprovedAt` | `DateTime?` | UTC, Customer onayladığında. |
+| `DeveloperApprovedAt` | `DateTime?` | UTC, Developer onayladığında. |
+
+### 6.6. ContractRevision
+| Alan | Tip | Kural |
+|------|-----|-------|
+| `Id` | `Guid` | PK, otomatik üretilir. |
+| `ContractId` | `Guid` | FK → Contract. |
+| `RevisedById` | `string` | Revize eden kullanıcı Id'si. |
+| `ContentSnapshot` | `string` | Düzenleme öncesi sözleşme metni. |
+| `RevisionNumber` | `int` | Bu revizyon numarası. |
+| `RevisionNote` | `string?` | Opsiyonel açıklama; max 500 karakter. |
 
 ---
 
@@ -236,23 +288,28 @@ Sistemde yazma (Command) ve okuma (Query) operasyonları **MediatR** kütüphane
 |---------|------------|-------|
 | `RegisterUserCommand` | Kullanıcı kaydı | Public |
 | `LoginUserCommand` | Kullanıcı girişi, JWT döner | Public |
-| `CreateProjectRequestCommand` | Yeni ilan açma | Customer |
-| `UpdateProjectRequestCommand` | İlan güncelleme | Customer (Sahip) |
-| `DeleteProjectRequestCommand` | İlan silme (soft) | Customer (Sahip) |
+| `CreateProjectCommand` | Yeni proje oluşturma | Customer |
+| `UpdateProjectCommand` | Proje güncelleme | Customer (Sahip) |
+| `DeleteProjectCommand` | Proje silme (soft) | Customer (Sahip) |
 | `PlaceBidCommand` | Teklif verme | Developer |
 | `UpdateBidCommand` | Teklif güncelleme | Developer (Sahip) |
-| `AcceptBidCommand` | Teklif kabul | Customer (İlan Sahibi) |
+| `AcceptBidCommand` | Teklif kabul — `AwaitingContract`'a geçiş + `Contract` oluşturma | Customer (Proje Sahibi) |
+| `ReviseContractCommand` | Sözleşme revize etme | Customer/Developer (Proje Tarafı) |
+| `ApproveContractCommand` | Sözleşme onaylama — her ikisi onayladıysa `Ongoing`'e geçiş | Customer/Developer (Proje Tarafı) |
+| `CancelContractCommand` | Sözleşme iptali — projeyi `Cancelled` yapar | Customer/Developer (Proje Tarafı) |
 | `LinkGitHubRepoCommand` | GitHub repo bağlama | Developer (Atanmış) |
 
 ### 7.2. Query'ler (Okuma İşlemleri)
 
 | Query | Döndürdüğü Veri | Yetki |
 |-------|----------------|-------|
-| `GetProjectRequestsQuery` | Sayfalı açık ilan listesi | Auth |
-| `GetProjectRequestByIdQuery` | Tek ilan detayı | Auth |
-| `GetMyProjectRequestsQuery` | Giriş yapan Customer'ın ilanları | Customer |
-| `GetProjectBidsQuery` | Bir ilana ait tüm teklifler | Customer (Sahip) |
+| `GetProjectsQuery` | Sayfalı açık proje listesi | Auth |
+| `GetProjectByIdQuery` | Tek proje detayı | Auth |
+| `GetMyProjectsQuery` | Giriş yapan Customer'ın projeleri | Customer |
+| `GetProjectBidsQuery` | Bir projeye ait tüm teklifler | Customer (Sahip) |
 | `GetMyBidsQuery` | Developer'ın verdiği teklifler | Developer |
+| `GetContractQuery` | Projeye ait sözleşme detayı | Auth (Proje Tarafı) |
+| `GetContractRevisionsQuery` | Sözleşme revizyon geçmişi | Auth (Proje Tarafı) |
 | `GetProjectDetailQuery` | Aktif proje detayı | Auth (Proje Tarafı) |
 | `GetGitHubLogsByProjectQuery` | Proje aktivite timeline'ı | Auth (Proje Tarafı) |
 
