@@ -97,18 +97,25 @@ Persistence  ──►  Application  ──►  Domain
 ## 4. Proje Klasör Yapısı
 
 ```
-Dev4All.sln
-│
-├── src/
-│   ├── Dev4All.Domain/               # Entity, Enum, Exception (Interface YOK — sıfır bağımlılık)
-│   ├── Dev4All.Application/          # CQRS, DTO, Validator, Abstractions (IRepository, IUnitOfWork, IEmailService...)
-│   ├── Dev4All.Infrastructure/       # Email, GitHub, Background Jobs
-│   ├── Dev4All.Persistence/          # DbContext, Repository, Migration
-│   └── Dev4All.WebAPI/               # Controller, Middleware, Program.cs
-│
-└── tests/
-    ├── Dev4All.UnitTests/            # Application Handler testleri
-    └── Dev4All.IntegrationTests/     # API endpoint testleri
+Dev4All/   (monorepo kökü)
+├── backend/
+│   ├── Dev4All.slnx
+│   ├── Directory.Build.props
+│   ├── src/
+│   │   ├── Core/
+│   │   │   ├── Dev4All.Domain/       # Entity, Enum, Exception (sıfır bağımlılık)
+│   │   │   └── Dev4All.Application/  # CQRS, DTO, Validator, Abstractions
+│   │   ├── Infrastructure/
+│   │   │   ├── Dev4All.Infrastructure/  # Email, GitHub, Background Jobs
+│   │   │   └── Dev4All.Persistence/     # DbContext, Repository, Migration
+│   │   └── Presentation/
+│   │       └── Dev4All.WebAPI/       # Controller, Middleware, Program.cs
+│   └── tests/
+│       ├── Dev4All.UnitTests/
+│       └── Dev4All.IntegrationTests/
+├── frontend/   (planlı web istemcisi)
+├── mobile/     (planlı mobil istemci)
+└── docs/
 ```
 
 ---
