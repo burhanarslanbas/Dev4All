@@ -65,10 +65,28 @@ project.json
 .nuget/
 *.nupkg
 
-# Node/npm/yarn
+# Node/npm/yarn/pnpm (frontend and tooling)
 node_modules/
 npm-debug.log
 yarn-error.log
+pnpm-debug.log*
+.pnpm-store/
+
+# Frontend build outputs (Vite, etc.) — when `frontend/` app exists
+frontend/dist/
+frontend/build/
+frontend/.vite/
+*.tsbuildinfo
+
+# Android / Gradle (when `mobile/` Android project exists)
+mobile/**/.gradle/
+mobile/**/build/
+mobile/**/local.properties
+mobile/**/*.keystore
+mobile/**/*.jks
+*.apk
+*.aab
+*.dex
 
 # User Secrets mechanism
 # Though secrets are saved in the user profile directory (~/.microsoft/usersecrets/),
@@ -85,3 +103,9 @@ appsettings.*.Local.json
 
 # Publish output
 publish/
+
+# Cursor IDE — local rules, not shared on remote
+.cursor/
+
+# Local AI/agent guide for this repo (keep private)
+docs/AGENTS.md

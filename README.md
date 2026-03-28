@@ -18,6 +18,26 @@
 
 <br />
 
+## 📁 Depo Yapısı (Monorepo)
+
+Bu depo **backend**, **web istemcisi** ve **mobil istemci** için ortak bir kök kullanır. Şu an üretim kodu yalnızca backend altında yer alır; diğer klasörler ileride eklenecek projeler için ayrılmıştır.
+
+| Klasör / dosya | İçerik |
+|----------------|--------|
+| `backend/src/` | .NET backend (Clean Architecture, Web API) |
+| `backend/tests/` | Backend birim ve entegrasyon testleri |
+| `backend/Dev4All.slnx` | .NET çözüm dosyası |
+| `backend/Directory.Build.props` | Paylaşılan MSBuild ayarları (TFM, nullable, analiz) |
+| `frontend/` | Web uygulaması (React / Vite — henüz scaffold yok) |
+| `mobile/` | Mobil uygulama (Kotlin / Android — henüz scaffold yok) |
+| `docs/` | Analiz (`docs/analyse/`), plan (`docs/plan/`), [rehberler](docs/guides/README.md), [AGENTS.md](docs/AGENTS.md) |
+
+Kök dizinde: `README.md`, `.gitignore`, `.editorconfig`. AI asistan talimatları: **[docs/AGENTS.md](docs/AGENTS.md)**. Sohbet/model seçimi ve plan adımları için: **[docs/guides/ai-assisted-development-workflow.md](docs/guides/ai-assisted-development-workflow.md)**.
+
+**Backend derlemesi:** `dotnet build backend/Dev4All.slnx`
+
+---
+
 ## 📖 Proje Hakkında
 
 **Dev4All**, yazılım hizmeti almak isteyen müşteriler (bireysel veya kurumsal) ile bağımsız geliştiricileri (freelance yazılım uzmanları, küçük takımlar) güvenli bir ekosistemde bir araya getiren B2B/B2C tabanlı bir **Proje Yönetim ve Eşleşme Platformudur**. 
@@ -73,7 +93,7 @@ Dev4All backend sistemi katmanlı mimari (Onion Architecture) prensiplerine gör
 
 1. **Domain (Core):** Bağımlılıklardan tamamen izole edilmiş, iş kurallarını barındıran POCO sınıfları, enum ve arayüzler.
 2. **Application:** CQRS pattern'i kullanılarak Use Case'lerin işletildiği katman. DTO, Validator ve servis arayüzleri burada yer alır.
-3. **Infrastructure / Persistence:** DbContext, veritabanı bağlantıları, dış servis entegrasyonları (Email, GitHub vb.) uygulama katmanı logiğini hayata geçirir.
+3. **Infrastructure / Persistence:** DbContext, veritabanı bağlantıları, dış servis entegrasyonları (Email, GitHub vb.) uygulama katmanı mantığını hayata geçirir.
 4. **Presentation (API):** Middleware konfigürasyonları, endpoint'lerin dışa sunulduğu merkez yapı.
 
 ---
