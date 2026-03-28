@@ -53,7 +53,7 @@ Persistence  ──►  Application  ──►  Domain
 | **DTO'lar** | Request ve Response — `sealed record` tipinde veri transfer nesneleri. |
 | **Validator'lar** | FluentValidation tabanlı; her Command/Query ile aynı klasörde ayrı validator sınıfı. |
 | **Persistence Soyutlamaları** | `IReadRepository<T>`, `IWriteRepository<T>`, `IUnitOfWork` — Persistence'a karşı soyutlama. |
-| **Entity Repository Interface'leri** | `IProjectRepository`, `IBidRepository`, `IGitHubLogRepository`, `IContractRepository` — entity bazlı özelleşmiş interface'ler. |
+| **Entity Repository Interface'leri** | `IProjectReadRepository` / `IProjectWriteRepository`, `IBidReadRepository` / `IBidWriteRepository`, vb. — aggregate başına okuma ve yazma ayrı arayüzler (`Abstractions/Persistence/Repositories/{Aggregate}/`). |
 | **Servis Interface'leri** | `IEmailService`, `IGitHubService` — Infrastructure'a karşı soyutlama. |
 | **Bağımlılık** | Yalnızca Domain katmanına bağımlıdır. `MediatR`, `FluentValidation` referansları. |
 
@@ -75,7 +75,7 @@ Persistence  ──►  Application  ──►  Domain
 | İçerik | Açıklama |
 |--------|----------|
 | **DbContext** | `Dev4AllDbContext` — EF Core DbSet tanımları; her entity için ayrı `IEntityTypeConfiguration<T>`. |
-| **Repository'ler** | `IProjectRepository`, `IBidRepository` vb. entity-specific interface implementasyonları. Soft delete için `MarkAsDeleted()` çağrılır. |
+| **Repository'ler** | Read/write interface implementasyonları (`ProjectRepository` → `IProjectReadRepository`, `IProjectWriteRepository`, …). Soft delete için `MarkAsDeleted()` çağrılır. |
 | **Unit of Work** | `IUnitOfWork` implementasyonu — `BeginTransactionAsync / CommitTransactionAsync / RollbackTransactionAsync`. |
 | **Migration'lar** | EF Core migration dosyaları (`dotnet ef migrations add`). |
 | **Seed Verileri** | Geliştirme ortamı için başlangıç verileri (Admin kullanıcısı vb.). |

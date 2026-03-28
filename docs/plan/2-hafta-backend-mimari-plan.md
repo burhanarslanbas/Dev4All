@@ -670,324 +670,79 @@ public static class ApplicationServiceRegistration
 
 ---
 
-## Adım 5 — Persistence Katmanı — Identity ve DbContext
+## Adım 5 — Persistence Katmanı — Identity, DbContext, Repository implementasyonları
 
-Dosya konumu: `backend/src/Infrastructure/Dev4All.Persistence/`
+**Konum:** `backend/src/Infrastructure/Dev4All.Persistence/`
 
-### 5.1. ApplicationUser
+**Application ile hizalama:** Okuma/yazma arayüzleri `Dev4All.Application.Abstractions.Persistence.Repositories.*` altında tanımlıdır (Adım 4 güncel yapı). Persistence tarafında **aggregate başına iki somut sınıf:** `{Aggregate}ReadRepository` → `I{Aggregate}ReadRepository`, `{Aggregate}WriteRepository` → `I{Aggregate}WriteRepository`. **`SaveChangesAsync` yalnızca `IUnitOfWork`** üzerinden çağrılır (repository’lerde yok).
 
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Identity/ApplicationUser.cs`
+### 5.1. Klasör yapısı
 
-```csharp
-using Microsoft.AspNetCore.Identity;
-
-namespace Dev4All.Persistence.Identity;
-
-public class ApplicationUser : IdentityUser
-{
-    public string Name { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-}
+```
+Dev4All.Persistence/
+├── Context/
+│   └── Dev4AllDbContext.cs
+├── Configurations/
+│   ├── ProjectConfiguration.cs
+│   ├── BidConfiguration.cs
+│   ├── GitHubLogConfiguration.cs
+│   ├── ContractConfiguration.cs
+│   └── ContractRevisionConfiguration.cs
+├── Identity/
+│   └── ApplicationUser.cs
+├── Repositories/
+│   ├── Projects/ProjectReadRepository.cs, ProjectWriteRepository.cs
+│   ├── Bids/BidReadRepository.cs, BidWriteRepository.cs
+│   ├── GitHubLogs/GitHubLogReadRepository.cs, GitHubLogWriteRepository.cs
+│   ├── Contracts/ContractReadRepository.cs, ContractWriteRepository.cs
+│   └── ContractRevisions/ContractRevisionReadRepository.cs, ContractRevisionWriteRepository.cs
+├── UnitOfWork.cs
+└── PersistenceServiceRegistration.cs
 ```
 
-### 5.2. Dev4AllDbContext
+### 5.2. ApplicationUser
 
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Context/Dev4AllDbContext.cs`
+**Dosya:** `Identity/ApplicationUser.cs` — `IdentityUser` türevi; `Name`, `CreatedDate`.
 
-```csharp
-using Dev4All.Domain.Entities;
-using Dev4All.Persistence.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+### 5.3. Dev4AllDbContext
 
-namespace Dev4All.Persistence.Context;
+**Dosya:** `Context/Dev4AllDbContext.cs`
 
-public class Dev4AllDbContext(DbContextOptions<Dev4AllDbContext> options)
-    : IdentityDbContext<ApplicationUser>(options)
-{
-    public DbSet<Project> Projects => Set<Project>();
-    public DbSet<Bid> Bids => Set<Bid>();
-    public DbSet<GitHubLog> GitHubLogs => Set<GitHubLog>();
-    public DbSet<Contract> Contracts => Set<Contract>();
-    public DbSet<ContractRevision> ContractRevisions => Set<ContractRevision>();
+- `IdentityDbContext<ApplicationUser>` tabanı.
+- `DbSet`: `Project`, `Bid`, `GitHubLog`, `Contract`, `ContractRevision`.
+- `OnModelCreating`: `ApplyConfigurationsFromAssembly(typeof(Dev4AllDbContext).Assembly)`.
+- `SaveChangesAsync` override: `BaseEntity` için `Added` → `CreatedDate`, `Modified` → `MarkAsUpdated()`.
 
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(Dev4AllDbContext).Assembly);
-    }
-}
-```
+### 5.4. Entity konfigürasyonları (Fluent API)
 
-### 5.3. Entity Type Configurations
+- **Project:** `CustomerId` / `AssignedDeveloperId` uzunlukları, precision, soft-delete `HasQueryFilter`, `HasMany` Bids, **`HasMany` GitHubLogs** (1-N; domain’de `Project.GitHubLogs`), `HasOne` Contract (1-1).
+- **Bid:** precision, `ProposalNote`, soft-delete filter.
+- **GitHubLog:** string uzunlukları (commit hash, mesaj, vb.).
+- **Contract:** içerik uzunluğu, Project ile 1-1, `Revisions` ile 1-N cascade.
+- **ContractRevision:** snapshot ve not alanları.
 
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Configurations/ProjectConfiguration.cs`
+### 5.5. Repository sınıfları
 
-```csharp
-using Dev4All.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+Read ve write ayrı dosyalarda: `Repositories/{Aggregate}/{Entity}ReadRepository.cs` ve `{Entity}WriteRepository.cs`.
 
-namespace Dev4All.Persistence.Configurations;
+- Application’daki **`IReadRepository<T>`** / **`IWriteRepository<T>`** taban metotlarının tamamı + aggregate’a özel read/write metotları.
+- **`IProjectWriteRepository.SoftDelete`:** `MarkAsDeleted()` + `Update`.
+- Read repository’lerde mümkün olduğunca **`AsNoTracking()`**; write repository’ler aynı scope’taki `DbContext` ile tracking kullanır.
 
-public class ProjectConfiguration : IEntityTypeConfiguration<Project>
-{
-    public void Configure(EntityTypeBuilder<Project> builder)
-    {
-        builder.HasKey(x => x.Id);
+### 5.6. UnitOfWork
 
-        builder.Property(x => x.Title).IsRequired().HasMaxLength(100);
-        builder.Property(x => x.Description).IsRequired().HasMaxLength(2000);
-        builder.Property(x => x.Budget).HasPrecision(18, 2);
-        builder.Property(x => x.Technologies).HasMaxLength(500);
+**Dosya:** `UnitOfWork.cs` — `IUnitOfWork`: transaction başlatma/commit/rollback + `SaveChangesAsync`.
 
-        // Soft delete global filter
-        builder.HasQueryFilter(x => x.DeletedDate == null);
+### 5.7. DI kaydı
 
-        // İlişkiler
-        builder.HasMany(x => x.Bids)
-            .WithOne(x => x.Project)
-            .HasForeignKey(x => x.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
+**Dosya:** `PersistenceServiceRegistration.cs`
 
-        builder.HasOne(x => x.GitHubLog)
-            .WithOne(x => x.Project)
-            .HasForeignKey<GitHubLog>(x => x.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
-    }
-}
-```
+- `AddScoped<IProjectReadRepository, ProjectReadRepository>()` ve `AddScoped<IProjectWriteRepository, ProjectWriteRepository>()` (aynı kalıp diğer aggregate’ler için). Her ikisi de aynı scope’tan tek `Dev4AllDbContext` alır.
+- **`AddScoped<IUnitOfWork, UnitOfWork>()`**
 
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Configurations/BidConfiguration.cs`
+### 5.8. WebAPI
 
-```csharp
-using Dev4All.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Dev4All.Persistence.Configurations;
-
-public class BidConfiguration : IEntityTypeConfiguration<Bid>
-{
-    public void Configure(EntityTypeBuilder<Bid> builder)
-    {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.BidAmount).HasPrecision(18, 2);
-        builder.Property(x => x.ProposalNote).IsRequired().HasMaxLength(1000);
-        builder.HasQueryFilter(x => x.DeletedDate == null);
-    }
-}
-```
-
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Configurations/GitHubLogConfiguration.cs`
-
-```csharp
-using Dev4All.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Dev4All.Persistence.Configurations;
-
-public class GitHubLogConfiguration : IEntityTypeConfiguration<GitHubLog>
-{
-    public void Configure(EntityTypeBuilder<GitHubLog> builder)
-    {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.RepoUrl).IsRequired().HasMaxLength(500);
-        builder.Property(x => x.Branch).IsRequired().HasMaxLength(100);
-        builder.Property(x => x.CommitHash).IsRequired().HasMaxLength(40);
-        builder.Property(x => x.CommitMessage).IsRequired().HasMaxLength(1000);
-        builder.Property(x => x.AuthorName).IsRequired().HasMaxLength(200);
-    }
-}
-```
-
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Configurations/ContractConfiguration.cs`
-
-```csharp
-using Dev4All.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Dev4All.Persistence.Configurations;
-
-public class ContractConfiguration : IEntityTypeConfiguration<Contract>
-{
-    public void Configure(EntityTypeBuilder<Contract> builder)
-    {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Content).IsRequired().HasMaxLength(10000);
-        builder.Property(x => x.LastRevisedById).IsRequired().HasMaxLength(450);
-
-        // 1-1 ilişki: bir Project'in en fazla bir Contract'u olabilir
-        builder.HasOne(x => x.Project)
-            .WithOne(x => x.Contract)
-            .HasForeignKey<Contract>(x => x.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasMany(x => x.Revisions)
-            .WithOne(x => x.Contract)
-            .HasForeignKey(x => x.ContractId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-}
-```
-
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Configurations/ContractRevisionConfiguration.cs`
-
-```csharp
-using Dev4All.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Dev4All.Persistence.Configurations;
-
-public class ContractRevisionConfiguration : IEntityTypeConfiguration<ContractRevision>
-{
-    public void Configure(EntityTypeBuilder<ContractRevision> builder)
-    {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.ContentSnapshot).IsRequired().HasMaxLength(10000);
-        builder.Property(x => x.RevisedById).IsRequired().HasMaxLength(450);
-        builder.Property(x => x.RevisionNote).HasMaxLength(500);
-    }
-}
-```
-
-### 5.4. Repository Implementasyonları
-
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/Repositories/ProjectRepository.cs`
-
-```csharp
-using Dev4All.Application.Abstractions.Repositories;
-using Dev4All.Application.Common.Pagination;
-using Dev4All.Domain.Entities;
-using Dev4All.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
-
-namespace Dev4All.Persistence.Repositories;
-
-public class ProjectRepository(Dev4AllDbContext context) : IProjectRepository
-{
-    public async Task<Project?> GetByIdAsync(Guid id, CancellationToken ct = default)
-        => await context.Projects.FirstOrDefaultAsync(x => x.Id == id, ct);
-
-    public async Task<Project?> GetByIdWithBidsAsync(Guid id, CancellationToken ct = default)
-        => await context.Projects
-            .Include(x => x.Bids)
-            .FirstOrDefaultAsync(x => x.Id == id, ct);
-
-    public async Task<PagedResult<Project>> GetOpenProjectsAsync(
-        int page, int pageSize, CancellationToken ct = default)
-    {
-        var query = context.Projects
-            .Where(x => x.Status == Dev4All.Domain.Enums.ProjectStatus.Open)
-            .AsQueryable();
-
-        var totalCount = await query.CountAsync(ct);
-        var items = await query
-            .OrderByDescending(x => x.CreatedDate)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
-
-        return new PagedResult<Project>(items, totalCount, page, pageSize);
-    }
-
-    public async Task<List<Project>> GetByCustomerIdAsync(string customerId, CancellationToken ct = default)
-        => await context.Projects
-            .Where(x => x.CustomerId == customerId)
-            .OrderByDescending(x => x.CreatedDate)
-            .ToListAsync(ct);
-
-    public async Task AddAsync(Project entity, CancellationToken ct = default)
-        => await context.Projects.AddAsync(entity, ct);
-
-    public void Update(Project entity) => context.Projects.Update(entity);
-
-    public void Delete(Project entity)
-    {
-        entity.MarkAsDeleted();
-        context.Projects.Update(entity);
-    }
-
-    public async Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => await context.SaveChangesAsync(ct);
-}
-```
-
-### 5.5. UnitOfWork Implementasyonu
-
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/UnitOfWork.cs`
-
-```csharp
-using Dev4All.Application.Abstractions.Persistence;
-using Dev4All.Persistence.Context;
-using Microsoft.EntityFrameworkCore.Storage;
-
-namespace Dev4All.Persistence;
-
-public class UnitOfWork(Dev4AllDbContext context) : IUnitOfWork
-{
-    private IDbContextTransaction? _transaction;
-
-    public async Task BeginTransactionAsync(CancellationToken ct = default)
-    {
-        if (_transaction != null)
-            throw new InvalidOperationException("A transaction is already in progress.");
-        _transaction = await context.Database.BeginTransactionAsync(ct);
-    }
-
-    public async Task CommitTransactionAsync(CancellationToken ct = default)
-    {
-        if (_transaction == null) throw new InvalidOperationException("No transaction to commit.");
-        try
-        {
-            await context.SaveChangesAsync(ct);
-            await _transaction.CommitAsync(ct);
-        }
-        catch { await RollbackTransactionAsync(ct); throw; }
-        finally { await _transaction.DisposeAsync(); _transaction = null; }
-    }
-
-    public async Task RollbackTransactionAsync(CancellationToken ct = default)
-    {
-        if (_transaction == null) return;
-        try { await _transaction.RollbackAsync(ct); }
-        finally { await _transaction.DisposeAsync(); _transaction = null; }
-    }
-
-    public async Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => await context.SaveChangesAsync(ct);
-}
-```
-
-### 5.6. PersistenceServiceRegistration
-
-**Dosya:** `backend/src/Infrastructure/Dev4All.Persistence/PersistenceServiceRegistration.cs`
-
-```csharp
-using Dev4All.Application.Abstractions.Persistence;
-using Dev4All.Application.Abstractions.Repositories;
-using Dev4All.Persistence.Repositories;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Dev4All.Persistence;
-
-public static class PersistenceServiceRegistration
-{
-    public static IServiceCollection AddPersistenceServices(this IServiceCollection services)
-    {
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<IBidRepository, BidRepository>();
-        services.AddScoped<IGitHubLogRepository, GitHubLogRepository>();
-        services.AddScoped<IContractRepository, ContractRepository>();
-        services.AddScoped<IContractRevisionRepository, ContractRevisionRepository>();
-        return services;
-    }
-}
-```
+`Program.cs` içinde `AddDbContext<Dev4AllDbContext>(…)` ve `AddPersistenceServices()` çağrıları (connection string ile) bu adımın parçasıdır; tam örnek Adım 7’de toplanabilir.
 
 ---
 
@@ -1074,6 +829,43 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 }
 ```
+
+### 6.3.b EmailService Implementasyonu
+
+**Dosya:** `backend/src/Infrastructure/Dev4All.Infrastructure/Email/EmailService.cs`
+
+```csharp
+using Dev4All.Application.Abstractions.Services;
+using MailKit.Net.Smtp;
+using Microsoft.Extensions.Configuration;
+using MimeKit;
+
+namespace Dev4All.Infrastructure.Email;
+
+public class EmailService(IConfiguration configuration) : IEmailService
+{
+    public async Task SendAsync(string recipient, string subject, string htmlBody, CancellationToken ct = default)
+    {
+        var smtp = configuration.GetSection("Smtp");
+
+        var message = new MimeMessage();
+        message.From.Add(MailboxAddress.Parse(smtp["SenderEmail"]));
+        message.To.Add(MailboxAddress.Parse(recipient));
+        message.Subject = subject;
+        message.Body = new TextPart("html") { Text = htmlBody };
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(smtp["Host"], int.Parse(smtp["Port"]!),
+            bool.Parse(smtp["UseSsl"] ?? "false"), ct);
+        await client.SendAsync(message, ct);
+        await client.DisconnectAsync(true, ct);
+    }
+}
+```
+
+> **Not:** `MailKit` NuGet paketi `Dev4All.Infrastructure.csproj`'a eklenmelidir (`dotnet add package MailKit`).
+
+---
 
 ### 6.4. InfrastructureServiceRegistration
 
@@ -1296,16 +1088,19 @@ builder.Services.AddCors(opt =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();   // .NET 9+ native OpenAPI (Swashbuckle yerine)
 
 var app = builder.Build();
 
 // Middleware pipeline (sıra zorunludur)
 app.UseMiddleware<GlobalExceptionMiddleware>();   // 1. Global hata yakalama
 app.UseHttpsRedirection();                        // 2. HTTPS
-app.UseSwagger();                                 // 3. Swagger
-app.UseSwaggerUI();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();                             // 3. OpenAPI — sadece geliştirme ortamında
+}
+
 app.UseCors("AllowFrontend");                     // 4. CORS
 app.UseAuthentication();                          // 5. JWT doğrulama
 app.UseAuthorization();                           // 6. Rol/Policy
@@ -1315,6 +1110,8 @@ app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = Dat
 
 app.Run();
 ```
+
+> **Not:** `AddOpenApi()` / `MapOpenApi()`, .NET 9+'da gelen yerleşik OpenAPI desteğidir; `Swashbuckle.AspNetCore` paketi ayrıca eklenmez. `MapOpenApi()` varsayılan olarak `/openapi/v1.json` adresinde şema sunar. Swagger UI istenirse `scalar` veya `redoc` paketi entegre edilebilir.
 
 ---
 
@@ -1334,11 +1131,11 @@ Dev4All.Application/
         │   │   ├── RegisterUserCommandHandler.cs       ← İskelet (NotImplementedException)
         │   │   ├── RegisterUserCommandValidator.cs
         │   │   └── RegisterUserResponse.cs
-        │   └── LoginUser/
-        │       ├── LoginUserCommand.cs
-        │       ├── LoginUserCommandHandler.cs
-        │       ├── LoginUserCommandValidator.cs
-        │       └── LoginUserResponse.cs
+│   └── LoginUser/
+│       ├── LoginUserCommand.cs
+│       ├── LoginUserCommandHandler.cs          ← İskelet (NotImplementedException)
+│       ├── LoginUserCommandValidator.cs
+│       └── LoginUserResponse.cs
         └── Queries/
             └── GetCurrentUser/
                 ├── GetCurrentUserQuery.cs
@@ -1413,7 +1210,7 @@ namespace Dev4All.WebAPI.Controllers.v1;
 /// <summary>Authentication ve kullanıcı işlemleri</summary>
 [ApiController]
 [Route("api/v1/[controller]")]
-public sealed class AuthController(IMediator mediator) : ControllerBase
+public sealed class AuthController(ISender sender) : ControllerBase
 {
     /// <summary>Yeni kullanıcı kaydı</summary>
     [HttpPost("register")]
@@ -1421,7 +1218,7 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterUserCommand command, CancellationToken ct)
     {
-        var response = await mediator.Send(command, ct);
+        var response = await sender.Send(command, ct);
         return Created($"/api/v1/auth/me", response);
     }
 
@@ -1431,7 +1228,7 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginUserCommand command, CancellationToken ct)
     {
-        var response = await mediator.Send(command, ct);
+        var response = await sender.Send(command, ct);
         return Ok(response);
     }
 
@@ -1441,7 +1238,7 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(GetCurrentUserResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Me(CancellationToken ct)
     {
-        var response = await mediator.Send(new GetCurrentUserQuery(), ct);
+        var response = await sender.Send(new GetCurrentUserQuery(), ct);
         return Ok(response);
     }
 }
@@ -1470,16 +1267,16 @@ dotnet build backend/Dev4All.slnx
 
 | # | Kontrol | Durum |
 |---|---------|-------|
-| 1 | Solution 5 proje içeriyor (Domain, Application, Infrastructure, Persistence, WebAPI) | ☐ |
+| 1 | Solution 7 proje içeriyor (Domain, Application, Infrastructure, Persistence, WebAPI, UnitTests, IntegrationTests) | ☐ |
 | 2 | Katman referans kuralları ihlal edilmedi (Domain → hiçbir şey) | ☐ |
-| 3 | `BaseEntity`, `ProjectRequest`, `Bid`, `GitHubLog`, **`Contract`**, **`ContractRevision`** entity'leri oluşturuldu | ☐ |
+| 3 | `BaseEntity`, `Project`, `Bid`, `GitHubLog`, **`Contract`**, **`ContractRevision`** entity'leri oluşturuldu | ☐ |
 | 4 | `ProjectStatus`, `BidStatus`, `UserRole`, **`ContractStatus`** enum'ları tanımlı | ☐ |
 | 5 | `DomainException`, `ResourceNotFoundException`, `BusinessRuleViolationException` hazır | ☐ |
-| 6 | `IProjectRepository`, `IBidRepository`, `IGitHubLogRepository`, **`IContractRepository`**, **`IContractRevisionRepository`** interface'leri Application'da | ☐ |
+| 6 | Application'da aggregate read/write arayüzleri (`IProjectReadRepository` / `IProjectWriteRepository`, …) tanımlı | ☐ |
 | 7 | `IUnitOfWork` interface'i Application'da tanımlı | ☐ |
 | 8 | `ValidationBehavior<,>` MediatR pipeline'a eklenmiş | ☐ |
 | 9 | `Dev4AllDbContext` Identity + entity DbSet'leriyle hazır (`Contracts`, `ContractRevisions` dahil) | ☐ |
-| 10 | Entity konfigürasyonları (soft delete filtre, precision, ilişkiler, Contract 1-1) tamamlandı | ☐ |
+| 10 | Entity konfigürasyonları (soft delete filtre, precision, ilişkiler, Project–GitHubLog 1-N, Contract 1-1) tamamlandı | ☐ |
 | 11 | `JwtService` ve `CurrentUser` implementasyonları hazır | ☐ |
 | 12 | `GlobalExceptionMiddleware` middleware pipeline'ının başına eklendi | ☐ |
 | 13 | `Program.cs` temiz ve middleware sırası doğru | ☐ |
@@ -1492,4 +1289,4 @@ dotnet build backend/Dev4All.slnx
 
 - `Dev4AllDbContext` migration'larını çalıştırma (`dotnet ef migrations add InitialCreate`)
 - PostgreSQL veritabanı oluşturma ve seed verileri (Admin kullanıcısı, roller)
-- Contract ve ContractRevision repository implementasyonlarını oluşturma
+- Auth feature handler'larının tam implementasyonu (`RegisterUser`, `LoginUser`, `GetCurrentUser`)

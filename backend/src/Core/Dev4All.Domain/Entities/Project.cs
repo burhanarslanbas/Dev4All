@@ -17,7 +17,7 @@ public class Project : BaseEntity
     public ProjectStatus Status { get; private set; } = ProjectStatus.Open;
 
     public ICollection<Bid> Bids { get; set; } = [];
-    public GitHubLog? GitHubLog { get; set; }
+    public ICollection<GitHubLog> GitHubLogs { get; set; } = [];
     public Contract? Contract { get; set; }
 
     public void SetCustomer(string customerId)
