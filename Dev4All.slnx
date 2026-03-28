@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Core/">
+    <Project Path="src/Core/Dev4All.Application/Dev4All.Application.csproj" />
+    <Project Path="src/Core/Dev4All.Domain/Dev4All.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="src/Infrastructure/Dev4All.Infrastructure/Dev4All.Infrastructure.csproj" />
+    <Project Path="src/Infrastructure/Dev4All.Persistence/Dev4All.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentation/">
+    <Project Path="src/Presentation/Dev4All.WebAPI/Dev4All.WebAPI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Dev4All.IntegrationTests/Dev4All.IntegrationTests.csproj" />
+    <Project Path="tests/Dev4All.UnitTests/Dev4All.UnitTests.csproj" />
+  </Folder>
+</Solution>
