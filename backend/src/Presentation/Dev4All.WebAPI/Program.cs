@@ -1,13 +1,16 @@
+using Dev4All.Application;
 using Dev4All.Application.Options;
+using Dev4All.Infrastructure;
+using Dev4All.Persistence;
+using Dev4All.Persistence.Context;
+using Dev4All.Persistence.Identity;
+using Dev4All.WebAPI.Middlewares;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
+// Options — validate at startup so misconfiguration fails early
 builder.Services.AddOptions<DatabaseOptions>()
     .Bind(builder.Configuration.GetSection(DatabaseOptions.SectionName))
     .ValidateDataAnnotations()
@@ -18,18 +21,70 @@ builder.Services.AddOptions<JwtOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddOptions<SmtpOptions>()
+    .Bind(builder.Configuration.GetSection(SmtpOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+// DbContext — reads connection string from DatabaseOptions
+var dbOptions = builder.Configuration
+    .GetSection(DatabaseOptions.SectionName)
+    .Get<DatabaseOptions>()
+    ?? throw new InvalidOperationException("Database configuration section is missing.");
+
+builder.Services.AddDbContext<Dev4AllDbContext>(options =>
+    options.UseNpgsql(dbOptions.ConnectionString,
+        npgsql => npgsql.EnableRetryOnFailure(dbOptions.MaxRetryCount)));
+
+// Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireUppercase = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+})
+.AddEntityFrameworkStores<Dev4AllDbContext>()
+.AddDefaultTokenProviders();
+
+// Layer services
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddPersistenceServices();
+
+// CORS
+builder.Services.AddCors(opt =>
+{
+    var origins = builder.Configuration
+        .GetSection("Cors:AllowedOrigins")
+        .Get<string[]>() ?? [];
+
+    opt.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins(origins)
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Middleware pipeline (order is mandatory)
+app.UseMiddleware<GlobalExceptionMiddleware>();   // 1. Global error handling
+
+app.UseHttpsRedirection();                        // 2. HTTPS
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi();                             // 3. OpenAPI — development only
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");                     // 4. CORS
+app.UseAuthentication();                          // 5. JWT validation
+app.UseAuthorization();                           // 6. Role/Policy
+app.MapControllers();                             // 7. Controller routing
 
-app.UseAuthorization();
-
-app.MapControllers();
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }));
 
 app.Run();
