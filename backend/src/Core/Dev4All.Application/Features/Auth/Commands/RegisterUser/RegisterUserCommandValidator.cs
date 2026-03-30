@@ -1,3 +1,4 @@
+using Dev4All.Domain.Enums;
 using FluentValidation;
 
 namespace Dev4All.Application.Features.Auth.Commands.RegisterUser;
@@ -21,6 +22,8 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
             .Matches("[0-9]").WithMessage("Şifre en az 1 rakam içermelidir.");
 
         RuleFor(x => x.Role)
-            .IsInEnum().WithMessage("Rol 'Customer' veya 'Developer' olmalıdır.");
+            .IsInEnum()
+            .Must(role => role is UserRole.Customer or UserRole.Developer)
+            .WithMessage("Public kayıt için yalnızca 'Customer' veya 'Developer' rolü seçilebilir.");
     }
 }

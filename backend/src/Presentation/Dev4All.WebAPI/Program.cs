@@ -67,6 +67,7 @@ builder.Services.AddCors(opt =>
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -78,6 +79,8 @@ app.UseHttpsRedirection();                        // 2. HTTPS
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();                             // 3. OpenAPI — development only
+    app.UseSwagger();                             // 3.1 Swagger JSON
+    app.UseSwaggerUI();                           // 3.2 Swagger UI
 }
 
 app.UseCors("AllowFrontend");                     // 4. CORS

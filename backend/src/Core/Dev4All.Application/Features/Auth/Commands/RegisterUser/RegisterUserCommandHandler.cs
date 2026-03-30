@@ -1,4 +1,5 @@
 using Dev4All.Application.Abstractions.Auth;
+using Dev4All.Domain.Enums;
 using Dev4All.Domain.Exceptions;
 using MediatR;
 
@@ -10,6 +11,9 @@ public sealed class RegisterUserCommandHandler(
 {
     public async Task<RegisterUserResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
+        if (request.Role == UserRole.Admin)
+            throw new UnauthorizedDomainException("Admin rolü public register endpoint'i üzerinden oluşturulamaz.");
+
         var (succeeded, userId, errors) = await identityService.CreateUserAsync(
             request.Name,
             request.Email,
