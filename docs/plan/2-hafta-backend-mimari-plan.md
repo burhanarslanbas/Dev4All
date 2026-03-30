@@ -750,7 +750,11 @@ Read ve write ayrı dosyalarda: `Repositories/{Aggregate}/{Entity}ReadRepository
 
 Dosya konumu: `backend/src/Infrastructure/Dev4All.Infrastructure/`
 
-### 6.1. IJwtService Interface (Application katmanında)
+### 6.1. Application Katmanındaki Soyutlamalar
+
+> **Mimari Kural:** Application katmanı yalnızca kendi tanımladığı interface'lere bağımlıdır. `UserManager<ApplicationUser>`, `IdentityUser`, `ApplicationUser` gibi Infrastructure/Persistence'a ait tipler **asla Application katmanına girmez**. Tüm imzalar primitive türler (string, bool, Guid) kullanır.
+
+#### 6.1.a IJwtService
 
 **Dosya:** `backend/src/Core/Dev4All.Application/Abstractions/Auth/IJwtService.cs`
 
@@ -759,12 +763,32 @@ namespace Dev4All.Application.Abstractions.Auth;
 
 public interface IJwtService
 {
-    /// <summary>Kullanıcı bilgilerinden JWT Token üretir</summary>
+    /// <summary>Generates a signed JWT token for the given user identity.</summary>
     string GenerateToken(string userId, string email, string role);
 }
 ```
 
-> **Mimari Not:** Interface Application katmanında primitive parametreler alır. `ApplicationUser`'a (Persistence) referans vermek Application → Persistence bağımlılığı yaratır; bu Clean Architecture'ı ihlal eder.
+#### 6.1.b IIdentityService
+
+**Dosya:** `backend/src/Core/Dev4All.Application/Abstractions/Auth/IIdentityService.cs`
+
+```csharp
+namespace Dev4All.Application.Abstractions.Auth;
+
+/// <summary>Abstracts ASP.NET Core Identity operations. Implemented in Infrastructure.</summary>
+public interface IIdentityService
+{
+    Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(
+        string name, string email, string password, string role, CancellationToken ct = default);
+
+    Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(
+        string email, string password, CancellationToken ct = default);
+
+    Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default);
+
+    Task<string?> GetUserNameAsync(string userId, CancellationToken ct = default);
+}
+```
 
 ### 6.2. JwtService Implementasyonu
 
@@ -772,7 +796,8 @@ public interface IJwtService
 
 ```csharp
 using Dev4All.Application.Abstractions.Auth;
-using Microsoft.Extensions.Configuration;
+using Dev4All.Application.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -780,12 +805,13 @@ using System.Text;
 
 namespace Dev4All.Infrastructure.Auth;
 
-public class JwtService(IConfiguration configuration) : IJwtService
+public sealed class JwtService(IOptions<JwtOptions> options) : IJwtService
 {
+    private readonly JwtOptions _jwt = options.Value;
+
     public string GenerateToken(string userId, string email, string role)
     {
-        var jwtSettings = configuration.GetSection("Jwt");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -797,16 +823,79 @@ public class JwtService(IConfiguration configuration) : IJwtService
         };
 
         var token = new JwtSecurityToken(
-            issuer: jwtSettings["Issuer"],
-            audience: jwtSettings["Audience"],
+            issuer: _jwt.Issuer,
+            audience: _jwt.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiryMinutes"]!)),
+            expires: DateTime.UtcNow.AddMinutes(_jwt.ExpiryInMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
 ```
+
+### 6.2.b IdentityService Implementasyonu
+
+**Dosya:** `backend/src/Infrastructure/Dev4All.Infrastructure/Auth/IdentityService.cs`
+
+```csharp
+using Dev4All.Application.Abstractions.Auth;
+using Dev4All.Persistence.Identity;
+using Microsoft.AspNetCore.Identity;
+
+namespace Dev4All.Infrastructure.Auth;
+
+/// <summary>Implements IIdentityService using ASP.NET Core Identity UserManager/RoleManager.</summary>
+public sealed class IdentityService(
+    UserManager<ApplicationUser> userManager,
+    RoleManager<IdentityRole> roleManager) : IIdentityService
+{
+    public async Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(
+        string name, string email, string password, string role, CancellationToken ct = default)
+    {
+        var user = new ApplicationUser { UserName = email, Email = email, Name = name };
+        var result = await userManager.CreateAsync(user, password);
+
+        if (!result.Succeeded)
+            return (false, string.Empty, result.Errors.Select(e => e.Description));
+
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+
+        await userManager.AddToRoleAsync(user, role);
+        return (true, user.Id, []);
+    }
+
+    public async Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(
+        string email, string password, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null) return (false, string.Empty, string.Empty, string.Empty);
+
+        var valid = await userManager.CheckPasswordAsync(user, password);
+        if (!valid) return (false, string.Empty, string.Empty, string.Empty);
+
+        var roles = await userManager.GetRolesAsync(user);
+        return (true, user.Id, user.Email!, roles.FirstOrDefault() ?? string.Empty);
+    }
+
+    public async Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        return user is not null && await userManager.IsInRoleAsync(user, role);
+    }
+
+    public async Task<string?> GetUserNameAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        return user?.UserName;
+    }
+}
+```
+
+> **Not:** `IdentityService`, `Dev4All.Persistence` projesine proje referansı gerektirir (`ApplicationUser` orada tanımlı). `Dev4All.Infrastructure.csproj`'a `<ProjectReference>` eklenmelidir.
+
+---
 
 ### 6.3. CurrentUser Implementasyonu
 
@@ -836,27 +925,34 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
 
 ```csharp
 using Dev4All.Application.Abstractions.Services;
+using Dev4All.Application.Options;
 using MailKit.Net.Smtp;
-using Microsoft.Extensions.Configuration;
+using MailKit.Security;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace Dev4All.Infrastructure.Email;
 
-public class EmailService(IConfiguration configuration) : IEmailService
+public sealed class EmailService(IOptions<SmtpOptions> options) : IEmailService
 {
+    private readonly SmtpOptions _smtp = options.Value;
+
     public async Task SendAsync(string recipient, string subject, string htmlBody, CancellationToken ct = default)
     {
-        var smtp = configuration.GetSection("Smtp");
-
         var message = new MimeMessage();
-        message.From.Add(MailboxAddress.Parse(smtp["SenderEmail"]));
+        message.From.Add(MailboxAddress.Parse(_smtp.SenderEmail));
         message.To.Add(MailboxAddress.Parse(recipient));
         message.Subject = subject;
         message.Body = new TextPart("html") { Text = htmlBody };
 
         using var client = new SmtpClient();
-        await client.ConnectAsync(smtp["Host"], int.Parse(smtp["Port"]!),
-            bool.Parse(smtp["UseSsl"] ?? "false"), ct);
+
+        var secureSocket = _smtp.UseSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
+        await client.ConnectAsync(_smtp.Host, _smtp.Port, secureSocket, ct);
+
+        if (!string.IsNullOrWhiteSpace(_smtp.Username))
+            await client.AuthenticateAsync(_smtp.Username, _smtp.Password, ct);
+
         await client.SendAsync(message, ct);
         await client.DisconnectAsync(true, ct);
     }
@@ -874,6 +970,7 @@ public class EmailService(IConfiguration configuration) : IEmailService
 ```csharp
 using Dev4All.Application.Abstractions.Auth;
 using Dev4All.Application.Abstractions.Services;
+using Dev4All.Application.Options;
 using Dev4All.Infrastructure.Auth;
 using Dev4All.Infrastructure.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -889,8 +986,12 @@ public static class InfrastructureServiceRegistration
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services, IConfiguration configuration)
     {
-        // JWT Authentication
-        var jwtSettings = configuration.GetSection("Jwt");
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
+
+        var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+            ?? throw new InvalidOperationException("Jwt configuration section is missing.");
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -900,17 +1001,19 @@ public static class InfrastructureServiceRegistration
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings["Key"]!))
+                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
                 };
             });
 
+        services.AddHttpContextAccessor();
+
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ICurrentUser, CurrentUser>();
+        services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IEmailService, EmailService>();
-        services.AddHttpContextAccessor();
 
         return services;
     }
@@ -929,29 +1032,32 @@ Dosya konumu: `backend/src/Presentation/Dev4All.WebAPI/`
 
 ```json
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=dev4all_db;Username=postgres;Password=YOUR_PASSWORD"
-  },
-  "Jwt": {
-    "Issuer": "Dev4All",
-    "Audience": "Dev4All",
-    "Key": "CHANGE_ME_IN_PRODUCTION_MIN_32_CHARS_SECURE",
-    "ExpiryMinutes": 60
-  },
-  "Smtp": {
-    "Host": "smtp.gmail.com",
-    "Port": 587,
-    "SenderEmail": "noreply@dev4all.com",
-    "UseSsl": true
-  },
-  "Cors": {
-    "AllowedOrigins": ["http://localhost:5173"]
-  },
   "Logging": {
     "LogLevel": {
       "Default": "Information",
       "Microsoft.AspNetCore": "Warning"
     }
+  },
+  "AllowedHosts": "*",
+  "Database": {
+    "ConnectionString": ""
+  },
+  "Jwt": {
+    "Issuer": "Dev4All",
+    "Audience": "Dev4AllUsers",
+    "SecretKey": "",
+    "ExpiryInMinutes": 120
+  },
+  "Smtp": {
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "SenderEmail": "noreply@dev4all.com",
+    "Username": "",
+    "Password": "",
+    "UseSsl": true
+  },
+  "Cors": {
+    "AllowedOrigins": [ "http://localhost:5173" ]
   }
 }
 ```
@@ -1047,6 +1153,7 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
 
 ```csharp
 using Dev4All.Application;
+using Dev4All.Application.Options;
 using Dev4All.Infrastructure;
 using Dev4All.Persistence;
 using Dev4All.Persistence.Context;
@@ -1057,11 +1164,30 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext
-builder.Services.AddDbContext<Dev4AllDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddOptions<DatabaseOptions>()
+    .Bind(builder.Configuration.GetSection(DatabaseOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
-// Identity
+builder.Services.AddOptions<JwtOptions>()
+    .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOptions<SmtpOptions>()
+    .Bind(builder.Configuration.GetSection(SmtpOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+var dbOptions = builder.Configuration
+    .GetSection(DatabaseOptions.SectionName)
+    .Get<DatabaseOptions>()
+    ?? throw new InvalidOperationException("Database configuration section is missing.");
+
+builder.Services.AddDbContext<Dev4AllDbContext>(options =>
+    options.UseNpgsql(dbOptions.ConnectionString,
+        npgsql => npgsql.EnableRetryOnFailure(dbOptions.MaxRetryCount)));
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -1072,12 +1198,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<Dev4AllDbContext>()
 .AddDefaultTokenProviders();
 
-// Katman servisleri
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPersistenceServices();
 
-// CORS
 builder.Services.AddCors(opt =>
 {
     var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -1088,23 +1212,22 @@ builder.Services.AddCors(opt =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();   // .NET 9+ native OpenAPI (Swashbuckle yerine)
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Middleware pipeline (sıra zorunludur)
-app.UseMiddleware<GlobalExceptionMiddleware>();   // 1. Global hata yakalama
-app.UseHttpsRedirection();                        // 2. HTTPS
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();                             // 3. OpenAPI — sadece geliştirme ortamında
+    app.MapOpenApi();
 }
 
-app.UseCors("AllowFrontend");                     // 4. CORS
-app.UseAuthentication();                          // 5. JWT doğrulama
-app.UseAuthorization();                           // 6. Rol/Policy
-app.MapControllers();                             // 7. Controller routing
+app.UseCors("AllowFrontend");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }));
 
@@ -1115,9 +1238,9 @@ app.Run();
 
 ---
 
-## Adım 8 — CQRS Feature Scaffold: Auth Modülü (Örnek)
+## Adım 8 — CQRS Feature: Auth Modülü
 
-Bu haftanın kapsamında Features klasörü kurulur; **Auth feature'ının komut ve query iskeletleri** oluşturulur. Tam handler implementasyonu 6. haftada yapılacaktır.
+Bu adımda Auth feature'ı yalnızca iskelet değil, **çalışır command/query handler implementasyonları** ile tamamlanır. Handler'lar `UserManager` gibi altyapı sınıflarına değil, Application katmanındaki `IIdentityService`, `IJwtService`, `ICurrentUser` soyutlamalarına bağımlıdır.
 
 ### Klasör yapısı
 
@@ -1128,12 +1251,12 @@ Dev4All.Application/
         ├── Commands/
         │   ├── RegisterUser/
         │   │   ├── RegisterUserCommand.cs
-        │   │   ├── RegisterUserCommandHandler.cs       ← İskelet (NotImplementedException)
+        │   │   ├── RegisterUserCommandHandler.cs
         │   │   ├── RegisterUserCommandValidator.cs
         │   │   └── RegisterUserResponse.cs
 │   └── LoginUser/
 │       ├── LoginUserCommand.cs
-│       ├── LoginUserCommandHandler.cs          ← İskelet (NotImplementedException)
+│       ├── LoginUserCommandHandler.cs
 │       ├── LoginUserCommandValidator.cs
 │       └── LoginUserResponse.cs
         └── Queries/
@@ -1143,9 +1266,10 @@ Dev4All.Application/
                 └── GetCurrentUserResponse.cs
 ```
 
-**Örnek — RegisterUserCommand.cs:**
+**RegisterUserCommand.cs:**
 
 ```csharp
+using Dev4All.Domain.Enums;
 using MediatR;
 
 namespace Dev4All.Application.Features.Auth.Commands.RegisterUser;
@@ -1154,11 +1278,11 @@ public sealed record RegisterUserCommand(
     string Name,
     string Email,
     string Password,
-    string Role   // "Customer" veya "Developer"
+    UserRole Role   // Enum — type-safe, string tabanlı kontrol yok
 ) : IRequest<RegisterUserResponse>;
 ```
 
-**Örnek — RegisterUserCommandValidator.cs:**
+**RegisterUserCommandValidator.cs:**
 
 ```csharp
 using FluentValidation;
@@ -1184,12 +1308,95 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
             .Matches("[0-9]").WithMessage("Şifre en az 1 rakam içermelidir.");
 
         RuleFor(x => x.Role)
-            .NotEmpty()
-            .Must(r => r is "Customer" or "Developer")
-            .WithMessage("Rol 'Customer' veya 'Developer' olmalıdır.");
+            .IsInEnum().WithMessage("Geçersiz kullanıcı rolü.");  // Enum doğrulama
     }
 }
 ```
+
+**RegisterUserCommandHandler.cs** — `IIdentityService` kullanır:
+
+```csharp
+using Dev4All.Application.Abstractions.Auth;
+using Dev4All.Domain.Exceptions;
+using MediatR;
+
+namespace Dev4All.Application.Features.Auth.Commands.RegisterUser;
+
+public sealed class RegisterUserCommandHandler(
+    IIdentityService identityService) : IRequestHandler<RegisterUserCommand, RegisterUserResponse>
+{
+    public async Task<RegisterUserResponse> Handle(
+        RegisterUserCommand request, CancellationToken cancellationToken)
+    {
+        var (succeeded, userId, errors) = await identityService.CreateUserAsync(
+            request.Name, request.Email, request.Password,
+            request.Role.ToString(), cancellationToken);
+
+        if (!succeeded)
+            throw new BusinessRuleViolationException(string.Join(", ", errors));
+
+        return new RegisterUserResponse(Guid.Parse(userId), request.Email, request.Name);
+    }
+}
+```
+
+**LoginUserCommandHandler.cs** — `IIdentityService` + `IJwtService` + `IOptions<JwtOptions>` kullanır:
+
+```csharp
+using Dev4All.Application.Abstractions.Auth;
+using Dev4All.Application.Options;
+using Dev4All.Domain.Exceptions;
+using MediatR;
+using Microsoft.Extensions.Options;
+
+namespace Dev4All.Application.Features.Auth.Commands.LoginUser;
+
+public sealed class LoginUserCommandHandler(
+    IIdentityService identityService,
+    IJwtService jwtService,
+    IOptions<JwtOptions> jwtOptions) : IRequestHandler<LoginUserCommand, LoginUserResponse>
+{
+    public async Task<LoginUserResponse> Handle(
+        LoginUserCommand request, CancellationToken cancellationToken)
+    {
+        var (succeeded, userId, email, role) = await identityService.AuthenticateAsync(
+            request.Email, request.Password, cancellationToken);
+
+        if (!succeeded)
+            throw new UnauthorizedDomainException("Geçersiz e-posta veya şifre.");
+
+        var token = jwtService.GenerateToken(userId, email, role);
+        var expiresAt = DateTime.UtcNow.AddMinutes(jwtOptions.Value.ExpiryInMinutes);
+        return new LoginUserResponse(token, expiresAt, email, role);
+    }
+}
+```
+
+**GetCurrentUserQueryHandler.cs** — yalnızca `ICurrentUser` kullanır (DB çağrısı yok):
+
+```csharp
+using Dev4All.Application.Abstractions.Auth;
+using Dev4All.Domain.Exceptions;
+using MediatR;
+
+namespace Dev4All.Application.Features.Auth.Queries.GetCurrentUser;
+
+public sealed class GetCurrentUserQueryHandler(
+    ICurrentUser currentUser) : IRequestHandler<GetCurrentUserQuery, GetCurrentUserResponse>
+{
+    public Task<GetCurrentUserResponse> Handle(
+        GetCurrentUserQuery request, CancellationToken cancellationToken)
+    {
+        if (!currentUser.IsAuthenticated)
+            throw new UnauthorizedDomainException("Kullanıcı doğrulaması gereklidir.");
+
+        return Task.FromResult(
+            new GetCurrentUserResponse(currentUser.UserId, currentUser.Email, currentUser.Role));
+    }
+}
+```
+
+> **Mimari Özet:** Handler'lar `IIdentityService`, `IJwtService`, `ICurrentUser` interface'lerini inject eder. `UserManager`, `RoleManager`, `ApplicationUser`, `IdentityUser` gibi sınıflar Application katmanında **asla görünmez**. Bu sınıflar yalnızca `IdentityService` içinde (`Dev4All.Infrastructure`) kullanılır.
 
 ---
 
@@ -1267,21 +1474,21 @@ dotnet build backend/Dev4All.slnx
 
 | # | Kontrol | Durum |
 |---|---------|-------|
-| 1 | Solution 7 proje içeriyor (Domain, Application, Infrastructure, Persistence, WebAPI, UnitTests, IntegrationTests) | ☐ |
-| 2 | Katman referans kuralları ihlal edilmedi (Domain → hiçbir şey) | ☐ |
-| 3 | `BaseEntity`, `Project`, `Bid`, `GitHubLog`, **`Contract`**, **`ContractRevision`** entity'leri oluşturuldu | ☐ |
-| 4 | `ProjectStatus`, `BidStatus`, `UserRole`, **`ContractStatus`** enum'ları tanımlı | ☐ |
-| 5 | `DomainException`, `ResourceNotFoundException`, `BusinessRuleViolationException` hazır | ☐ |
-| 6 | Application'da aggregate read/write arayüzleri (`IProjectReadRepository` / `IProjectWriteRepository`, …) tanımlı | ☐ |
-| 7 | `IUnitOfWork` interface'i Application'da tanımlı | ☐ |
-| 8 | `ValidationBehavior<,>` MediatR pipeline'a eklenmiş | ☐ |
-| 9 | `Dev4AllDbContext` Identity + entity DbSet'leriyle hazır (`Contracts`, `ContractRevisions` dahil) | ☐ |
-| 10 | Entity konfigürasyonları (soft delete filtre, precision, ilişkiler, Project–GitHubLog 1-N, Contract 1-1) tamamlandı | ☐ |
-| 11 | `JwtService` ve `CurrentUser` implementasyonları hazır | ☐ |
-| 12 | `GlobalExceptionMiddleware` middleware pipeline'ının başına eklendi | ☐ |
-| 13 | `Program.cs` temiz ve middleware sırası doğru | ☐ |
-| 14 | `Auth` feature iskeletleri (Command, Validator, Response) oluşturuldu | ☐ |
-| 15 | `dotnet build` sıfır hatayla tamamlandı | ☐ |
+| 1 | Solution 7 proje içeriyor (Domain, Application, Infrastructure, Persistence, WebAPI, UnitTests, IntegrationTests) | ☑ |
+| 2 | Katman referans kuralları ihlal edilmedi (Domain → hiçbir şey) | ☑ |
+| 3 | `BaseEntity`, `Project`, `Bid`, `GitHubLog`, **`Contract`**, **`ContractRevision`** entity'leri oluşturuldu | ☑ |
+| 4 | `ProjectStatus`, `BidStatus`, `UserRole`, **`ContractStatus`** enum'ları tanımlı | ☑ |
+| 5 | `DomainException`, `ResourceNotFoundException`, `BusinessRuleViolationException` hazır | ☑ |
+| 6 | Application'da aggregate read/write arayüzleri (`IProjectReadRepository` / `IProjectWriteRepository`, …) tanımlı | ☑ |
+| 7 | `IUnitOfWork` interface'i Application'da tanımlı | ☑ |
+| 8 | `ValidationBehavior<,>` MediatR pipeline'a eklenmiş | ☑ |
+| 9 | `Dev4AllDbContext` Identity + entity DbSet'leriyle hazır (`Contracts`, `ContractRevisions` dahil) | ☑ |
+| 10 | Entity konfigürasyonları (soft delete filtre, precision, ilişkiler, Project–GitHubLog 1-N, Contract 1-1) tamamlandı | ☑ |
+| 11 | `JwtService`, `CurrentUser` ve `IdentityService` implementasyonları hazır | ☑ |
+| 12 | `GlobalExceptionMiddleware` middleware pipeline'ının başına eklendi | ☑ |
+| 13 | `Program.cs` temiz ve middleware sırası doğru | ☑ |
+| 14 | `Auth` feature command/query, validator, handler ve response dosyaları oluşturuldu | ☑ |
+| 15 | `dotnet build` sıfır hatayla tamamlandı | ☑ |
 
 ---
 
@@ -1289,4 +1496,4 @@ dotnet build backend/Dev4All.slnx
 
 - `Dev4AllDbContext` migration'larını çalıştırma (`dotnet ef migrations add InitialCreate`)
 - PostgreSQL veritabanı oluşturma ve seed verileri (Admin kullanıcısı, roller)
-- Auth feature handler'larının tam implementasyonu (`RegisterUser`, `LoginUser`, `GetCurrentUser`)
+- Auth akışı için integration testleri (`register/login/me`) ve hata senaryoları

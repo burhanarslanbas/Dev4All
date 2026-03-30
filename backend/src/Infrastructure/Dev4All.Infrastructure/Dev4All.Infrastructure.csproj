@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Dev4All.Application\Dev4All.Application.csproj" />
+    <ProjectReference Include="..\Dev4All.Persistence\Dev4All.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -45,6 +45,7 @@ public static class InfrastructureServiceRegistration
 
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ICurrentUser, CurrentUser>();
+        services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IEmailService, EmailService>();
 
         return services;
