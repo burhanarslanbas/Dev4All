@@ -166,3 +166,7 @@ csharp_preserve_single_line_blocks = true
 
 # CS8618: Non-nullable field not initialized (nav properties use null! pattern)
 dotnet_diagnostic.CS8618.severity = suggestion
+
+# EF Core generated migrations (block namespaces; avoid IDE0161 noise on tooling output)
+[**/Migrations/*.cs]
+dotnet_diagnostic.IDE0161.severity = none
