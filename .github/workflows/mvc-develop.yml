@@ -1,0 +1,44 @@
+name: MVC CI (develop)
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/mvc-develop.yml"
+  pull_request:
+    branches: [develop]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/mvc-develop.yml"
+
+jobs:
+  build-and-test-frontend:
+    name: Build & Test Frontend (develop)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/Dev4All.Web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: |
+          if [ -d "../Dev4All.Web.Tests" ]; then
+            dotnet test ../Dev4All.Web.Tests/ --no-build --configuration Release --verbosity normal
+          else
+            echo "No test project found yet, skipping tests."
+          fi
