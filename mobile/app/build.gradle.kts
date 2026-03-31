@@ -73,6 +73,13 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))
+    implementation(project(":core:network"))
+    implementation(project(":core:datastore"))
+    implementation(project(":core:designsystem"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
