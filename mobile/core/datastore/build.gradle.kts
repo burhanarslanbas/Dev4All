@@ -23,4 +23,11 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.kotlinx.coroutines.core)
+}
+
+dependencies {
+    implementation(project(":core:common"))
 }
