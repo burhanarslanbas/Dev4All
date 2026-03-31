@@ -1,0 +1,48 @@
+name: "Bug Report: Mobile"
+description: "Report a mobile bug with reproducible steps"
+title: "fix(mobile): <short bug title>"
+labels:
+  - type:bug
+  - area:mobile
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Clearly describe current behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open app
+        2. Go to Login
+        3. Enter invalid password
+        4. Tap Login
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "Android 14, Pixel 6 emulator, debug build"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Paste relevant logs, stack traces, or images.
+
