@@ -1,0 +1,62 @@
+name: "Epic: Mobile Sprint"
+description: "Create a sprint-level epic for Dev4All mobile roadmap"
+title: "epic(mobile): sprint <N> - <goal>"
+labels:
+  - type:epic
+  - area:mobile
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for sprint epics linked to `mobile/plan/07-ROADMAP.md`.
+
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint number
+      placeholder: "Sprint 1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Sprint objective
+      description: What should be true at the end of this sprint?
+      placeholder: "Example: Multi-module foundation is complete and build is green."
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List the features/modules included in this sprint.
+      placeholder: |
+        - Core infrastructure
+        - Design system
+        - Network baseline
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ] Scope items delivered
+        - [ ] CI is green
+        - [ ] All linked tasks moved to Done
+        - [ ] Demo notes added
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Links
+      description: Add roadmap section, related docs, and child issues.
+      placeholder: |
+        - Roadmap: mobile/plan/07-ROADMAP.md
+        - Child issues: #123, #124
+

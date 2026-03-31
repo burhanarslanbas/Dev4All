@@ -1,0 +1,74 @@
+name: "Feature Task: Mobile"
+description: "Create an implementation task for Dev4All mobile"
+title: "feat(mobile): <feature name>"
+labels:
+  - type:feature
+  - area:mobile
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: "Implement login screen with ViewModel and API integration"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - area:auth
+        - area:project
+        - area:bid
+        - area:contract
+        - area:github
+        - area:ui
+        - area:data
+        - area:test
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - priority:P1
+        - priority:P2
+        - priority:P3
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Implementation details
+      description: Mention expected files/modules/classes.
+      placeholder: |
+        - app/feature/auth/login/LoginScreen.kt
+        - app/feature/auth/login/LoginViewModel.kt
+        - core/network/api/AuthApiService.kt
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ] Feature works as specified
+        - [ ] Unit tests added/updated
+        - [ ] UI states handled: loading/success/error
+        - [ ] Documentation updated if needed
+    validations:
+      required: true
+
+  - type: input
+    id: epic
+    attributes:
+      label: Parent epic
+      placeholder: "#<epic issue number>"
+    validations:
+      required: true
+
