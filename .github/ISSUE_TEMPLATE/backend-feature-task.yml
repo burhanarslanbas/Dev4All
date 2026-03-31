@@ -1,0 +1,61 @@
+name: "Backend Feature Task"
+description: "A backend feature or task to be completed"
+labels: ["area:backend"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Task Type
+      options:
+        - feat (new feature)
+        - fix (bug fix)
+        - refactor (code improvement)
+        - test (testing)
+        - docs (documentation)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: Sprint
+      options:
+        - "S1 — Project Module"
+        - "S2 — Bid Module"
+        - "S3 — Contract Module"
+        - "S4 — GitHub Integration"
+        - "S5 — Email & Background Jobs"
+        - "S6 — Testing & Quality"
+        - "S7 — Polish & Docs"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: "What needs to be done?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to Create/Modify
+      description: "List all files that need to be created or modified"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: "How will we know this is done?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: agent-prompt
+    attributes:
+      label: Agent Prompt
+      description: "Copy-paste agent prompt for AI-assisted development (optional)"
