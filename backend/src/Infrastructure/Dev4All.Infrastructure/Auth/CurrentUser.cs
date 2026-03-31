@@ -9,7 +9,10 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
 {
     private ClaimsPrincipal? User => httpContextAccessor.HttpContext?.User;
 
-    public string UserId => User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+    public string UserId =>
+        User?.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? User?.FindFirstValue("sub")
+        ?? string.Empty;
     public string Email => User?.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
     public string Role => User?.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;

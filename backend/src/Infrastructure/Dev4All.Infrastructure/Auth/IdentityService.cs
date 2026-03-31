@@ -1,13 +1,18 @@
 using Dev4All.Application.Abstractions.Auth;
+using Dev4All.Persistence.Context;
 using Dev4All.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dev4All.Infrastructure.Auth;
 
 /// <summary>Implements identity operations via ASP.NET Core Identity managers.</summary>
 public sealed class IdentityService(
     UserManager<ApplicationUser> userManager,
-    RoleManager<IdentityRole> roleManager) : IIdentityService
+    RoleManager<IdentityRole> roleManager,
+    Dev4AllDbContext dbContext,
+    IPasswordHasher<ApplicationUser> passwordHasher,
+    ILookupNormalizer lookupNormalizer) : IIdentityService
 {
     public async Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(
         string name,
@@ -34,21 +39,48 @@ public sealed class IdentityService(
         return (true, user.Id, []);
     }
 
-    public async Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(
+    public Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(
         string email,
         string password,
         CancellationToken ct = default)
     {
-        var user = await userManager.FindByEmailAsync(email);
-        if (user is null)
-            return (false, string.Empty, string.Empty, string.Empty);
+        var normalizedEmail = lookupNormalizer.NormalizeEmail(email);
+        var authData =
+            (from user in dbContext.Users.AsNoTracking()
+             where user.NormalizedEmail == normalizedEmail
+             join userRole in dbContext.UserRoles.AsNoTracking()
+                 on user.Id equals userRole.UserId into userRoleGroup
+             from userRole in userRoleGroup.DefaultIfEmpty()
+             join role in dbContext.Roles.AsNoTracking()
+                 on userRole.RoleId equals role.Id into roleGroup
+             from role in roleGroup.DefaultIfEmpty()
+             select new
+             {
+                 user.Id,
+                 user.Email,
+                 user.PasswordHash,
+                 Role = role != null ? role.Name : string.Empty
+             })
+            .FirstOrDefault();
 
-        var valid = await userManager.CheckPasswordAsync(user, password);
-        if (!valid)
-            return (false, string.Empty, string.Empty, string.Empty);
+        if (authData is null)
+            return Task.FromResult((false, string.Empty, string.Empty, string.Empty));
 
-        var roles = await userManager.GetRolesAsync(user);
-        return (true, user.Id, user.Email ?? string.Empty, roles.FirstOrDefault() ?? string.Empty);
+        if (string.IsNullOrWhiteSpace(authData.PasswordHash))
+            return Task.FromResult((false, string.Empty, string.Empty, string.Empty));
+
+        var userForHash = new ApplicationUser
+        {
+            Id = authData.Id,
+            Email = authData.Email,
+            PasswordHash = authData.PasswordHash
+        };
+
+        var passwordResult = passwordHasher.VerifyHashedPassword(userForHash, authData.PasswordHash, password);
+        if (passwordResult is PasswordVerificationResult.Failed)
+            return Task.FromResult((false, string.Empty, string.Empty, string.Empty));
+
+        return Task.FromResult((true, authData.Id, authData.Email ?? string.Empty, authData.Role ?? string.Empty));
     }
 
     public async Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default)

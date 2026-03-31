@@ -4,9 +4,11 @@ using Dev4All.Infrastructure;
 using Dev4All.Persistence;
 using Dev4All.Persistence.Context;
 using Dev4All.Persistence.Identity;
+using Dev4All.WebAPI.Seed;
 using Dev4All.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,8 +35,15 @@ var dbOptions = builder.Configuration
     ?? throw new InvalidOperationException("Database configuration section is missing.");
 
 builder.Services.AddDbContext<Dev4AllDbContext>(options =>
-    options.UseNpgsql(dbOptions.ConnectionString,
-        npgsql => npgsql.EnableRetryOnFailure(dbOptions.MaxRetryCount)));
+{
+    options.UseNpgsql(dbOptions.ConnectionString, npgsql =>
+    {
+        if (dbOptions.MaxRetryCount > 0)
+        {
+            npgsql.EnableRetryOnFailure(dbOptions.MaxRetryCount);
+        }
+    });
+});
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -67,9 +76,32 @@ builder.Services.AddCors(opt =>
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter JWT token. Example: Bearer eyJhbGciOi..."
+    });
+
+    options.AddSecurityRequirement(_ =>
+    {
+        var schemeRef = new OpenApiSecuritySchemeReference("Bearer");
+        return new OpenApiSecurityRequirement { [schemeRef] = [] };
+    });
+});
 
 var app = builder.Build();
+
+var seedRolesOnStartup = builder.Configuration.GetValue<bool>("Seed:SeedRolesOnStartup");
+if (seedRolesOnStartup)
+{
+    await IdentityRoleSeeder.SeedAsync(app.Services);
+}
 
 // Middleware pipeline (order is mandatory)
 app.UseMiddleware<GlobalExceptionMiddleware>();   // 1. Global error handling
@@ -84,6 +116,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");                     // 4. CORS
+
 app.UseAuthentication();                          // 5. JWT validation
 app.UseAuthorization();                           // 6. Role/Policy
 app.MapControllers();                             // 7. Controller routing

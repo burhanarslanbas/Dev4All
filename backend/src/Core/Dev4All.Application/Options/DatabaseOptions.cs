@@ -9,5 +9,6 @@ public sealed class DatabaseOptions
     [Required(ErrorMessage = "Veritabanı bağlantı dizesi (ConnectionString) zorunludur.")]
     public string ConnectionString { get; set; } = string.Empty;
 
-    public int MaxRetryCount { get; set; } = 3;
+    [Range(0, 10, ErrorMessage = "MaxRetryCount must be between 0 and 10.")]
+    public int MaxRetryCount { get; set; } = 0;
 }

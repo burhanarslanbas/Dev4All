@@ -21,6 +21,7 @@ public sealed class JwtService(IOptions<JwtOptions> options) : IJwtService
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
+            new Claim(ClaimTypes.NameIdentifier, userId),
             new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(ClaimTypes.Role, role),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
