@@ -17,6 +17,10 @@ val localProperties = Properties().apply {
 fun localOrGradleProp(key: String): String =
     (localProperties.getProperty(key) ?: project.findProperty(key) as? String ?: "").trim()
 
+/** Escape a raw string so it is safe inside a Java/Kotlin string literal (for buildConfigField). */
+fun String.escapeForBuildConfig(): String =
+    replace("\\", "\\\\").replace("\"", "\\\"")
+
 android {
     namespace = "com.dev4all.mobile"
     compileSdk = 35
@@ -34,12 +38,12 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${localOrGradleProp("API_BASE_URL")}\""
+            "\"${localOrGradleProp("API_BASE_URL").escapeForBuildConfig()}\""
         )
         buildConfigField(
             "String",
             "FEATURE_FLAGS",
-            "\"${localOrGradleProp("FEATURE_FLAGS")}\""
+            "\"${localOrGradleProp("FEATURE_FLAGS").escapeForBuildConfig()}\""
         )
     }
 
