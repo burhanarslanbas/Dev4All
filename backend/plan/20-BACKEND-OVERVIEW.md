@@ -1,7 +1,7 @@
 # 20. Backend Agent Development Plan — Master Overview
 
-> **Last updated:** 2026-03-31  
-> **Status:** Auth module complete; remaining features to be implemented via agent-driven development.
+> **Last updated:** 2026-04-01  
+> **Status:** Auth module partially implemented (register/login/me done — 7 endpoints pending in Sprint 0); remaining features via agent-driven development.
 
 ---
 
@@ -19,7 +19,7 @@ Dev4All backend is a .NET 10 / C# 13 Web API built with **Clean Architecture (On
 | Validation | FluentValidation 12 |
 | Auth | ASP.NET Core Identity + JWT Bearer |
 | Email | MailKit |
-| Scheduling | Quartz.NET (planned) |
+| Scheduling | Quartz.NET (Sprint 0'da kurulacak — EmailDispatchJob) |
 | Testing | xUnit, FluentAssertions, NSubstitute, Bogus, coverlet |
 
 ## 3. Solution Architecture
@@ -57,7 +57,7 @@ Domain ← Application ← Persistence/Infrastructure ← WebAPI
 | **Domain** | `BaseEntity`, `Project`, `Bid`, `Contract`, `ContractRevision`, `GitHubLog` | ✅ Complete |
 | **Domain** | `ProjectStatus`, `BidStatus`, `ContractStatus`, `UserRole` enums | ✅ Complete |
 | **Domain** | Exception hierarchy (`DomainException`, `ResourceNotFoundException`, `BusinessRuleViolationException`, `UnauthorizedDomainException`) | ✅ Complete |
-| **Application** | Auth CQRS — `RegisterUser`, `LoginUser`, `GetCurrentUser` (Command/Query + Handler + Validator + Response) | ✅ Complete |
+| **Application** | Auth CQRS — `RegisterUser`, `LoginUser`, `GetCurrentUser` (Command/Query + Handler + Validator + Response) | ⚠️ Partial (7 endpoint eksik — Sprint 0) |
 | **Application** | All repository interfaces (read/write per aggregate) | ✅ Complete |
 | **Application** | `IUnitOfWork`, `IEmailService`, `IGitHubService`, `ICurrentUser`, `IJwtService`, `IIdentityService` | ✅ Complete |
 | **Application** | `ValidationBehavior`, `PagedResult<T>`, `ApplicationServiceRegistration` | ✅ Complete |
@@ -70,7 +70,7 @@ Domain ← Application ← Persistence/Infrastructure ← WebAPI
 | **Persistence** | Initial migration (`20260330181333_InitialCreate`) | ✅ Complete |
 | **Infrastructure** | `JwtService`, `IdentityService`, `CurrentUser`, `EmailService` | ✅ Complete |
 | **Infrastructure** | `InfrastructureServiceRegistration` (JWT Bearer + DI) | ✅ Complete |
-| **WebAPI** | `AuthController` (register, login, me) | ✅ Complete |
+| **WebAPI** | `AuthController` (register, login, me) | ⚠️ Partial (7 endpoint eksik — Sprint 0) |
 | **WebAPI** | `GlobalExceptionMiddleware` | ✅ Complete |
 | **WebAPI** | `Program.cs` (Options, DbContext, Identity, CORS, Swagger, middleware pipeline, health endpoint) | ✅ Complete |
 | **WebAPI** | `IdentityRoleSeeder` | ✅ Complete |
@@ -78,15 +78,40 @@ Domain ← Application ← Persistence/Infrastructure ← WebAPI
 
 ## 5. What Needs to Be Built
 
-| Sprint | Module | Components |
-|--------|--------|------------|
-| S1 | **Project CRUD** | Commands (Create, Update, Delete), Queries (List, ById, MyProjects), `ProjectsController`, unit tests |
-| S2 | **Bid Module** | Commands (Place, Update, Accept), Queries (ProjectBids, MyBids), `BidsController`, unit tests |
-| S3 | **Contract Module** | Commands (Revise, Approve, Cancel), Queries (GetContract, Revisions), `ContractsController`, unit tests |
-| S4 | **GitHub Integration** | `GitHubService` impl, Commands (LinkRepo), `WebhookController`, Queries (GitHubLogs), unit tests |
-| S5 | **Email & Background Jobs** | Email templates, Quartz.NET EmailDispatchJob, notification triggers, unit tests |
-| S6 | **Testing & Quality** | Integration tests (WebApplicationFactory), Serilog, code coverage >80% |
-| S7 | **Polish & Docs** | Swagger improvements, API versioning review, performance audit, README updates |
+| Sprint | Module | Components | Issues |
+|--------|--------|------------|--------|
+| **S0** | **Auth Tamamlama** | IIdentityService/IJwtService genişletme, RefreshToken entity, EmailQueue+Quartz, 7 yeni Command/Handler, AuthController güncelleme, auth unit+integration tests | #108-#119 |
+| S1 | **Project CRUD** | Commands (Create, Update, Delete), Queries (List, ById, MyProjects), `ProjectsController`, unit tests, integration tests | #31-#38, #63 |
+| S2 | **Bid Module** | Commands (Place, Update, Accept), Queries (ProjectBids, MyBids), `BidsController`, unit tests, integration tests | #39-#45, #64 |
+| S3 | **Contract Module** | Commands (Revise, Approve, Cancel), Queries (GetContract, Revisions), `ContractsController`, unit tests, integration tests | #46-#52, #64 |
+| S4 | **GitHub Integration** | `GitHubService` impl, Commands (LinkRepo), `WebhookController`, Queries (GitHubLogs), unit tests | #53-#57 |
+| S5 | **Email & Background Jobs** | Business email templates (new-bid, bid-accepted, bid-rejected, repo-linked), notification triggers in handlers, unit tests | #58-#61 |
+| S6 | **Quality** | Serilog structured logging, code coverage >80% | #65-#66 |
+| S7 | **Polish & Docs** | Swagger improvements, API versioning review, performance audit, README updates | #67-#70 |
+
+> **Not:** Testler her modülden hemen sonra yazılır. Integration testleri, ilgili sprint'in sonunda yer alır (Sprint 6'ya ertelenmez).
+
+### Auth Closure Criteria (Definition of Done)
+
+| Kriter | Durum | Issue |
+|--------|-------|-------|
+| Register + Login + Me endpoints | ✅ Implemented | — |
+| JWT Bearer token üretimi ve doğrulama | ✅ Implemented | — |
+| Role-based authorization (Customer/Developer/Admin) | ✅ Implemented | — |
+| IIdentityService + IJwtService genişletme | ⏳ Sprint 0 | #108 |
+| RefreshToken entity + DB persistence | ⏳ Sprint 0 | #108 |
+| EmailQueue + Quartz.NET + TemplateRenderer + auth templates | ⏳ Sprint 0 | #109 |
+| RefreshTokenCommand | ⏳ Sprint 0 | #110 |
+| LogoutCommand | ⏳ Sprint 0 | #111 |
+| ConfirmEmailCommand | ⏳ Sprint 0 | #112 |
+| ForgotPasswordCommand | ⏳ Sprint 0 | #113 |
+| ResetPasswordCommand | ⏳ Sprint 0 | #114 |
+| ChangePasswordCommand | ⏳ Sprint 0 | #115 |
+| ResendConfirmationCommand | ⏳ Sprint 0 | #116 |
+| AuthController güncelleme (7 yeni endpoint) | ⏳ Sprint 0 | #117 |
+| Auth Unit Tests (tüm handlers + validators) | ⏳ Sprint 0 | #118 |
+| Auth Integration Tests (tüm 10 endpoint) | ⏳ Sprint 0 | #119 |
+| Auth modülü DoD onayı | ⏳ Sprint 0 tamamlanmasına bağlı | — |
 
 ## 6. Reference Documents
 
@@ -147,6 +172,18 @@ Contract: Draft → UnderReview → BothApproved
 | `POST` | `/api/v1/auth/register` | Public |
 | `POST` | `/api/v1/auth/login` | Public |
 | `GET` | `/api/v1/auth/me` | `[Authorize]` |
+
+### Sprint 0 — Auth Tamamlama (To Be Implemented)
+
+| Method | Endpoint | Auth | Issue |
+|--------|----------|------|-------|
+| `POST` | `/api/v1/auth/refresh-token` | Public | #110 |
+| `POST` | `/api/v1/auth/logout` | Public | #111 |
+| `POST` | `/api/v1/auth/confirm-email` | Public | #112 |
+| `POST` | `/api/v1/auth/forgot-password` | Public | #113 |
+| `POST` | `/api/v1/auth/reset-password` | Public | #114 |
+| `POST` | `/api/v1/auth/change-password` | `[Authorize]` | #115 |
+| `POST` | `/api/v1/auth/resend-confirmation` | Public | #116 |
 
 ### To Be Implemented
 
