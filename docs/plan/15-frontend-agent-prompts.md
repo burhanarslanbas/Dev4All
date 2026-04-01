@@ -2,6 +2,10 @@
 
 Bu dosya, GitHub'daki açık frontend issue'lar için kolayca kopyalanıp agent'a verilebilecek hazır prompt'ları içerir.
 
+> **Cross-reference:** Detaylı prompt içerikleri: `frontend/plan/32-FRONTEND-AGENT-PROMPTS.md`  
+> Issue eşleşme: #72 = #F01, #73 = #F02, ..., #105 = #F34.  
+> **Backend dependency:** Auth akışı backend Sprint 0 (#108-#119) tamamlanmış olmalı.
+
 ## Kullanım
 
 1. GitHub issue numarasını seç.
@@ -11,9 +15,10 @@ Bu dosya, GitHub'daki açık frontend issue'lar için kolayca kopyalanıp agent'
    - Model: `GPT-5.3-Codex` (önerilen)
 4. Prompt'u yapıştırıp çalıştır.
 
-## Önerilen Uygulama Sırası (Dependency-Aware)
+## Baştan Sona Uygulama Sırası (Önce Yapılacaklara Göre)
 
 Bu sıra, issue numarasına değil bağımlılıklara göre optimize edilmiştir.
+Issue'ları baştan sona bu sırayla uygula; prompt içerikleri değişmeden kalır.
 
 1. `#72` — MVC project scaffold (S1)
 2. `#73` — API client infrastructure (S1)
@@ -52,6 +57,22 @@ Bu sıra, issue numarasına değil bağımlılıklara göre optimize edilmiştir
 
 ---
 
+## Auth Odaklı Hızlı Sıra (Sadece bugün auth hedefi için)
+
+Genel geliştirme sırası yukarıdaki dependency sırasıdır.  
+Eğer sadece auth hedefli bir gün planı yapıyorsan frontend tarafında şu kısa rotayı kullan:
+
+1. `#72` — MVC project scaffold + Program.cs + Bootstrap layout
+2. `#73` — API client infrastructure (HttpClient + JWT handler)
+3. `#74` — Login page + AuthService + cookie authentication
+4. `#75` — Register page + role selection
+
+Not:
+- `#74` ve `#75` için `#72` ve `#73` tamamlanmış olmalı.
+- Auth akışı backend Auth endpointlerine bağımlıdır.
+
+---
+
 ## Global Prompt Header (Her issue için üstte kalsın)
 
 ```md
@@ -82,10 +103,15 @@ Output format required:
 
 ## #72 — feat: MVC project scaffold + Program.cs + Bootstrap layout
 
+**Sıra (Order):** 1
+
+**Uygulama Sırası / Order:** 1
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #72
+Sıra: 1
 Goal:
 - Create ASP.NET Core MVC project, configure cookie auth, HttpClient, Bootstrap 5 layout.
 
@@ -113,10 +139,15 @@ Constraints:
 
 ## #73 — feat: API client infrastructure (HttpClient + JWT handler)
 
+**Sıra (Order):** 2
+
+**Uygulama Sırası / Order:** 2
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #73
+Sıra: 2
 Goal:
 - Create generic API client + JWT DelegatingHandler for backend communication.
 
@@ -139,10 +170,15 @@ Constraints:
 
 ## #74 — feat: Login page + AuthService + cookie authentication
 
+**Sıra (Order):** 3
+
+**Uygulama Sırası / Order:** 3
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #74
+Sıra: 3
 Goal:
 - Implement login page, AuthService, and cookie-based JWT bridge authentication.
 
@@ -168,10 +204,15 @@ Constraints:
 
 ## #75 — feat: Register page + role selection
 
+**Sıra (Order):** 4
+
+**Uygulama Sırası / Order:** 4
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #75
+Sıra: 4
 Goal:
 - Implement register page with Customer/Developer role selection.
 
@@ -187,10 +228,15 @@ Tasks:
 
 ## #76 — feat: Shared layout - navbar, login partial, footer
 
+**Sıra (Order):** 5
+
+**Uygulama Sırası / Order:** 5
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #76
+Sıra: 5
 Goal:
 - Update _Layout.cshtml and create _LoginPartial.cshtml.
 
@@ -208,10 +254,15 @@ Tasks:
 
 ## #77 — feat: Landing page (home)
 
+**Sıra (Order):** 6
+
+**Uygulama Sırası / Order:** 6
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #77
+Sıra: 6
 Goal:
 - Create attractive landing page.
 
@@ -231,10 +282,15 @@ Tasks:
 
 ## #78 — feat: Project list page (paginated, filterable)
 
+**Sıra (Order):** 7
+
+**Uygulama Sırası / Order:** 7
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #78
+Sıra: 7
 Goal:
 - Build paginated project listing with card grid layout.
 
@@ -255,10 +311,15 @@ Tasks:
 
 ## #79 — feat: Project detail page
 
+**Sıra (Order):** 8
+
+**Uygulama Sırası / Order:** 8
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #79
+Sıra: 8
 Goal:
 - Full project detail view with role-conditional sections.
 
@@ -277,10 +338,15 @@ Tasks:
 
 ## #80 — feat: Create project form + validation
 
+**Sıra (Order):** 9
+
+**Uygulama Sırası / Order:** 9
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #80
+Sıra: 9
 Goal:
 - Create project creation form with server-side validation.
 
@@ -296,10 +362,15 @@ Tasks:
 
 ## #81 — feat: Edit project form
 
+**Sıra (Order):** 10
+
+**Uygulama Sırası / Order:** 10
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #81
+Sıra: 10
 Goal:
 - Edit form pre-filled with existing project data.
 
@@ -314,10 +385,15 @@ Tasks:
 
 ## #82 — feat: My Projects page (Customer)
 
+**Sıra (Order):** 11
+
+**Uygulama Sırası / Order:** 11
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #82
+Sıra: 11
 Goal:
 - Customer's own projects listing.
 
@@ -332,10 +408,15 @@ Tasks:
 
 ## #83 — feat: Delete project (confirmation modal)
 
+**Sıra (Order):** 12
+
+**Uygulama Sırası / Order:** 12
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #83
+Sıra: 12
 Goal:
 - Delete with Bootstrap modal confirmation.
 
@@ -354,10 +435,15 @@ Tasks:
 
 ## #84 — feat: Place bid form (on project detail page)
 
+**Sıra (Order):** 13
+
+**Uygulama Sırası / Order:** 13
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #84
+Sıra: 13
 Goal:
 - Bid placement form for Developers, inline on project detail.
 
@@ -374,10 +460,15 @@ Tasks:
 
 ## #85 — feat: Project bids list (Customer view)
 
+**Sıra (Order):** 14
+
+**Uygulama Sırası / Order:** 14
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #85
+Sıra: 14
 Goal:
 - Show all bids on a project for the project owner.
 
@@ -392,10 +483,15 @@ Tasks:
 
 ## #86 — feat: Accept bid button + confirmation
 
+**Sıra (Order):** 15
+
+**Uygulama Sırası / Order:** 15
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #86
+Sıra: 15
 Goal:
 - Confirmation modal for accepting a bid.
 
@@ -410,10 +506,15 @@ Tasks:
 
 ## #87 — feat: My Bids page (Developer)
 
+**Sıra (Order):** 16
+
+**Uygulama Sırası / Order:** 16
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #87
+Sıra: 16
 Goal:
 - Developer's bids listing.
 
@@ -429,10 +530,15 @@ Tasks:
 
 ## #88 — feat: Update bid form
 
+**Sıra (Order):** 17
+
+**Uygulama Sırası / Order:** 17
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #88
+Sıra: 17
 Goal:
 - Edit bid amount and proposal for Pending bids.
 
@@ -452,10 +558,15 @@ Tasks:
 
 ## #89 — feat: Contract view page
 
+**Sıra (Order):** 18
+
+**Uygulama Sırası / Order:** 18
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #89
+Sıra: 18
 Goal:
 - Contract detail view with status and approval indicators.
 
@@ -474,10 +585,15 @@ Tasks:
 
 ## #90 — feat: Contract edit/revise page
 
+**Sıra (Order):** 19
+
+**Uygulama Sırası / Order:** 19
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #90
+Sıra: 19
 Goal:
 - Contract text revision form.
 
@@ -493,10 +609,15 @@ Tasks:
 
 ## #91 — feat: Approve contract button
 
+**Sıra (Order):** 20
+
+**Uygulama Sırası / Order:** 20
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #91
+Sıra: 20
 Goal:
 - Approval button with confirmation modal.
 
@@ -511,10 +632,15 @@ Tasks:
 
 ## #92 — feat: Cancel contract button + confirmation
 
+**Sıra (Order):** 21
+
+**Uygulama Sırası / Order:** 21
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #92
+Sıra: 21
 Goal:
 - Cancel button with serious confirmation.
 
@@ -529,10 +655,15 @@ Tasks:
 
 ## #93 — feat: Contract revision history view
 
+**Sıra (Order):** 22
+
+**Uygulama Sırası / Order:** 22
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #93
+Sıra: 22
 Goal:
 - Timeline/table showing contract revision history.
 
@@ -551,10 +682,15 @@ Tasks:
 
 ## #94 — feat: Link GitHub repo form (Developer)
 
+**Sıra (Order):** 23
+
+**Uygulama Sırası / Order:** 23
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #94
+Sıra: 23
 Goal:
 - Form for Developer to link GitHub repository.
 
@@ -570,10 +706,15 @@ Tasks:
 
 ## #95 — feat: GitHub activity timeline component
 
+**Sıra (Order):** 24
+
+**Uygulama Sırası / Order:** 24
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #95
+Sıra: 24
 Goal:
 - Vertical timeline showing commit history.
 
@@ -590,10 +731,15 @@ Tasks:
 
 ## #96 — feat: Customer dashboard (stats, projects, contracts)
 
+**Sıra (Order):** 25
+
+**Uygulama Sırası / Order:** 25
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #96
+Sıra: 25
 Goal:
 - Customer dashboard with stats and recent activity.
 
@@ -609,10 +755,15 @@ Tasks:
 
 ## #97 — feat: Developer dashboard (stats, bids, projects)
 
+**Sıra (Order):** 26
+
+**Uygulama Sırası / Order:** 26
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #97
+Sıra: 26
 Goal:
 - Developer dashboard with bids and projects.
 
@@ -631,10 +782,15 @@ Tasks:
 
 ## #98 — feat: Client-side validation (jQuery Validation)
 
+**Sıra (Order):** 27
+
+**Uygulama Sırası / Order:** 27
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #98
+Sıra: 27
 Goal:
 - jQuery Validation + Unobtrusive for all forms.
 
@@ -650,10 +806,15 @@ Tasks:
 
 ## #99 — feat: Toast notifications (success/error feedback)
 
+**Sıra (Order):** 28
+
+**Uygulama Sırası / Order:** 28
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #99
+Sıra: 28
 Goal:
 - Bootstrap toast notification system.
 
@@ -667,10 +828,15 @@ Tasks:
 
 ## #100 — feat: Loading states and empty states
 
+**Sıra (Order):** 29
+
+**Uygulama Sırası / Order:** 29
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #100
+Sıra: 29
 Goal:
 - Loading spinners and empty state components.
 
@@ -684,10 +850,15 @@ Tasks:
 
 ## #101 — feat: Responsive design audit (mobile/tablet)
 
+**Sıra (Order):** 30
+
+**Uygulama Sırası / Order:** 30
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #101
+Sıra: 30
 Goal:
 - Test and fix all pages for mobile/tablet/desktop.
 
@@ -701,10 +872,15 @@ Tasks:
 
 ## #102 — feat: Error pages (404, 403, 500)
 
+**Sıra (Order):** 31
+
+**Uygulama Sırası / Order:** 31
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #102
+Sıra: 31
 Goal:
 - Custom error pages with friendly messages.
 
@@ -722,10 +898,15 @@ Tasks:
 
 ## #103 — test: Frontend integration tests (WebApplicationFactory)
 
+**Sıra (Order):** 32
+
+**Uygulama Sırası / Order:** 32
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #103
+Sıra: 32
 Goal:
 - Integration tests with mocked backend.
 
@@ -740,10 +921,15 @@ Tasks:
 
 ## #104 — feat: Accessibility audit (ARIA, contrast)
 
+**Sıra (Order):** 33
+
+**Uygulama Sırası / Order:** 33
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #104
+Sıra: 33
 Goal:
 - WCAG AA compliance check.
 
@@ -758,10 +944,15 @@ Tasks:
 
 ## #105 — docs: Frontend README update
 
+**Sıra (Order):** 34
+
+**Uygulama Sırası / Order:** 34
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #105
+Sıra: 34
 Goal:
 - Comprehensive frontend README.
 

@@ -1,47 +1,82 @@
 # 32. Frontend (MVC) Agent Prompts — All Issues
 
-> Copy-paste ready agent prompts. Execution order follows dependency graph.
+> Copy-paste ready agent prompts. Execution order follows dependency graph.  
+> **Cross-reference:** Operasyonel kısa sürüm: `docs/plan/15-frontend-agent-prompts.md`  
+> Issue eşleşme: #F01 = GitHub #72, #F02 = #73, ..., #F34 = #105.
 
 ---
 
-## Recommended Execution Order
+## Full Delivery Sırası (Baştan Sona Dependency-Aware)
+
+Bu sıra dependency bazlıdır; issue'ları baştan sona bu akışta uygula.
 
 ```
+── Sprint 1: Scaffold & Auth ─────────────────────────────────
 1.  #F01 — MVC project scaffold (S1)
 2.  #F02 — API client infrastructure (S1)
 3.  #F03 — Login page + cookie auth (S1)
 4.  #F04 — Register page (S1)
 5.  #F05 — Shared layout (S1)
 6.  #F06 — Landing page (S1)
+
+── Sprint 2: Project Pages ───────────────────────────────────
 7.  #F07 — Project list page (S2)
 8.  #F08 — Project detail page (S2)
 9.  #F09 — Create project form (S2)
 10. #F10 — Edit project form (S2)
 11. #F11 — My projects page (S2)
 12. #F12 — Delete project modal (S2)
+
+── Sprint 3: Bid Pages ───────────────────────────────────────
 13. #F13 — Place bid form (S3)
 14. #F14 — Project bids list (S3)
 15. #F15 — Accept bid button (S3)
 16. #F16 — My bids page (S3)
 17. #F17 — Update bid form (S3)
+
+── Sprint 4: Contract Pages ──────────────────────────────────
 18. #F18 — Contract view page (S4)
 19. #F19 — Contract edit/revise page (S4)
 20. #F20 — Approve contract button (S4)
 21. #F21 — Cancel contract button (S4)
 22. #F22 — Contract revision history (S4)
+
+── Sprint 5: GitHub & Dashboard ──────────────────────────────
 23. #F23 — Link GitHub repo form (S5)
 24. #F24 — GitHub activity timeline (S5)
 25. #F25 — Customer dashboard (S5)
 26. #F26 — Developer dashboard (S5)
+
+── Sprint 6: UX Polish ───────────────────────────────────────
 27. #F27 — Client-side validation (S6)
 28. #F28 — Toast notifications (S6)
 29. #F29 — Loading & empty states (S6)
 30. #F30 — Responsive design audit (S6)
 31. #F31 — Error pages (S6)
+
+── Sprint 7: Testing & Docs ──────────────────────────────────
 32. #F32 — Integration tests (S7)
 33. #F33 — Accessibility audit (S7)
 34. #F34 — Frontend README (S7)
 ```
+
+---
+
+## Auth Odaklı Hızlı Sıra (sadece auth hedefi için)
+
+Eğer sadece auth hedefli bir gün planı yapıyorsan frontend tarafında şu kısa rotayı kullan:
+
+```
+1. #F01 — MVC project scaffold + Program.cs + Bootstrap layout
+2. #F02 — API client infrastructure (HttpClient + JWT handler)
+3. #F03 — Login page + AuthService + cookie authentication
+4. #F04 — Register page + role selection
+```
+
+> **Not:**  
+> - #F03 ve #F04 için #F01 ve #F02 tamamlanmış olmalı.  
+> - Auth akışı **Backend Sprint 0** (#108-#119) tamamlanmış olmalı — özellikle `POST /auth/login` ve `POST /auth/register` endpoint'leri.  
+> - Backend'de 10 auth endpoint bulunur: register, login, me, refresh-token, logout, confirm-email, forgot-password, reset-password, change-password, resend-confirmation.
 
 ---
 
@@ -50,6 +85,10 @@
 ---
 
 ### #F01 — feat: MVC project scaffold + Program.cs + Bootstrap layout
+
+**Sıra (Order):** 1
+
+**Uygulama Sırası / Order:** 1
 
 ```
 You are a senior ASP.NET Core developer building the Dev4All web frontend.
@@ -122,6 +161,10 @@ Create the MVC project scaffold at `frontend/Dev4All.Web/`.
 
 ### #F02 — feat: API client infrastructure (HttpClient + JWT handler)
 
+**Sıra (Order):** 2
+
+**Uygulama Sırası / Order:** 2
+
 ```
 You are a senior ASP.NET Core developer building the Dev4All web frontend.
 
@@ -178,6 +221,10 @@ Create the API client infrastructure in `frontend/Dev4All.Web/Services/` and `fr
 ---
 
 ### #F03 — feat: Login page + AuthService + cookie authentication
+
+**Sıra (Order):** 3
+
+**Uygulama Sırası / Order:** 3
 
 ```
 You are a senior ASP.NET Core developer building the Dev4All web frontend.
@@ -249,6 +296,10 @@ READ FIRST:
 
 ### #F04 — feat: Register page + role selection
 
+**Sıra (Order):** 4
+
+**Uygulama Sırası / Order:** 4
+
 ```
 You are a senior ASP.NET Core developer building the Dev4All web frontend.
 
@@ -275,6 +326,10 @@ Verify build.
 
 ### #F05 — feat: shared layout with navbar and login partial
 
+**Sıra (Order):** 5
+
+**Uygulama Sırası / Order:** 5
+
 ```
 Update `Views/Shared/_Layout.cshtml` and create `_LoginPartial.cshtml`.
 
@@ -299,6 +354,10 @@ Verify build.
 ---
 
 ### #F06 — feat: landing page (home)
+
+**Sıra (Order):** 6
+
+**Uygulama Sırası / Order:** 6
 
 ```
 Create an attractive landing page at `Views/Home/Index.cshtml`.
@@ -325,6 +384,10 @@ Update `HomeController` if needed. Verify build.
 ---
 
 ### #F07 — feat: project list page (paginated, filterable)
+
+**Sıra (Order):** 7
+
+**Uygulama Sırası / Order:** 7
 
 ```
 You are a senior ASP.NET Core developer building the Dev4All web frontend.
@@ -372,6 +435,10 @@ Register `IProjectService` in DI. Verify build.
 
 ### #F08 — feat: project detail page
 
+**Sıra (Order):** 8
+
+**Uygulama Sırası / Order:** 8
+
 ```
 Create project detail page at `Views/Projects/Detail.cshtml`.
 
@@ -395,6 +462,10 @@ Verify build.
 ---
 
 ### #F09 — feat: create project form
+
+**Sıra (Order):** 9
+
+**Uygulama Sırası / Order:** 9
 
 ```
 Create project creation form.
@@ -421,6 +492,10 @@ Verify build.
 
 ### #F10 — feat: edit project form
 
+**Sıra (Order):** 10
+
+**Uygulama Sırası / Order:** 10
+
 ```
 ### Route: GET/POST /projects/{id}/edit
 - Pre-fill form with existing project data
@@ -436,6 +511,10 @@ Verify build.
 
 ### #F11 — feat: My Projects page (Customer)
 
+**Sıra (Order):** 11
+
+**Uygulama Sırası / Order:** 11
+
 ```
 ### Route: GET /projects/my
 - Call ProjectService.GetMyProjectsAsync()
@@ -450,6 +529,10 @@ Verify build.
 ---
 
 ### #F12 — feat: delete project (confirmation modal)
+
+**Sıra (Order):** 12
+
+**Uygulama Sırası / Order:** 12
 
 ```
 - Bootstrap modal confirmation dialog
@@ -468,6 +551,10 @@ Verify build.
 ---
 
 ### #F13 — feat: place bid form
+
+**Sıra (Order):** 13
+
+**Uygulama Sırası / Order:** 13
 
 ```
 Create bid placement form on the project detail page.
@@ -499,6 +586,10 @@ Register IBidService in DI. Verify build.
 
 ### #F14 — feat: project bids list (Customer view)
 
+**Sıra (Order):** 14
+
+**Uygulama Sırası / Order:** 14
+
 ```
 Show all bids on a project for the Customer (project owner).
 
@@ -515,6 +606,10 @@ Verify build.
 
 ### #F15 — feat: accept bid button + confirmation
 
+**Sıra (Order):** 15
+
+**Uygulama Sırası / Order:** 15
+
 ```
 - Confirmation modal: "Are you sure? This will reject all other bids."
 - POST to backend AcceptBid endpoint
@@ -527,6 +622,10 @@ Verify build.
 ---
 
 ### #F16 — feat: My Bids page (Developer)
+
+**Sıra (Order):** 16
+
+**Uygulama Sırası / Order:** 16
 
 ```
 ### Route: GET /bids/my
@@ -542,6 +641,10 @@ Verify build.
 ---
 
 ### #F17 — feat: update bid form
+
+**Sıra (Order):** 17
+
+**Uygulama Sırası / Order:** 17
 
 ```
 - Modal or inline edit form on My Bids page
@@ -560,6 +663,10 @@ Verify build.
 ---
 
 ### #F18 — feat: contract view page
+
+**Sıra (Order):** 18
+
+**Uygulama Sırası / Order:** 18
 
 ```
 Create contract view page.
@@ -592,6 +699,10 @@ Register IContractService in DI. Verify build.
 
 ### #F19 — feat: contract edit/revise page
 
+**Sıra (Order):** 19
+
+**Uygulama Sırası / Order:** 19
+
 ```
 ### Route: GET/POST /contracts/{projectId}/edit
 - Textarea with current contract content
@@ -609,6 +720,10 @@ Verify build.
 
 ### #F20 — feat: approve contract button
 
+**Sıra (Order):** 20
+
+**Uygulama Sırası / Order:** 20
+
 ```
 - Button on contract detail page
 - Confirmation modal: "This will register your approval"
@@ -623,6 +738,10 @@ Verify build.
 
 ### #F21 — feat: cancel contract button + confirmation
 
+**Sıra (Order):** 21
+
+**Uygulama Sırası / Order:** 21
+
 ```
 - Red "Cancel Contract" button
 - Serious confirmation modal: "This will cancel the contract AND the project"
@@ -635,6 +754,10 @@ Verify build.
 ---
 
 ### #F22 — feat: contract revision history
+
+**Sıra (Order):** 22
+
+**Uygulama Sırası / Order:** 22
 
 ```
 ### Route: GET /contracts/{projectId}/revisions
@@ -654,6 +777,10 @@ Verify build.
 
 ### #F23 — feat: link GitHub repo form (Developer)
 
+**Sıra (Order):** 23
+
+**Uygulama Sırası / Order:** 23
+
 ```
 Create form for Developer to link GitHub repo to project.
 
@@ -670,6 +797,10 @@ Verify build.
 ---
 
 ### #F24 — feat: GitHub activity timeline component
+
+**Sıra (Order):** 24
+
+**Uygulama Sırası / Order:** 24
 
 ```
 Create a timeline component showing GitHub commit activity.
@@ -698,6 +829,10 @@ Verify build.
 
 ### #F25 — feat: Customer dashboard
 
+**Sıra (Order):** 25
+
+**Uygulama Sırası / Order:** 25
+
 ```
 ### Route: GET /dashboard (Customer role)
 
@@ -718,6 +853,10 @@ Verify build.
 ---
 
 ### #F26 — feat: Developer dashboard
+
+**Sıra (Order):** 26
+
+**Uygulama Sırası / Order:** 26
 
 ```
 ### Route: GET /dashboard (Developer role)
@@ -744,6 +883,10 @@ Verify build.
 
 ### #F27 — feat: client-side validation
 
+**Sıra (Order):** 27
+
+**Uygulama Sırası / Order:** 27
+
 ```
 - Add jQuery Validation + Unobtrusive Validation
 - Ensure all forms have proper client-side validation matching backend rules
@@ -758,6 +901,10 @@ Verify build.
 
 ### #F28 — feat: toast notifications
 
+**Sıra (Order):** 28
+
+**Uygulama Sırası / Order:** 28
+
 ```
 - Implement Bootstrap toast notification system
 - TempData-based flash messages from server (success, error, warning, info)
@@ -771,6 +918,10 @@ Verify build.
 ---
 
 ### #F29 — feat: loading & empty states
+
+**Sıra (Order):** 29
+
+**Uygulama Sırası / Order:** 29
 
 ```
 - Add loading spinners for AJAX operations
@@ -787,6 +938,10 @@ Verify build.
 
 ### #F30 — feat: responsive design audit
 
+**Sıra (Order):** 30
+
+**Uygulama Sırası / Order:** 30
+
 ```
 - Test all pages on mobile (375px), tablet (768px), desktop (1200px+)
 - Fix any Bootstrap grid issues
@@ -801,6 +956,10 @@ Verify build.
 ---
 
 ### #F31 — feat: error pages (404, 403, 500)
+
+**Sıra (Order):** 31
+
+**Uygulama Sırası / Order:** 31
 
 ```
 Create custom error pages.
@@ -832,6 +991,10 @@ Verify build.
 
 ### #F32 — test: integration tests
 
+**Sıra (Order):** 32
+
+**Uygulama Sırası / Order:** 32
+
 ```
 Create integration tests for the MVC frontend.
 
@@ -855,6 +1018,10 @@ Verify all tests pass.
 
 ### #F33 — feat: accessibility audit
 
+**Sıra (Order):** 33
+
+**Uygulama Sırası / Order:** 33
+
 ```
 - Add ARIA labels to all interactive elements
 - Ensure proper heading hierarchy (h1 → h2 → h3)
@@ -869,6 +1036,10 @@ Verify build.
 ---
 
 ### #F34 — docs: Frontend README update
+
+**Sıra (Order):** 34
+
+**Uygulama Sırası / Order:** 34
 
 ```
 Update `frontend/README.md` with:

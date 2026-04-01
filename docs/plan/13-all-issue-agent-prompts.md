@@ -2,6 +2,10 @@
 
 Bu dosya, GitHub'daki açık mobile issue'lar için mobil cihazdan bile kolayca kopyalanıp agent'a verilebilecek hazır prompt'ları içerir.
 
+> **Not:** Mobile issue'lar için tek kaynak bu dosyadır.  
+> **Backend dependency:** Auth akışı backend Sprint 0 (#108-#119) tamamlanmış olmalı.  
+> Backend auth endpoint listesi (10 adet): register, login, me, refresh-token, logout, confirm-email, forgot-password, reset-password, change-password, resend-confirmation.
+
 ## Kullanım
 
 1. GitHub issue numarasını seç.
@@ -11,34 +15,39 @@ Bu dosya, GitHub'daki açık mobile issue'lar için mobil cihazdan bile kolayca 
    - Model: `GPT-5.3-Codex` (önerilen)
 4. Prompt'u yapıştırıp çalıştır.
 
-## Önerilen Uygulama Sırası (Dependency-Aware)
+## Full Delivery Sırası (Baştan Sona Dependency-Aware)
 
 Bu sıra, issue numarasına değil bağımlılıklara göre optimize edilmiştir.
+Issue'ları baştan sona bu sırayla uygula; prompt içerikleri değişmeden kalır.
 
 1. `#5` — Epic (Sprint 1 takip)
-2. `#10` — Theme foundation
-3. `#11` — Reusable UI components
-4. `#12` — Network setup
-5. `#13` — Datastore
-6. `#24` — CI check enforcement
-7. `#6` — Epic (Sprint 2 takip)
-8. `#14` — Auth domain models/use cases
-9. `#15` — Auth API services/DTOs
-10. `#16` — Auth repository
-11. `#17` — Login screen + ViewModel
-12. `#18` — Register screen + role cards
-13. `#19` — Splash routing
-14. `#7` — Epic (Sprint 3 takip)
-15. `#20` — Onboarding
-16. `#21` — Customer bottom nav
-17. `#22` — Developer bottom nav
-18. `#23` — Navigation refactor/typed routes
+2. `#6` — Epic (Sprint 2 takip)
+3. `#7` — Epic (Sprint 3 takip)
+4. `#9` — Version catalog foundation
+5. `#10` — Theme foundation
+6. `#11` — Reusable UI components
+7. `#12` — Network setup
+8. `#13` — Datastore
+9. `#14` — Auth domain models/use cases
+10. `#15` — Auth API services/DTOs
+11. `#16` — Auth repository
+12. `#17` — Login screen + ViewModel
+13. `#18` — Register screen + role cards
+14. `#123` — Token refresh + auto-logout (**YENİ** — backend #110, #111'e bağlı)
+15. `#121` — Email confirmation screen (**YENİ** — backend #112, #116'ya bağlı)
+16. `#120` — Forgot password flow (**YENİ** — backend #113, #114'e bağlı)
+17. `#122` — Change password screen (**YENİ** — backend #115'e bağlı)
+18. `#19` — Splash routing
+19. `#20` — Onboarding
+20. `#21` — Customer bottom nav
+21. `#22` — Developer bottom nav
+22. `#23` — Navigation refactor/typed routes
+23. `#24` — CI check enforcement
 
 Not:
-- `#8` ve `#9` tamamlandı/merge edildiği için bu listede yoktur.
+- `#8` tamamlandı/merge edildiği için bu listede yoktur.
 - Epic issue'lar (`#5`, `#6`, `#7`) koordinasyon ve kapanış kontrolü içindir.
-
----
+- Yeni auth issue'lar (#120-#123) backend Sprint 0'ın tamamlanmasını gerektirir.
 
 ## Global Prompt Header (Her issue için üstte kalsın)
 
@@ -66,10 +75,15 @@ Output format required:
 
 ## #5 — epic(mobile): sprint 1 foundation and core setup
 
+**Sıra (Order):** 1
+
+**Uygulama Sırası / Order:** 1
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #5 (Epic)
+Sıra: 1
 Goal:
 - Track Sprint 1 foundation progress.
 - Ensure child issues are linked and progress is visible.
@@ -88,10 +102,15 @@ Constraints:
 
 ## #6 — epic(mobile): sprint 2 authentication flow
 
+**Sıra (Order):** 2
+
+**Uygulama Sırası / Order:** 2
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #6 (Epic)
+Sıra: 2
 Goal:
 - Prepare Sprint 2 auth execution and dependencies.
 
@@ -110,10 +129,15 @@ Constraints:
 
 ## #7 — epic(mobile): sprint 3 onboarding and role-based navigation
 
+**Sıra (Order):** 3
+
+**Uygulama Sırası / Order:** 3
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #7 (Epic)
+Sıra: 3
 Goal:
 - Prepare Sprint 3 execution map for onboarding/navigation.
 
@@ -128,10 +152,15 @@ Tasks:
 
 ## #9 — chore(mobile): define version catalog for all dependencies
 
+**Sıra (Order):** 4
+
+**Uygulama Sırası / Order:** 4
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #9
+Sıra: 4
 Goal:
 - Standardize dependency versions and plugin aliases in `mobile/gradle/libs.versions.toml`.
 
@@ -151,10 +180,15 @@ Key files:
 
 ## #10 — feat(mobile): implement tech-blue theme in designsystem
 
+**Sıra (Order):** 5
+
+**Uygulama Sırası / Order:** 5
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #10
+Sıra: 5
 Goal:
 - Implement Dev4All tech-blue design system theme (light + dark baseline).
 
@@ -177,10 +211,15 @@ Constraints:
 
 ## #11 — feat(mobile): create reusable compose ui components
 
+**Sıra (Order):** 6
+
+**Uygulama Sırası / Order:** 6
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #11
+Sıra: 6
 Goal:
 - Build reusable UI primitives in `:core:designsystem`.
 
@@ -205,10 +244,15 @@ Constraints:
 
 ## #12 — feat(mobile): setup retrofit okhttp and interceptors
 
+**Sıra (Order):** 7
+
+**Uygulama Sırası / Order:** 7
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #12
+Sıra: 7
 Goal:
 - Build network foundation with Retrofit + OkHttp + interceptors.
 
@@ -230,10 +274,15 @@ Key files:
 
 ## #13 — feat(mobile): implement datastore for token and session
 
+**Sıra (Order):** 8
+
+**Uygulama Sırası / Order:** 8
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #13
+Sıra: 8
 Goal:
 - Implement local session/token/preferences storage in `:core:datastore`.
 
@@ -254,10 +303,15 @@ Constraints:
 
 ## #14 — feat(mobile): add auth domain models and use cases
 
+**Sıra (Order):** 9
+
+**Uygulama Sırası / Order:** 9
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #14
+Sıra: 9
 Goal:
 - Build auth domain contracts and use cases in `:core:domain`.
 
@@ -282,10 +336,15 @@ Constraints:
 
 ## #15 — feat(mobile): implement auth api services and dto contracts
 
+**Sıra (Order):** 10
+
+**Uygulama Sırası / Order:** 10
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #15
+Sıra: 10
 Goal:
 - Implement auth API layer matching backend contract.
 
@@ -305,10 +364,15 @@ Reference:
 
 ## #16 — feat(mobile): implement auth repository with token persistence
 
+**Sıra (Order):** 11
+
+**Uygulama Sırası / Order:** 11
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #16
+Sıra: 11
 Goal:
 - Implement `AuthRepositoryImpl` in `:core:data` using network + datastore.
 
@@ -329,10 +393,15 @@ Dependencies:
 
 ## #17 — feat(mobile): implement login screen and viewmodel
 
+**Sıra (Order):** 12
+
+**Uygulama Sırası / Order:** 12
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #17
+Sıra: 12
 Goal:
 - Build login feature UI and ViewModel with proper state handling.
 
@@ -351,10 +420,15 @@ Tasks:
 
 ## #18 — feat(mobile): implement register screen with role selection cards
 
+**Sıra (Order):** 13
+
+**Uygulama Sırası / Order:** 13
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #18
+Sıra: 13
 Goal:
 - Build register UI with customer/developer role selection cards.
 
@@ -373,10 +447,15 @@ Tasks:
 
 ## #19 — feat(mobile): add splash routing based on onboarding and session state
 
+**Sıra (Order):** 14
+
+**Uygulama Sırası / Order:** 14
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #19
+Sıra: 14
 Goal:
 - Implement splash decision logic and startup routing.
 
@@ -396,10 +475,15 @@ Tasks:
 
 ## #20 — feat(mobile): implement onboarding screens and completion flag
 
+**Sıra (Order):** 15
+
+**Uygulama Sırası / Order:** 15
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #20
+Sıra: 15
 Goal:
 - Build 3-page onboarding and persist completion flag.
 
@@ -414,10 +498,15 @@ Tasks:
 
 ## #21 — feat(mobile): create customer bottom navigation shell
 
+**Sıra (Order):** 16
+
+**Uygulama Sırası / Order:** 16
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #21
+Sıra: 16
 Goal:
 - Build customer tab shell and placeholder destinations.
 
@@ -437,10 +526,15 @@ Tasks:
 
 ## #22 — feat(mobile): create developer bottom navigation shell
 
+**Sıra (Order):** 17
+
+**Uygulama Sırası / Order:** 17
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #22
+Sıra: 17
 Goal:
 - Build developer tab shell and placeholder destinations.
 
@@ -460,10 +554,15 @@ Tasks:
 
 ## #23 — refactor(mobile): standardize navigation graph and typed routes
 
+**Sıra (Order):** 18
+
+**Uygulama Sırası / Order:** 18
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #23
+Sıra: 18
 Goal:
 - Refactor routing into centralized typed route definitions.
 
@@ -478,10 +577,15 @@ Tasks:
 
 ## #24 — chore(mobile): enforce ci checks for build and tests on mobile changes
 
+**Sıra (Order):** 19
+
+**Uygulama Sırası / Order:** 19
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #24
+Sıra: 19
 Goal:
 - Ensure mobile CI gate is strict and predictable.
 

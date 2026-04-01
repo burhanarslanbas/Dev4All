@@ -2,6 +2,9 @@
 
 Bu dosya, GitHub'daki açık backend issue'lar için kolayca kopyalanıp agent'a verilebilecek hazır prompt'ları içerir.
 
+> **Cross-reference:** Detaylı prompt içerikleri: `backend/plan/22-BACKEND-AGENT-PROMPTS.md`  
+> Issue eşleşme: #31 = #B01, #32 = #B02, ..., #70 = #B40. Sprint 0 issue'ları: #108-#119.
+
 ## Kullanım
 
 1. GitHub issue numarasını seç.
@@ -11,50 +14,93 @@ Bu dosya, GitHub'daki açık backend issue'lar için kolayca kopyalanıp agent'a
    - Model: `GPT-5.3-Codex` (önerilen)
 4. Prompt'u yapıştırıp çalıştır.
 
-## Önerilen Uygulama Sırası (Dependency-Aware)
+## ⚠️ E-posta Mimarisi (Tüm Agent'lar İçin Zorunlu)
 
-Bu sıra, issue numarasına değil bağımlılıklara göre optimize edilmiştir.
+Handler içinde `IEmailService.SendAsync()` **ÇAĞIRMA**. Doğru akış:
+Handler → `IEmailNotificationService.QueueXxxEmailAsync()` → EmailQueue (Pending) → Quartz `EmailDispatchJob` (1 dk) → MailKit.
 
-1. `#31` — CreateProjectCommand (S1)
-2. `#32` — GetProjectsQuery (S1)
-3. `#33` — GetProjectByIdQuery (S1)
-4. `#34` — GetMyProjectsQuery (S1)
-5. `#35` — UpdateProjectCommand (S1)
-6. `#36` — DeleteProjectCommand (S1)
-7. `#37` — ProjectsController (S1)
-8. `#38` — Unit tests — Project (S1)
-9. `#39` — PlaceBidCommand (S2)
-10. `#40` — UpdateBidCommand (S2)
-11. `#41` — AcceptBidCommand (S2)
-12. `#42` — GetProjectBidsQuery (S2)
-13. `#43` — GetMyBidsQuery (S2)
-14. `#44` — BidsController (S2)
-15. `#45` — Unit tests — Bid (S2)
-16. `#46` — ReviseContractCommand (S3)
-17. `#47` — ApproveContractCommand (S3)
-18. `#48` — CancelContractCommand (S3)
-19. `#49` — GetContractQuery (S3)
-20. `#50` — GetContractRevisionsQuery (S3)
-21. `#51` — ContractsController (S3)
-22. `#52` — Unit tests — Contract (S3)
-23. `#53` — GitHubService HMAC + push parsing (S4)
-24. `#54` — LinkGitHubRepoCommand (S4)
-25. `#55` — WebhookController (S4)
-26. `#56` — GetGitHubLogsByProjectQuery (S4)
-27. `#57` — Unit tests — GitHub (S4)
-28. `#58` — Email HTML templates (S5)
-29. `#61` — Quartz.NET + EmailDispatchJob (S5)
-30. `#60` — Email notification triggers (S5)
-31. `#59` — Unit tests — Email (S5)
-32. `#62` — Integration tests — Auth (S6)
-33. `#63` — Integration tests — Project (S6)
-34. `#64` — Integration tests — Bid + Contract (S6)
-35. `#65` — Serilog structured logging (S6)
-36. `#66` — Code coverage report (S6)
-37. `#67` — Swagger documentation (S7)
-38. `#68` — Performance review (S7)
-39. `#69` — API versioning audit (S7)
-40. `#70` — Backend README update (S7)
+## Full Delivery Sırası (Baştan Sona Dependency-Aware)
+
+```
+── Sprint 0: Auth Tamamlama ──────────────────────────────────
+1.  #108 — Auth altyapı genişletme (IIdentityService, IJwtService, RefreshToken entity)
+2.  #109 — EmailQueue + Quartz.NET setup + auth email templates
+3.  #110 — RefreshTokenCommand + Handler + Validator
+4.  #111 — LogoutCommand + Handler
+5.  #112 — ConfirmEmailCommand + Handler + Validator
+6.  #113 — ForgotPasswordCommand + Handler + Validator
+7.  #114 — ResetPasswordCommand + Handler + Validator
+8.  #115 — ChangePasswordCommand + Handler + Validator
+9.  #116 — ResendConfirmationCommand + Handler + Validator
+10. #117 — AuthController güncelleme (7 yeni endpoint)
+11. #118 — Auth Unit Tests
+12. #119 — Auth Integration Tests (replaces #62)
+
+── Sprint 1: Project Module ──────────────────────────────────
+13. #31 — CreateProjectCommand (S1)
+14. #32 — GetProjectsQuery (S1)
+15. #33 — GetProjectByIdQuery (S1)
+16. #34 — GetMyProjectsQuery (S1)
+17. #35 — UpdateProjectCommand (S1)
+18. #36 — DeleteProjectCommand (S1)
+19. #37 — ProjectsController (S1)
+20. #38 — Unit tests — Project (S1)
+21. #63 — Integration tests — Project (S1 sonunda)
+
+── Sprint 2: Bid Module ──────────────────────────────────────
+22. #39 — PlaceBidCommand (S2)
+23. #40 — UpdateBidCommand (S2)
+24. #41 — AcceptBidCommand (S2)
+25. #42 — GetProjectBidsQuery (S2)
+26. #43 — GetMyBidsQuery (S2)
+27. #44 — BidsController (S2)
+28. #45 — Unit tests — Bid (S2)
+29. #64 — Integration tests — Bid + Contract (S2/S3 sonunda)
+
+── Sprint 3: Contract Module ──────────────────────────────────
+30. #46 — ReviseContractCommand (S3)
+31. #47 — ApproveContractCommand (S3)
+32. #48 — CancelContractCommand (S3)
+33. #49 — GetContractQuery (S3)
+34. #50 — GetContractRevisionsQuery (S3)
+35. #51 — ContractsController (S3)
+36. #52 — Unit tests — Contract (S3)
+
+── Sprint 4: GitHub Integration ──────────────────────────────
+37. #53 — GitHubService HMAC + push parsing (S4)
+38. #54 — LinkGitHubRepoCommand (S4)
+39. #55 — WebhookController (S4)
+40. #56 — GetGitHubLogsByProjectQuery (S4)
+41. #57 — Unit tests — GitHub (S4)
+
+── Sprint 5: Email (iş e-postaları) ──────────────────────────
+42. #58 — Business email HTML templates (S5)
+43. #60 — Email notification triggers (S5)
+44. #59 — Unit tests — Email (S5)
+
+── Sprint 6: Quality ─────────────────────────────────────────
+45. #65 — Serilog structured logging
+46. #66 — Code coverage report
+
+── Sprint 7: Polish & Docs ───────────────────────────────────
+47. #67 — Swagger documentation
+48. #68 — Performance review
+49. #69 — API versioning audit
+50. #70 — Backend README update
+```
+
+> **Not:** Quartz + EmailQueue altyapısı Sprint 0'da kurulur. Sprint 5'te sadece iş e-posta şablonları ve trigger'lar eklenir.
+
+---
+
+## Auth Odaklı Hızlı Sıra (Sadece auth hedefi için)
+
+Sprint 0 issue'larını sırayla uygula (#108 → #119).
+
+Not:
+- Sprint 0'daki 12 issue tam auth akışını kapsar.
+- Auth tamamlanmadan Sprint 1'e geçme.
+- E-posta gerektiren handler'larda `IEmailNotificationService` kuyruk sistemi kullan (bkz. yukarıdaki e-posta mimarisi notu).
 
 ---
 
@@ -88,10 +134,15 @@ Output format required:
 
 ## #31 — feat: implement CreateProjectCommand + Handler + Validator
 
+**Sıra (Order):** 1
+
+**Uygulama Sırası / Order:** 1
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #31
+Sıra: 1
 Goal:
 - Implement the CreateProjectCommand CQRS feature following existing Auth pattern.
 
@@ -119,10 +170,15 @@ Constraints:
 
 ## #32 — feat: implement GetProjectsQuery (paginated open projects)
 
+**Sıra (Order):** 2
+
+**Uygulama Sırası / Order:** 2
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #32
+Sıra: 2
 Goal:
 - Implement paginated open project listing query.
 
@@ -146,10 +202,15 @@ Constraints:
 
 ## #33 — feat: implement GetProjectByIdQuery
 
+**Sıra (Order):** 3
+
+**Uygulama Sırası / Order:** 3
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #33
+Sıra: 3
 Goal:
 - Implement single project detail query.
 
@@ -171,10 +232,15 @@ Constraints:
 
 ## #34 — feat: implement GetMyProjectsQuery (customer's own projects)
 
+**Sıra (Order):** 4
+
+**Uygulama Sırası / Order:** 4
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #34
+Sıra: 4
 Goal:
 - Implement query returning current Customer's projects.
 
@@ -193,10 +259,15 @@ Key files:
 
 ## #35 — feat: implement UpdateProjectCommand + Handler + Validator
 
+**Sıra (Order):** 5
+
+**Uygulama Sırası / Order:** 5
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #35
+Sıra: 5
 Goal:
 - Implement project update with ownership and status guards.
 
@@ -216,10 +287,15 @@ Constraints:
 
 ## #36 — feat: implement DeleteProjectCommand (soft delete)
 
+**Sıra (Order):** 6
+
+**Uygulama Sırası / Order:** 6
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #36
+Sıra: 6
 Goal:
 - Implement soft delete for projects.
 
@@ -241,10 +317,15 @@ Constraints:
 
 ## #37 — feat: implement ProjectsController
 
+**Sıra (Order):** 7
+
+**Uygulama Sırası / Order:** 7
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #37
+Sıra: 7
 Goal:
 - Create thin MVC controller delegating to MediatR for all Project endpoints.
 
@@ -271,10 +352,15 @@ Constraints:
 
 ## #38 — test: unit tests for Project module handlers and validators
 
+**Sıra (Order):** 8
+
+**Uygulama Sırası / Order:** 8
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #38
+Sıra: 8
 Goal:
 - Full unit test coverage for Project CQRS handlers and validators.
 
@@ -301,10 +387,15 @@ Constraints:
 
 ## #39 — feat: implement PlaceBidCommand + Handler + Validator
 
+**Sıra (Order):** 9
+
+**Uygulama Sırası / Order:** 9
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #39
+Sıra: 9
 Goal:
 - Implement bid placement with multiple business rule checks.
 
@@ -333,10 +424,15 @@ Constraints:
 
 ## #40 — feat: implement UpdateBidCommand + Handler + Validator
 
+**Sıra (Order):** 10
+
+**Uygulama Sırası / Order:** 10
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #40
+Sıra: 10
 Goal:
 - Implement bid update (amount + proposal) for Pending bids only.
 
@@ -351,6 +447,10 @@ Tasks:
 ---
 
 ## #41 — feat: implement AcceptBidCommand (transactional)
+
+**Sıra (Order):** 11
+
+**Uygulama Sırası / Order:** 11
 
 ```md
 <GLOBAL HEADER>
@@ -389,10 +489,15 @@ Constraints:
 
 ## #42 — feat: implement GetProjectBidsQuery
 
+**Sıra (Order):** 12
+
+**Uygulama Sırası / Order:** 12
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #42
+Sıra: 11
 Goal:
 - Query returning all bids for a specific project (Customer owner only).
 
@@ -411,10 +516,15 @@ Constraints:
 
 ## #43 — feat: implement GetMyBidsQuery (developer's bids)
 
+**Sıra (Order):** 13
+
+**Uygulama Sırası / Order:** 13
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #43
+Sıra: 12
 Goal:
 - Query returning current Developer's bids.
 
@@ -430,10 +540,15 @@ Tasks:
 
 ## #44 — feat: implement BidsController
 
+**Sıra (Order):** 14
+
+**Uygulama Sırası / Order:** 14
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #44
+Sıra: 13
 Goal:
 - Create thin controller for all Bid endpoints.
 
@@ -455,10 +570,15 @@ Constraints:
 
 ## #45 — test: unit tests for Bid module handlers and validators
 
+**Sıra (Order):** 15
+
+**Uygulama Sırası / Order:** 15
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #45
+Sıra: 14
 Goal:
 - Full unit test coverage for Bid handlers and validators.
 
@@ -482,10 +602,15 @@ Constraints:
 
 ## #46 — feat: implement ReviseContractCommand + Handler + Validator
 
+**Sıra (Order):** 16
+
+**Uygulama Sırası / Order:** 16
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #46
+Sıra: 15
 Goal:
 - Implement contract revision with snapshot creation and approval reset.
 
@@ -512,10 +637,15 @@ Constraints:
 
 ## #47 — feat: implement ApproveContractCommand + Handler
 
+**Sıra (Order):** 17
+
+**Uygulama Sırası / Order:** 17
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #47
+Sıra: 16
 Goal:
 - Implement contract approval with dual-party logic.
 
@@ -537,10 +667,15 @@ Constraints:
 
 ## #48 — feat: implement CancelContractCommand + Handler
 
+**Sıra (Order):** 18
+
+**Uygulama Sırası / Order:** 18
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #48
+Sıra: 17
 Goal:
 - Implement contract cancellation (also cancels the project).
 
@@ -558,10 +693,15 @@ Constraints:
 
 ## #49 — feat: implement GetContractQuery
 
+**Sıra (Order):** 19
+
+**Uygulama Sırası / Order:** 19
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #49
+Sıra: 18
 Goal:
 - Query returning contract details for a project.
 
@@ -577,10 +717,15 @@ Tasks:
 
 ## #50 — feat: implement GetContractRevisionsQuery
 
+**Sıra (Order):** 20
+
+**Uygulama Sırası / Order:** 20
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #50
+Sıra: 19
 Goal:
 - Query returning contract revision history.
 
@@ -596,10 +741,15 @@ Tasks:
 
 ## #51 — feat: implement ContractsController
 
+**Sıra (Order):** 21
+
+**Uygulama Sırası / Order:** 21
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #51
+Sıra: 20
 Goal:
 - Create thin controller for Contract endpoints.
 
@@ -617,10 +767,15 @@ Tasks:
 
 ## #52 — test: unit tests for Contract module handlers and validators
 
+**Sıra (Order):** 22
+
+**Uygulama Sırası / Order:** 22
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #52
+Sıra: 21
 Goal:
 - Full unit test coverage for Contract handlers.
 
@@ -641,10 +796,15 @@ Tasks:
 
 ## #53 — feat: implement GitHubService (HMAC validation + push event parsing)
 
+**Sıra (Order):** 23
+
+**Uygulama Sırası / Order:** 23
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #53
+Sıra: 22
 Goal:
 - Implement Infrastructure-level GitHub webhook service.
 
@@ -669,10 +829,15 @@ Constraints:
 
 ## #54 — feat: implement LinkGitHubRepoCommand + Handler + Validator
 
+**Sıra (Order):** 24
+
+**Uygulama Sırası / Order:** 24
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #54
+Sıra: 23
 Goal:
 - Implement command for Developer to link GitHub repository to a project.
 
@@ -692,10 +857,15 @@ Constraints:
 
 ## #55 — feat: implement WebhookController (GitHub push event receiver)
 
+**Sıra (Order):** 25
+
+**Uygulama Sırası / Order:** 25
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #55
+Sıra: 24
 Goal:
 - Create webhook endpoint that receives GitHub push events.
 
@@ -719,10 +889,15 @@ Constraints:
 
 ## #56 — feat: implement GetGitHubLogsByProjectQuery
 
+**Sıra (Order):** 26
+
+**Uygulama Sırası / Order:** 26
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #56
+Sıra: 25
 Goal:
 - Query returning GitHub commit history for a project.
 
@@ -736,10 +911,15 @@ Tasks:
 
 ## #57 — test: unit tests for GitHub module handlers and service
 
+**Sıra (Order):** 27
+
+**Uygulama Sırası / Order:** 27
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #57
+Sıra: 26
 Goal:
 - Unit tests for GitHubService and GitHub handlers.
 
@@ -759,10 +939,15 @@ Tasks:
 
 ## #58 — feat: email HTML templates
 
+**Sıra (Order):** 28
+
+**Uygulama Sırası / Order:** 28
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #58
+Sıra: 27
 Goal:
 - Create responsive HTML email templates and a template renderer.
 
@@ -778,34 +963,38 @@ Key files:
 
 ---
 
-## #61 — feat: Quartz.NET integration + EmailDispatchJob
+## #59 — test: unit tests for email dispatch and templates
+
+**Sıra (Order):** 29
+
+**Uygulama Sırası / Order:** 29
 
 ```md
 <GLOBAL HEADER>
 
-Issue: #61
+Issue: #59
+Sıra: 28
 Goal:
-- Add Quartz.NET for async email dispatch.
+- Unit tests for TemplateRenderer and EmailNotificationService.
 
 Tasks:
-1) Add Quartz, Quartz.Extensions.Hosting NuGet packages.
-2) Create EmailQueue entity (Domain) + DbSet/Config/Repo/Migration (Persistence).
-3) Create EmailDispatchJob.cs (IJob) in Infrastructure/Jobs/.
-4) Register Quartz in DI with 1-minute interval trigger.
-
-Constraints:
-- Email sending must NOT block API responses.
-- Retry up to 3 times, then mark as Failed.
+1) TemplateRendererTests: valid replacement, missing placeholder leaves as-is.
+2) EmailNotificationServiceTests: verify correct template + variables for each type.
 ```
 
 ---
 
 ## #60 — feat: email notification triggers in handlers
 
+**Sıra (Order):** 30
+
+**Uygulama Sırası / Order:** 30
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #60
+Sıra: 29
 Goal:
 - Wire email notifications into existing command handlers.
 
@@ -824,18 +1013,29 @@ Constraints:
 
 ---
 
-## #59 — test: unit tests for email dispatch and templates
+## #61 — feat: Quartz.NET integration + EmailDispatchJob
+
+**Sıra (Order):** 31
+
+**Uygulama Sırası / Order:** 31
 
 ```md
 <GLOBAL HEADER>
 
-Issue: #59
+Issue: #61
+Sıra: 30
 Goal:
-- Unit tests for TemplateRenderer and EmailNotificationService.
+- Add Quartz.NET for async email dispatch.
 
 Tasks:
-1) TemplateRendererTests: valid replacement, missing placeholder leaves as-is.
-2) EmailNotificationServiceTests: verify correct template + variables for each type.
+1) Add Quartz, Quartz.Extensions.Hosting NuGet packages.
+2) Create EmailQueue entity (Domain) + DbSet/Config/Repo/Migration (Persistence).
+3) Create EmailDispatchJob.cs (IJob) in Infrastructure/Jobs/.
+4) Register Quartz in DI with 1-minute interval trigger.
+
+Constraints:
+- Email sending must NOT block API responses.
+- Retry up to 3 times, then mark as Failed.
 ```
 
 ---
@@ -846,10 +1046,15 @@ Tasks:
 
 ## #62 — test: integration tests for Auth endpoints
 
+**Sıra (Order):** 32
+
+**Uygulama Sırası / Order:** 32
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #62
+Sıra: 31
 Goal:
 - Set up integration test infra + Auth endpoint tests.
 
@@ -866,10 +1071,15 @@ Constraints:
 
 ## #63 — test: integration tests for Project endpoints
 
+**Sıra (Order):** 33
+
+**Uygulama Sırası / Order:** 33
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #63
+Sıra: 32
 Goal:
 - Integration tests for all Project endpoints.
 
@@ -887,10 +1097,15 @@ Tasks:
 
 ## #64 — test: integration tests for Bid + Contract endpoints
 
+**Sıra (Order):** 34
+
+**Uygulama Sırası / Order:** 34
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #64
+Sıra: 33
 Goal:
 - Integration tests for Bid and Contract workflows.
 
@@ -903,10 +1118,15 @@ Tasks:
 
 ## #65 — feat: Serilog structured logging
 
+**Sıra (Order):** 35
+
+**Uygulama Sırası / Order:** 35
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #65
+Sıra: 34
 Goal:
 - Add Serilog with console + file sinks.
 
@@ -922,10 +1142,15 @@ Tasks:
 
 ## #66 — test: code coverage report and gap analysis
 
+**Sıra (Order):** 36
+
+**Uygulama Sırası / Order:** 36
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #66
+Sıra: 35
 Goal:
 - Configure code coverage collection and enforce 80% threshold.
 
@@ -944,10 +1169,15 @@ Tasks:
 
 ## #67 — docs: Swagger/OpenAPI documentation improvements
 
+**Sıra (Order):** 37
+
+**Uygulama Sırası / Order:** 37
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #67
+Sıra: 36
 Goal:
 - Improve Swagger documentation for all endpoints.
 
@@ -962,10 +1192,15 @@ Tasks:
 
 ## #68 — refactor: performance review (N+1, projections, indexes)
 
+**Sıra (Order):** 38
+
+**Uygulama Sırası / Order:** 38
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #68
+Sıra: 37
 Goal:
 - Audit and optimize query performance.
 
@@ -981,10 +1216,15 @@ Tasks:
 
 ## #69 — refactor: API versioning consistency audit
 
+**Sıra (Order):** 39
+
+**Uygulama Sırası / Order:** 39
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #69
+Sıra: 38
 Goal:
 - Ensure consistent versioning and RESTful naming.
 
@@ -999,10 +1239,15 @@ Tasks:
 
 ## #70 — docs: Backend README update
 
+**Sıra (Order):** 40
+
+**Uygulama Sırası / Order:** 40
+
 ```md
 <GLOBAL HEADER>
 
 Issue: #70
+Sıra: 39
 Goal:
 - Comprehensive backend README.
 

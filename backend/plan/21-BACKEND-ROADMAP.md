@@ -2,13 +2,47 @@
 
 > Sprint-based development plan from current state to MVP completion.  
 > Each sprint ≈ 1 week. Issues are ordered by dependency.
+> **Testler her modülden hemen sonra yazılır.** Integration testleri Sprint 6'ya ertelenmez.
+
+---
+
+## Sprint 0 — Auth Tamamlama
+
+**Milestone:** `Backend S0 — Full Auth`  
+**Depends on:** Mevcut auth altyapısı (register/login/me implemented)
+
+| # | Issue # | Issue Title | Type | Est. |
+|---|---------|-------------|------|------|
+| 1 | #108 | Auth altyapı genişletme (IIdentityService, IJwtService, RefreshToken entity) | feat | 4h |
+| 2 | #109 | EmailQueue + Quartz.NET setup + auth email templates | feat | 5h |
+| 3 | #110 | RefreshTokenCommand + Handler + Validator | feat | 2h |
+| 4 | #111 | LogoutCommand + Handler | feat | 1.5h |
+| 5 | #112 | ConfirmEmailCommand + Handler + Validator | feat | 2h |
+| 6 | #113 | ForgotPasswordCommand + Handler + Validator | feat | 2h |
+| 7 | #114 | ResetPasswordCommand + Handler + Validator | feat | 2h |
+| 8 | #115 | ChangePasswordCommand + Handler + Validator | feat | 2h |
+| 9 | #116 | ResendConfirmationCommand + Handler + Validator | feat | 1.5h |
+| 10 | #117 | AuthController güncelleme (7 yeni endpoint) | feat | 2h |
+| 11 | #118 | Auth Unit Tests (tüm handlers + validators) | test | 4h |
+| 12 | #119 | Auth Integration Tests (replaces #62) | test | 3h |
+
+### E-posta Mimarisi Notu
+
+Handler içinde `IEmailService.SendAsync()` **DOĞRUDAN ÇAĞIRILMAZ**.  
+Doğru akış: Handler → `IEmailNotificationService.QueueXxxEmailAsync()` → INSERT EmailQueue (Pending) → Quartz `EmailDispatchJob` (1 dk aralık) → TemplateRenderer → MailKit.
+
+### Dependency Flow
+
+```
+S0 (Full Auth) ──► S1 (Project) ──► S2 (Bid) ──► S3 (Contract) ──► S4 (GitHub) ──► S5 (Email triggers) ──► S6/S7
+```
 
 ---
 
 ## Sprint 1 — Project Module (CRUD + Listing)
 
 **Milestone:** `Backend Sprint 1 — Project Module`  
-**Depends on:** Auth module (✅ complete)
+**Depends on:** Sprint 0 (Full Auth) tamamlanmış olmalı
 
 | # | Issue Title | Type | Est. | Files to Create/Modify |
 |---|-------------|------|------|----------------------|
