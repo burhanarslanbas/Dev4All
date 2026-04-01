@@ -1,54 +1,123 @@
 # 22. Backend Agent Prompts — All Issues
 
 > Copy-paste ready agent prompts for every backend issue.  
-> Execution order follows dependency graph: S1 → S2 → S3 → S4 → S5 → S6 → S7.  
-> Within each sprint, issues are ordered by dependency.
+> Execution order follows dependency graph: **S0 → S1 → S2 → S3 → S4 → S5 → S6 → S7**.  
+> Within each sprint, issues are ordered by dependency.  
+> **Testler her modülden hemen sonra yazılır.** Integration testleri Sprint 6'ya ertelenmez.
+
+> **Cross-reference:** Operasyonel kısa sürüm: `docs/plan/14-backend-agent-prompts.md`  
+> Issue eşleşme: #B01 = GitHub #31, #B02 = #32, ..., #B40 = #70. Sprint 0 issue'ları: #108-#119.
 
 ---
 
-## Recommended Execution Order
+## ⚠️ E-posta Mimarisi (Tüm Agent'lar İçin Zorunlu Bilgi)
+
+Bu projede e-posta **ASLA doğrudan gönderilmez**. Handler içinde `IEmailService.SendAsync()` **ÇAĞIRMA**.
 
 ```
-1.  #B01 — CreateProjectCommand (S1 — no dependency)
-2.  #B02 — GetProjectsQuery (S1 — no dependency)
-3.  #B03 — GetProjectByIdQuery (S1 — no dependency)
-4.  #B04 — GetMyProjectsQuery (S1 — no dependency)
-5.  #B05 — UpdateProjectCommand (S1 — depends on GetById pattern)
-6.  #B06 — DeleteProjectCommand (S1 — depends on GetById pattern)
-7.  #B07 — ProjectsController (S1 — depends on all Project CQRS)
-8.  #B08 — Unit tests — Project (S1 — depends on all Project CQRS)
-9.  #B09 — PlaceBidCommand (S2 — depends on Project module)
-10. #B10 — UpdateBidCommand (S2)
-11. #B11 — AcceptBidCommand (S2 — complex, depends on Bid + Contract entities)
-12. #B12 — GetProjectBidsQuery (S2)
-13. #B13 — GetMyBidsQuery (S2)
-14. #B14 — BidsController (S2 — depends on all Bid CQRS)
-15. #B15 — Unit tests — Bid (S2)
-16. #B16 — ReviseContractCommand (S3 — depends on AcceptBid creating contracts)
-17. #B17 — ApproveContractCommand (S3)
-18. #B18 — CancelContractCommand (S3)
-19. #B19 — GetContractQuery (S3)
-20. #B20 — GetContractRevisionsQuery (S3)
-21. #B21 — ContractsController (S3 — depends on all Contract CQRS)
-22. #B22 — Unit tests — Contract (S3)
-23. #B23 — GitHubService implementation (S4 — no handler dependency)
-24. #B24 — LinkGitHubRepoCommand (S4)
-25. #B25 — WebhookController (S4 — depends on GitHubService)
-26. #B26 — GetGitHubLogsByProjectQuery (S4)
-27. #B27 — Unit tests — GitHub (S4)
-28. #B28 — Email HTML templates (S5)
-29. #B29 — Quartz.NET + EmailDispatchJob (S5)
-30. #B30 — Email notification triggers (S5)
-31. #B31 — Unit tests — Email (S5)
-32. #B32 — Integration tests — Auth (S6)
-33. #B33 — Integration tests — Project (S6)
-34. #B34 — Integration tests — Bid + Contract (S6)
-35. #B35 — Serilog structured logging (S6)
-36. #B36 — Code coverage report (S6)
-37. #B37 — Swagger documentation (S7)
-38. #B38 — Performance review (S7)
-39. #B39 — API versioning audit (S7)
-40. #B40 — Backend README update (S7)
+Handler → IEmailNotificationService.QueueXxxEmailAsync(...)
+       → INSERT EmailQueue (Status = Pending)
+       → Quartz.NET EmailDispatchJob (1 dk aralık)
+       → TemplateRenderer → HTML üret
+       → MailKit (IEmailService.SendAsync) ile gönder
+       → Başarılıysa: Status = Sent
+       → Başarısızsa: RetryCount++; max 3 → Status = Failed + log
+```
+
+---
+
+## Full Delivery Sırası (Baştan Sona Dependency-Aware)
+
+```
+── Sprint 0: Auth Tamamlama ──────────────────────────────────
+1.  #108 — Auth altyapı genişletme (IIdentityService, IJwtService, RefreshToken entity)
+2.  #109 — EmailQueue + Quartz.NET setup + auth email templates
+3.  #110 — RefreshTokenCommand + Handler + Validator
+4.  #111 — LogoutCommand + Handler
+5.  #112 — ConfirmEmailCommand + Handler + Validator
+6.  #113 — ForgotPasswordCommand + Handler + Validator
+7.  #114 — ResetPasswordCommand + Handler + Validator
+8.  #115 — ChangePasswordCommand + Handler + Validator
+9.  #116 — ResendConfirmationCommand + Handler + Validator
+10. #117 — AuthController güncelleme (7 yeni endpoint)
+11. #118 — Auth Unit Tests (tüm handlers + validators)
+12. #119 — Auth Integration Tests (replaces #62)
+
+── Sprint 1: Project Module ──────────────────────────────────
+13. #B01 — CreateProjectCommand (S1)
+14. #B02 — GetProjectsQuery (S1)
+15. #B03 — GetProjectByIdQuery (S1)
+16. #B04 — GetMyProjectsQuery (S1)
+17. #B05 — UpdateProjectCommand (S1)
+18. #B06 — DeleteProjectCommand (S1)
+19. #B07 — ProjectsController (S1)
+20. #B08 — Unit tests — Project (S1)
+21. #B33 — Integration tests — Project (S1 sonunda)
+
+── Sprint 2: Bid Module ──────────────────────────────────────
+22. #B09 — PlaceBidCommand (S2)
+23. #B10 — UpdateBidCommand (S2)
+24. #B11 — AcceptBidCommand (S2)
+25. #B12 — GetProjectBidsQuery (S2)
+26. #B13 — GetMyBidsQuery (S2)
+27. #B14 — BidsController (S2)
+28. #B15 — Unit tests — Bid (S2)
+29. #B34a — Integration tests — Bid (S2 sonunda)
+
+── Sprint 3: Contract Module ──────────────────────────────────
+30. #B16 — ReviseContractCommand (S3)
+31. #B17 — ApproveContractCommand (S3)
+32. #B18 — CancelContractCommand (S3)
+33. #B19 — GetContractQuery (S3)
+34. #B20 — GetContractRevisionsQuery (S3)
+35. #B21 — ContractsController (S3)
+36. #B22 — Unit tests — Contract (S3)
+37. #B34b — Integration tests — Contract (S3 sonunda)
+
+── Sprint 4: GitHub Integration ──────────────────────────────
+38. #B23 — GitHubService implementation (S4)
+39. #B24 — LinkGitHubRepoCommand (S4)
+40. #B25 — WebhookController (S4)
+41. #B26 — GetGitHubLogsByProjectQuery (S4)
+42. #B27 — Unit tests — GitHub (S4)
+
+── Sprint 5: Email & Background Jobs (iş e-postaları) ────────
+43. #B28 — Business email HTML templates (new-bid, bid-accepted, bid-rejected, repo-linked)
+44. #B30 — Email notification triggers in handler'lara ekleme
+45. #B31 — Unit tests — Email (S5)
+
+── Sprint 6: Quality ─────────────────────────────────────────
+46. #B35 — Serilog structured logging
+47. #B36 — Code coverage report
+
+── Sprint 7: Polish & Docs ───────────────────────────────────
+48. #B37 — Swagger documentation
+49. #B38 — Performance review
+50. #B39 — API versioning audit
+51. #B40 — Backend README update
+```
+
+> **Not:** Sprint 5'te Quartz ve EmailQueue altyapısı kullanılmaz, çünkü Sprint 0'da zaten kurulmuş olacak. Sprint 5 sadece iş e-posta şablonlarını (#B28) ve handler'lara trigger eklemeyi (#B30) kapsar.
+
+---
+
+## Auth-Focused Quick Order (sadece auth hedefi için)
+
+Sprint 0 issue'larını sırayla uygula:
+
+```
+1.  #108 — Auth altyapı genişletme
+2.  #109 — EmailQueue + Quartz setup
+3.  #110 — RefreshTokenCommand
+4.  #111 — LogoutCommand
+5.  #112 — ConfirmEmailCommand
+6.  #113 — ForgotPasswordCommand
+7.  #114 — ResetPasswordCommand
+8.  #115 — ChangePasswordCommand
+9.  #116 — ResendConfirmationCommand
+10. #117 — AuthController güncelleme
+11. #118 — Auth Unit Tests
+12. #119 — Auth Integration Tests
 ```
 
 ---
@@ -58,6 +127,10 @@
 ---
 
 ### #B01 — feat: implement CreateProjectCommand
+
+**Sıra (Order):** 1
+
+**Uygulama Sırası / Order:** 1
 
 ```
 You are a senior .NET backend developer working on the Dev4All project — a B2B freelance marketplace.
@@ -120,6 +193,10 @@ Create the `CreateProjectCommand` feature in `backend/src/Core/Dev4All.Applicati
 
 ### #B02 — feat: implement GetProjectsQuery (paginated open projects)
 
+**Sıra (Order):** 2
+
+**Uygulama Sırası / Order:** 2
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -179,6 +256,10 @@ Create the `GetProjectsQuery` feature in `backend/src/Core/Dev4All.Application/F
 
 ### #B03 — feat: implement GetProjectByIdQuery
 
+**Sıra (Order):** 3
+
+**Uygulama Sırası / Order:** 3
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -215,6 +296,10 @@ Create `GetProjectByIdQuery` in `backend/src/Core/Dev4All.Application/Features/P
 ---
 
 ### #B04 — feat: implement GetMyProjectsQuery
+
+**Sıra (Order):** 4
+
+**Uygulama Sırası / Order:** 4
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -253,6 +338,10 @@ Create `GetMyProjectsQuery` in `backend/src/Core/Dev4All.Application/Features/Pr
 ---
 
 ### #B05 — feat: implement UpdateProjectCommand
+
+**Sıra (Order):** 5
+
+**Uygulama Sırası / Order:** 5
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -302,6 +391,10 @@ Create `UpdateProjectCommand` in `backend/src/Core/Dev4All.Application/Features/
 
 ### #B06 — feat: implement DeleteProjectCommand (soft delete)
 
+**Sıra (Order):** 6
+
+**Uygulama Sırası / Order:** 6
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -342,6 +435,10 @@ Create `DeleteProjectCommand` in `backend/src/Core/Dev4All.Application/Features/
 ---
 
 ### #B07 — feat: implement ProjectsController
+
+**Sıra (Order):** 7
+
+**Uygulama Sırası / Order:** 7
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -391,6 +488,10 @@ public sealed class ProjectsController(ISender sender) : ControllerBase
 ---
 
 ### #B08 — test: unit tests for Project module
+
+**Sıra (Order):** 8
+
+**Uygulama Sırası / Order:** 8
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -467,6 +568,10 @@ Create unit tests for all Project handlers and validators in `backend/tests/Dev4
 
 ### #B09 — feat: implement PlaceBidCommand
 
+**Sıra (Order):** 9
+
+**Uygulama Sırası / Order:** 9
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -519,6 +624,10 @@ Create `PlaceBidCommand` in `backend/src/Core/Dev4All.Application/Features/Bids/
 
 ### #B10 — feat: implement UpdateBidCommand
 
+**Sıra (Order):** 10
+
+**Uygulama Sırası / Order:** 10
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -562,6 +671,10 @@ Create `UpdateBidCommand` in `backend/src/Core/Dev4All.Application/Features/Bids
 ---
 
 ### #B11 — feat: implement AcceptBidCommand (complex transaction)
+
+**Sıra (Order):** 11
+
+**Uygulama Sırası / Order:** 11
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -630,6 +743,10 @@ Create `AcceptBidCommand` in `backend/src/Core/Dev4All.Application/Features/Bids
 
 ### #B12 — feat: implement GetProjectBidsQuery
 
+**Sıra (Order):** 12
+
+**Uygulama Sırası / Order:** 12
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -669,6 +786,10 @@ Create `GetProjectBidsQuery` in `backend/src/Core/Dev4All.Application/Features/B
 
 ### #B13 — feat: implement GetMyBidsQuery
 
+**Sıra (Order):** 13
+
+**Uygulama Sırası / Order:** 13
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -701,6 +822,10 @@ Create `GetMyBidsQuery` in `backend/src/Core/Dev4All.Application/Features/Bids/Q
 ---
 
 ### #B14 — feat: implement BidsController
+
+**Sıra (Order):** 14
+
+**Uygulama Sırası / Order:** 14
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -736,6 +861,10 @@ Create `BidsController` at `backend/src/Presentation/Dev4All.WebAPI/Controllers/
 ---
 
 ### #B15 — test: unit tests for Bid module
+
+**Sıra (Order):** 15
+
+**Uygulama Sırası / Order:** 15
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -788,6 +917,10 @@ Create unit tests in `backend/tests/Dev4All.UnitTests/Features/Bids/`.
 
 ### #B16 — feat: implement ReviseContractCommand
 
+**Sıra (Order):** 16
+
+**Uygulama Sırası / Order:** 16
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -837,6 +970,10 @@ Create `ReviseContractCommand` in `backend/src/Core/Dev4All.Application/Features
 
 ### #B17 — feat: implement ApproveContractCommand
 
+**Sıra (Order):** 17
+
+**Uygulama Sırası / Order:** 17
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -880,6 +1017,10 @@ Create `ApproveContractCommand` in `backend/src/Core/Dev4All.Application/Feature
 
 ### #B18 — feat: implement CancelContractCommand
 
+**Sıra (Order):** 18
+
+**Uygulama Sırası / Order:** 18
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -916,6 +1057,10 @@ Create `CancelContractCommand` in `backend/src/Core/Dev4All.Application/Features
 
 ### #B19 — feat: implement GetContractQuery
 
+**Sıra (Order):** 19
+
+**Uygulama Sırası / Order:** 19
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -951,6 +1096,10 @@ Create `GetContractQuery` in `backend/src/Core/Dev4All.Application/Features/Cont
 ---
 
 ### #B20 — feat: implement GetContractRevisionsQuery
+
+**Sıra (Order):** 20
+
+**Uygulama Sırası / Order:** 20
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -989,6 +1138,10 @@ Create `GetContractRevisionsQuery` in `backend/src/Core/Dev4All.Application/Feat
 
 ### #B21 — feat: implement ContractsController
 
+**Sıra (Order):** 21
+
+**Uygulama Sırası / Order:** 21
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -1020,6 +1173,10 @@ Verify build.
 ---
 
 ### #B22 — test: unit tests for Contract module
+
+**Sıra (Order):** 22
+
+**Uygulama Sırası / Order:** 22
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1062,6 +1219,10 @@ All tests: NSubstitute mocks, FluentAssertions, AAA pattern.
 ---
 
 ### #B23 — feat: implement GitHubService (HMAC + push parsing)
+
+**Sıra (Order):** 23
+
+**Uygulama Sırası / Order:** 23
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1117,6 +1278,10 @@ private sealed record GitHubAuthor(string Name);
 
 ### #B24 — feat: implement LinkGitHubRepoCommand
 
+**Sıra (Order):** 24
+
+**Uygulama Sırası / Order:** 24
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -1160,6 +1325,10 @@ Create `LinkGitHubRepoCommand` in `backend/src/Core/Dev4All.Application/Features
 ---
 
 ### #B25 — feat: implement WebhookController
+
+**Sıra (Order):** 25
+
+**Uygulama Sırası / Order:** 25
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1217,6 +1386,10 @@ public sealed class WebhookController(IGitHubService gitHubService, ...) : Contr
 
 ### #B26 — feat: implement GetGitHubLogsByProjectQuery
 
+**Sıra (Order):** 26
+
+**Uygulama Sırası / Order:** 26
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -1254,6 +1427,10 @@ Also add to `ProjectsController` (or a separate controller):
 ---
 
 ### #B27 — test: unit tests for GitHub module
+
+**Sıra (Order):** 27
+
+**Uygulama Sırası / Order:** 27
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1295,6 +1472,10 @@ Create unit tests in `backend/tests/Dev4All.UnitTests/Features/GitHub/` and `bac
 ---
 
 ### #B28 — feat: email HTML templates
+
+**Sıra (Order):** 28
+
+**Uygulama Sırası / Order:** 28
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1342,6 +1523,10 @@ Create email HTML templates in `backend/src/Infrastructure/Dev4All.Infrastructur
 ---
 
 ### #B29 — feat: Quartz.NET integration + EmailDispatchJob
+
+**Sıra (Order):** 29
+
+**Uygulama Sırası / Order:** 29
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1400,6 +1585,10 @@ services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 ### #B30 — feat: email notification triggers in handlers
 
+**Sıra (Order):** 30
+
+**Uygulama Sırası / Order:** 30
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -1447,6 +1636,10 @@ public interface IEmailNotificationService
 
 ### #B31 — test: unit tests for email
 
+**Sıra (Order):** 31
+
+**Uygulama Sırası / Order:** 31
+
 ```
 You are a senior .NET backend developer working on the Dev4All project.
 
@@ -1472,6 +1665,10 @@ Create email-related tests in `backend/tests/Dev4All.UnitTests/Infrastructure/Em
 ---
 
 ### #B32 — test: integration tests for Auth endpoints
+
+**Sıra (Order):** 32
+
+**Uygulama Sırası / Order:** 32
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1517,6 +1714,10 @@ Set up integration test infrastructure and create Auth endpoint tests.
 
 ### #B33 — test: integration tests for Project endpoints
 
+**Sıra (Order):** 33
+
+**Uygulama Sırası / Order:** 33
+
 ```
 Create integration tests for all Project endpoints in `backend/tests/Dev4All.IntegrationTests/Projects/`.
 
@@ -1538,6 +1739,10 @@ Use the `CustomWebApplicationFactory` from B32.
 
 ### #B34 — test: integration tests for Bid + Contract endpoints
 
+**Sıra (Order):** 34
+
+**Uygulama Sırası / Order:** 34
+
 ```
 Create integration tests for Bid and Contract endpoints.
 
@@ -1556,6 +1761,10 @@ Create integration tests for Bid and Contract endpoints.
 ---
 
 ### #B35 — feat: Serilog structured logging
+
+**Sıra (Order):** 35
+
+**Uygulama Sırası / Order:** 35
 
 ```
 You are a senior .NET backend developer working on the Dev4All project.
@@ -1596,6 +1805,10 @@ Add Serilog structured logging to the backend.
 
 ### #B36 — test: code coverage report
 
+**Sıra (Order):** 36
+
+**Uygulama Sırası / Order:** 36
+
 ```
 Configure code coverage collection and reporting.
 
@@ -1615,6 +1828,10 @@ Configure code coverage collection and reporting.
 
 ### #B37 — docs: Swagger documentation improvements
 
+**Sıra (Order):** 37
+
+**Uygulama Sırası / Order:** 37
+
 ```
 Improve Swagger/OpenAPI documentation.
 
@@ -1629,6 +1846,10 @@ Improve Swagger/OpenAPI documentation.
 ---
 
 ### #B38 — refactor: performance review
+
+**Sıra (Order):** 38
+
+**Uygulama Sırası / Order:** 38
 
 ```
 Review and optimize backend performance.
@@ -1645,6 +1866,10 @@ Review and optimize backend performance.
 
 ### #B39 — refactor: API versioning audit
 
+**Sıra (Order):** 39
+
+**Uygulama Sırası / Order:** 39
+
 ```
 Ensure consistent API versioning across all controllers.
 
@@ -1657,6 +1882,10 @@ Ensure consistent API versioning across all controllers.
 ---
 
 ### #B40 — docs: Backend README update
+
+**Sıra (Order):** 40
+
+**Uygulama Sırası / Order:** 40
 
 ```
 Update `backend/README.md` with:
