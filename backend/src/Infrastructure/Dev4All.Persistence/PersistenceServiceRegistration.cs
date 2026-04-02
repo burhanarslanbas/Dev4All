@@ -32,6 +32,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IGitHubLogWriteRepository, GitHubLogWriteRepository>();
 
         services.AddScoped<IRefreshTokenReadRepository, RefreshTokenReadRepository>();
+        services.AddScoped<IRefreshTokenWriteRepository, RefreshTokenWriteRepository>();
 
         services.AddScoped<IContractReadRepository, ContractReadRepository>();
         services.AddScoped<IContractWriteRepository, ContractWriteRepository>();

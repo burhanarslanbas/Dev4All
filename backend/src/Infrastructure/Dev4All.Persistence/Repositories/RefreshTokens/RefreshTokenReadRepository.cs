@@ -16,7 +16,7 @@ public sealed class RefreshTokenReadRepository(Dev4AllDbContext context) : IRefr
     }
 
     public async Task<RefreshToken?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => await context.RefreshTokens.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        => await context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<RefreshToken>> GetByIdsAsync(
         IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
@@ -52,5 +52,5 @@ public sealed class RefreshTokenReadRepository(Dev4AllDbContext context) : IRefr
     }
 
     public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
-        => await context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
+        => await context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
 }
