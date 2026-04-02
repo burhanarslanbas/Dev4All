@@ -53,4 +53,7 @@ public sealed class RefreshTokenReadRepository(Dev4AllDbContext context) : IRefr
 
     public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
         => await context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+    public async Task<RefreshToken?> GetByTokenForUpdateAsync(string token, CancellationToken cancellationToken = default)
+        => await context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
 }

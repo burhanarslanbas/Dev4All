@@ -6,12 +6,15 @@ namespace Dev4All.Application.Features.Auth.Commands.Logout;
 
 /// <summary>Handles user logout by revoking a persisted refresh token.</summary>
 public sealed class LogoutCommandHandler(
+    IRefreshTokenReadRepository refreshTokenReadRepository,
     IRefreshTokenWriteRepository refreshTokenWriteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<LogoutCommand, Unit>
 {
     public async Task<Unit> Handle(LogoutCommand request, CancellationToken cancellationToken)
     {
-        var refreshToken = await refreshTokenWriteRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
+        var refreshToken = await refreshTokenReadRepository.GetByTokenForUpdateAsync(
+            request.RefreshToken,
+            cancellationToken);
 
         if (refreshToken is not null && !refreshToken.IsRevoked)
         {

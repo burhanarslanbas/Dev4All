@@ -1,7 +1,6 @@
 using Dev4All.Application.Abstractions.Persistence.Repositories.RefreshTokens;
 using Dev4All.Domain.Entities;
 using Dev4All.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dev4All.Persistence.Repositories.RefreshTokens;
 
@@ -25,7 +24,4 @@ public sealed class RefreshTokenWriteRepository(Dev4AllDbContext context) : IRef
 
     public void RemoveRange(IEnumerable<RefreshToken> entities)
         => context.RefreshTokens.RemoveRange(entities);
-
-    public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
-        => await context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
 }
