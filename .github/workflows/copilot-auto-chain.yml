@@ -23,10 +23,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
+          set -euo pipefail
+          
           # PR body'den "Closes #XX" veya "Fixes #XX" ile bağlı issue numarasını çek
-          CLOSED_ISSUE=$(echo "$PR_BODY" | grep -oP '(?:Closes|Fixes|Resolves)\s*#\K[0-9]+' | head -1)
+          CLOSED_ISSUE="$(printf '%s' "$PR_BODY" | grep -oE '(Closes|Fixes|Resolves)[[:space:]]*#[0-9]+' | head -1 | grep -oE '[0-9]+$' || true)"
 
-          if [ -z "$CLOSED_ISSUE" ]; then
+          if [ -z "${CLOSED_ISSUE:-}" ]; then
             echo "⏭️ No linked issue found in PR body, skipping chain."
             exit 0
           fi
@@ -129,12 +131,9 @@ jobs:
           echo "➡️ Next issue: #$NEXT_ISSUE"
 
           # Sonraki issue'yu Copilot'a ata
-          gh issue edit $NEXT_ISSUE --add-assignee "copilot" 2>/dev/null || \
+          if ! gh issue edit "$NEXT_ISSUE" --add-assignee "copilot" 2>/dev/null; then
             echo "⚠️ Could not assign to copilot, trying copilot-swe-agent..."
-          
-          # Fallback: alternatif handle dene
-          if [ $? -ne 0 ]; then
-            gh issue edit $NEXT_ISSUE --add-assignee "copilot-swe-agent" 2>/dev/null || \
+            gh issue edit "$NEXT_ISSUE" --add-assignee "copilot-swe-agent" 2>/dev/null || \
               echo "❌ Failed to assign issue #$NEXT_ISSUE to any Copilot handle"
           fi
 
