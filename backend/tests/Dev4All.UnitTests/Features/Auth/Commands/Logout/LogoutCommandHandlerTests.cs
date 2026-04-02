@@ -1,7 +1,7 @@
 using Dev4All.Application.Abstractions.Persistence;
 using Dev4All.Application.Abstractions.Persistence.Repositories.RefreshTokens;
 using Dev4All.Application.Features.Auth.Commands.Logout;
-using RefreshToken = Dev4All.Domain.Entities.RefreshToken;
+using RefreshTokenEntity = global::Dev4All.Domain.Entities.RefreshToken;
 
 namespace Dev4All.UnitTests.Features.Auth.Commands.Logout;
 
@@ -10,7 +10,7 @@ public class LogoutCommandHandlerTests
     [Fact]
     public async Task Handle_WhenTokenExistsAndNotRevoked_RevokesAndSaves()
     {
-        var token = RefreshToken.Create("refresh-token", "user-1", DateTime.UtcNow.AddDays(1));
+        var token = RefreshTokenEntity.Create("refresh-token", "user-1", DateTime.UtcNow.AddDays(1));
         var writeRepository = new FakeRefreshTokenWriteRepository(token);
         var unitOfWork = new FakeUnitOfWork();
         var handler = new LogoutCommandHandler(writeRepository, unitOfWork);
@@ -40,7 +40,7 @@ public class LogoutCommandHandlerTests
     [Fact]
     public async Task Handle_WhenTokenAlreadyRevoked_DoesNotUpdateOrSave()
     {
-        var token = RefreshToken.Create("refresh-token", "user-1", DateTime.UtcNow.AddDays(1));
+        var token = RefreshTokenEntity.Create("refresh-token", "user-1", DateTime.UtcNow.AddDays(1));
         token.Revoke();
         var writeRepository = new FakeRefreshTokenWriteRepository(token);
         var unitOfWork = new FakeUnitOfWork();
@@ -55,37 +55,37 @@ public class LogoutCommandHandlerTests
 
     private sealed class FakeRefreshTokenWriteRepository : IRefreshTokenWriteRepository
     {
-        private readonly RefreshToken? _refreshToken;
+        private readonly RefreshTokenEntity? _refreshToken;
         public int UpdateCallCount { get; private set; }
 
-        public FakeRefreshTokenWriteRepository(RefreshToken? refreshToken = null)
+        public FakeRefreshTokenWriteRepository(RefreshTokenEntity? refreshToken = null)
         {
             _refreshToken = refreshToken;
         }
 
-        public Task AddAsync(RefreshToken entity, CancellationToken cancellationToken = default)
+        public Task AddAsync(RefreshTokenEntity entity, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
 
-        public Task AddRangeAsync(IEnumerable<RefreshToken> entities, CancellationToken cancellationToken = default)
+        public Task AddRangeAsync(IEnumerable<RefreshTokenEntity> entities, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
 
-        public void Update(RefreshToken entity)
+        public void Update(RefreshTokenEntity entity)
             => UpdateCallCount++;
 
-        public void UpdateRange(IEnumerable<RefreshToken> entities)
+        public void UpdateRange(IEnumerable<RefreshTokenEntity> entities)
         {
         }
 
-        public void Remove(RefreshToken entity)
+        public void Remove(RefreshTokenEntity entity)
         {
         }
 
-        public void RemoveRange(IEnumerable<RefreshToken> entities)
+        public void RemoveRange(IEnumerable<RefreshTokenEntity> entities)
         {
         }
 
-        public Task<RefreshToken?> GetByTokenForUpdateAsync(string token, CancellationToken cancellationToken = default)
-            => Task.FromResult<RefreshToken?>(_refreshToken);
+        public Task<RefreshTokenEntity?> GetByTokenForUpdateAsync(string token, CancellationToken cancellationToken = default)
+            => Task.FromResult<RefreshTokenEntity?>(_refreshToken);
     }
 
     private sealed class FakeUnitOfWork : IUnitOfWork
