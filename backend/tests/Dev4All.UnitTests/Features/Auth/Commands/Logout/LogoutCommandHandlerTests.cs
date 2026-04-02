@@ -1,7 +1,7 @@
 using Dev4All.Application.Abstractions.Persistence;
 using Dev4All.Application.Abstractions.Persistence.Repositories.RefreshTokens;
 using Dev4All.Application.Features.Auth.Commands.Logout;
-using Dev4All.Domain.Entities;
+using RefreshToken = Dev4All.Domain.Entities.RefreshToken;
 
 namespace Dev4All.UnitTests.Features.Auth.Commands.Logout;
 
