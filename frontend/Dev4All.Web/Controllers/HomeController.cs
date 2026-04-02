@@ -4,7 +4,7 @@ using Dev4All.Web.Models;
 
 namespace Dev4All.Web.Controllers;
 
-public class HomeController : Controller
+public sealed class HomeController : Controller
 {
     public IActionResult Index()
     {
