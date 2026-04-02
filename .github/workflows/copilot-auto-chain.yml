@@ -21,9 +21,9 @@ jobs:
       - name: Find closed issue and assign next to Copilot
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # PR body'den "Closes #XX" veya "Fixes #XX" ile bağlı issue numarasını çek
-          PR_BODY="${{ github.event.pull_request.body }}"
           CLOSED_ISSUE=$(echo "$PR_BODY" | grep -oP '(?:Closes|Fixes|Resolves)\s*#\K[0-9]+' | head -1)
 
           if [ -z "$CLOSED_ISSUE" ]; then
