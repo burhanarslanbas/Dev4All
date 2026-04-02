@@ -3,8 +3,8 @@ using Dev4All.Application.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Cryptography;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Dev4All.Infrastructure.Auth;
@@ -70,7 +70,11 @@ public sealed class JwtService(IOptions<JwtOptions> options) : IJwtService
 
             return principal;
         }
-        catch
+        catch (ArgumentException)
+        {
+            return null;
+        }
+        catch (SecurityTokenException)
         {
             return null;
         }
