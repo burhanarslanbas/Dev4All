@@ -36,4 +36,11 @@ jobs:
         run: dotnet build Dev4All.slnx --no-restore --configuration Release
 
       - name: Test
+        env:
+          # GitHub Secrets'dan alınan değerleri .NET konfigürasyon yapısına (Json/Env formatı) mapliyoruz
+          # Hiyerarşi için "__" kullanılıyor (Örn: "Jwt:Key" -> "Jwt__Key")
+          Jwt__Key: ${{ secrets.JWT_KEY }}
+          Jwt__Issuer: ${{ secrets.JWT_ISSUER }}
+          Jwt__Audience: ${{ secrets.JWT_AUDIENCE }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION }}
         run: dotnet test Dev4All.slnx --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
