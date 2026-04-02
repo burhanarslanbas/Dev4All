@@ -122,6 +122,276 @@ Sprint 0 issue'larını sırayla uygula:
 
 ---
 
+## Sprint 0 — Auth Tamamlama
+
+---
+
+### #108 — feat: Auth infrastructure expansion
+
+**Sıra (Order):** 1
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Context
+**READ FIRST:**
+- `docs/AGENTS.md`
+- `backend/plan/20-BACKEND-OVERVIEW.md`
+
+## Task — GitHub Issue #108
+
+**Auth infrastructure expansion** for full auth module.
+
+1. Expand `IIdentityService` in `backend/src/Core/Dev4All.Application/Abstractions/Auth/IIdentityService.cs`:
+- GenerateEmailConfirmationTokenAsync
+- ConfirmEmailAsync
+- GeneratePasswordResetTokenAsync
+- ResetPasswordAsync
+- ChangePasswordAsync
+- GetEmailByUserIdAsync
+
+2. Implement them in `IdentityService.cs` using `UserManager<ApplicationUser>`.
+
+3. Expand `IJwtService` in `backend/src/Core/Dev4All.Application/Abstractions/Auth/IJwtService.cs`:
+- GenerateRefreshToken()
+- GetPrincipalFromExpiredToken(string token)
+
+4. Implement them in `JwtService.cs`.
+
+5. Create `RefreshToken` entity in `backend/src/Core/Dev4All.Domain/Entities/RefreshToken.cs`:
+- Token, UserId, ExpiresAt, IsRevoked, RevokedAt.
+- Methods: Create(), Revoke(), IsActive.
+- Add to `Dev4AllDbContext` and create `RefreshTokenConfiguration.cs`.
+- Run EF Migration: `dotnet ef migrations add AddRefreshToken`
+```
+
+---
+
+### #109 — feat: EmailQueue + Quartz.NET setup
+
+**Sıra (Order):** 2
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Context
+Read `docs/AGENTS.md`. We never send emails synchronously.
+
+## Task — GitHub Issue #109
+
+1. Create `EmailQueue` entity in Domain/Entities:
+- To, Subject, Body, Status (Pending, Sent, Failed), RetryCount, ErrorMessage.
+
+2. Create `IEmailNotificationService` and its implementation `EmailNotificationService`:
+- Methods: QueueConfirmationEmailAsync, QueuePasswordResetEmailAsync.
+- This saves rows to `EmailQueue` via UnitOfWork.
+
+3. Setup Quartz.NET:
+- Add `Quartz` and `Quartz.Extensions.Hosting` to Infrastructure.
+- Create `EmailDispatchJob` that queries pending emails from DB.
+- Uses `IEmailService.SendAsync` via MailKit block.
+- Update status based on success/failure.
+
+4. Add HTML templates for layout, verify-email, reset-password in `Infrastructure/Email/Templates`.
+```
+
+---
+
+### #110 — feat: RefreshTokenCommand
+
+**Sıra (Order):** 3
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Context
+Task: RefreshTokenCommand handler.
+
+## Task — GitHub Issue #110
+
+1. Create `RefreshTokenCommand(string AccessToken, string RefreshToken)` in `Application/Features/Auth/Commands/RefreshToken/`.
+2. Create handler:
+- Extract principal using `IJwtService.GetPrincipalFromExpiredToken()`.
+- Validate refresh token from DB (must exist, belong to user, not revoked, not expired).
+- Revoke old token.
+- Generate new JWT and new Refresh Token.
+- Save new refresh token.
+- Return `AuthResponse`.
+3. Add FluentValidation.
+```
+
+---
+
+### #111 — feat: LogoutCommand
+
+**Sıra (Order):** 4
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Context
+Task: LogoutCommand handler.
+
+## Task — GitHub Issue #111
+
+1. Create `LogoutCommand(string RefreshToken)` in `Application/Features/Auth/Commands/Logout/`.
+2. Create handler:
+- Find RefreshToken in DB.
+- If exists and not revoked, call `.Revoke()`.
+- Save changes.
+- Return `Unit.Value`.
+```
+
+---
+
+### #112 — feat: ConfirmEmailCommand
+
+**Sıra (Order):** 5
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Task — GitHub Issue #112
+
+1. Create `ConfirmEmailCommand(string UserId, string Token)` in `Application/Features/Auth/Commands/ConfirmEmail/`.
+2. Create handler:
+- Call `IIdentityService.ConfirmEmailAsync(userId, token)`.
+- Return generic successful message.
+```
+
+---
+
+### #113 — feat: ForgotPasswordCommand
+
+**Sıra (Order):** 6
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Task — GitHub Issue #113
+
+1. Create `ForgotPasswordCommand(string Email)` in `Application/Features/Auth/Commands/ForgotPassword/`.
+2. Create handler:
+- Validate Email length and format with FluentValidation.
+- Generate token via `IIdentityService.GeneratePasswordResetTokenAsync`.
+- Do NOT throw if user doesn't exist (security).
+- If exists, calculate redirect URL.
+- Queue email via `IEmailNotificationService.QueuePasswordResetEmailAsync`.
+- Return generic success message.
+```
+
+---
+
+### #114 — feat: ResetPasswordCommand
+
+**Sıra (Order):** 7
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Task — GitHub Issue #114
+
+1. Create `ResetPasswordCommand(string Email, string Token, string NewPassword)` in `Application/Features/Auth/Commands/ResetPassword/`.
+2. Create Validator (Password rules).
+3. Create handler:
+- Call `IIdentityService.ResetPasswordAsync()`.
+- Return success or errors.
+```
+
+---
+
+### #115 — feat: ChangePasswordCommand
+
+**Sıra (Order):** 8
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Task — GitHub Issue #115
+
+1. Create `ChangePasswordCommand(string CurrentPassword, string NewPassword)` in `Application/Features/Auth/Commands/ChangePassword/`.
+2. Create Validator.
+3. Create handler:
+- Needs `ICurrentUser.Id`.
+- Call `IIdentityService.ChangePasswordAsync()`.
+- Force session logout if needed, or return success.
+```
+
+---
+
+### #116 — feat: ResendConfirmationCommand
+
+**Sıra (Order):** 9
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Task — GitHub Issue #116
+
+1. Create `ResendConfirmationCommand(string Email)` in `Application/Features/Auth/Commands/ResendConfirmation/`.
+2. Create handler:
+- Check if user exists and email is NOT verified.
+- Generate new token via `IIdentityService.GenerateEmailConfirmationTokenAsync`.
+- Queue email via `IEmailNotificationService.QueueConfirmationEmailAsync`.
+- Return generic success.
+```
+
+---
+
+### #117 — feat: AuthController update
+
+**Sıra (Order):** 10
+
+```text
+You are a senior .NET backend developer working on the Dev4All project.
+
+## Task — GitHub Issue #117
+
+1. Go to `backend/src/Presentation/Dev4All.API/Controllers/v1/AuthController.cs`.
+2. Add all missing endpoints from S0 (RefreshToken, Logout, ConfirmEmail, ForgotPassword, ResetPassword, ChangePassword, ResendConfirmation).
+3. Decorate with appropriate `[Authorize]` or `[AllowAnonymous]` attributes.
+4. Define proper Swagger documentation (`[ProducesResponseType]`).
+```
+
+---
+
+### #118 — test: Auth Unit Tests
+
+**Sıra (Order):** 11
+
+```text
+You are a senior test engineer in .NET.
+
+## Task — GitHub Issue #118
+
+1. Go to `Dev4All.Application.UnitTests`.
+2. Write xUnit tests for ALL the command handlers introduced in Sprint 0 (#108-#116).
+3. Mock `IIdentityService`, `IJwtService`, `IEmailNotificationService`.
+4. Cover success and failure paths.
+```
+
+---
+
+### #119 — test: Auth Integration Tests
+
+**Sıra (Order):** 12
+
+```text
+You are a senior test engineer in .NET.
+
+## Task — GitHub Issue #119
+
+1. Go to `Dev4All.WebApi.IntegrationTests`.
+2. Update or create the `CustomWebApplicationFactory` with PostgreSQL Testcontainers.
+3. Write end-to-end integration tests for:
+- Full registration flow -> verify email queued -> confirm email.
+- Full login flow -> Refresh token -> Logout.
+- Password reset flow.
+4. Ensure tests bypass real SMTP.
+```
+
+---
+
 ## Sprint 1 — Project Module
 
 ---
