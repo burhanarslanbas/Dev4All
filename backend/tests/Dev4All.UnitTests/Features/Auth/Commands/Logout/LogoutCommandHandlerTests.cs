@@ -1,6 +1,5 @@
 using Dev4All.Application.Abstractions.Persistence;
 using Dev4All.Application.Abstractions.Persistence.Repositories.RefreshTokens;
-using Dev4All.Application.Common.Pagination;
 using Dev4All.Application.Features.Auth.Commands.Logout;
 using Dev4All.Domain.Entities;
 
@@ -12,10 +11,9 @@ public class LogoutCommandHandlerTests
     public async Task Handle_WhenTokenExistsAndNotRevoked_RevokesAndSaves()
     {
         var token = RefreshToken.Create("refresh-token", "user-1", DateTime.UtcNow.AddDays(1));
-        var readRepository = new FakeRefreshTokenReadRepository(token);
-        var writeRepository = new FakeRefreshTokenWriteRepository();
+        var writeRepository = new FakeRefreshTokenWriteRepository(token);
         var unitOfWork = new FakeUnitOfWork();
-        var handler = new LogoutCommandHandler(readRepository, writeRepository, unitOfWork);
+        var handler = new LogoutCommandHandler(writeRepository, unitOfWork);
 
         var result = await handler.Handle(new LogoutCommand("refresh-token"), CancellationToken.None);
 
@@ -28,10 +26,9 @@ public class LogoutCommandHandlerTests
     [Fact]
     public async Task Handle_WhenTokenDoesNotExist_DoesNotUpdateOrSave()
     {
-        var readRepository = new FakeRefreshTokenReadRepository(null);
         var writeRepository = new FakeRefreshTokenWriteRepository();
         var unitOfWork = new FakeUnitOfWork();
-        var handler = new LogoutCommandHandler(readRepository, writeRepository, unitOfWork);
+        var handler = new LogoutCommandHandler(writeRepository, unitOfWork);
 
         var result = await handler.Handle(new LogoutCommand("missing-token"), CancellationToken.None);
 
@@ -45,10 +42,9 @@ public class LogoutCommandHandlerTests
     {
         var token = RefreshToken.Create("refresh-token", "user-1", DateTime.UtcNow.AddDays(1));
         token.Revoke();
-        var readRepository = new FakeRefreshTokenReadRepository(token);
-        var writeRepository = new FakeRefreshTokenWriteRepository();
+        var writeRepository = new FakeRefreshTokenWriteRepository(token);
         var unitOfWork = new FakeUnitOfWork();
-        var handler = new LogoutCommandHandler(readRepository, writeRepository, unitOfWork);
+        var handler = new LogoutCommandHandler(writeRepository, unitOfWork);
 
         var result = await handler.Handle(new LogoutCommand("refresh-token"), CancellationToken.None);
 
@@ -57,38 +53,15 @@ public class LogoutCommandHandlerTests
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
 
-    private sealed class FakeRefreshTokenReadRepository(RefreshToken? refreshToken) : IRefreshTokenReadRepository
-    {
-        public Task<IReadOnlyList<RefreshToken>> GetAllAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<RefreshToken>>([]);
-
-        public Task<RefreshToken?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-            => Task.FromResult<RefreshToken?>(null);
-
-        public Task<IReadOnlyList<RefreshToken>> GetByIdsAsync(
-            IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<RefreshToken>>([]);
-
-        public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
-            => Task.FromResult(false);
-
-        public Task<int> CountAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult(0);
-
-        public Task<PagedResult<RefreshToken>> ListAsync(
-            int page, int pageSize, CancellationToken cancellationToken = default)
-            => Task.FromResult(new PagedResult<RefreshToken>([], 0, page, pageSize));
-
-        public Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
-            => Task.FromResult<RefreshToken?>(refreshToken);
-
-        public Task<RefreshToken?> GetByTokenForUpdateAsync(string token, CancellationToken cancellationToken = default)
-            => Task.FromResult<RefreshToken?>(refreshToken);
-    }
-
     private sealed class FakeRefreshTokenWriteRepository : IRefreshTokenWriteRepository
     {
+        private readonly RefreshToken? _refreshToken;
         public int UpdateCallCount { get; private set; }
+
+        public FakeRefreshTokenWriteRepository(RefreshToken? refreshToken = null)
+        {
+            _refreshToken = refreshToken;
+        }
 
         public Task AddAsync(RefreshToken entity, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
@@ -110,6 +83,9 @@ public class LogoutCommandHandlerTests
         public void RemoveRange(IEnumerable<RefreshToken> entities)
         {
         }
+
+        public Task<RefreshToken?> GetByTokenForUpdateAsync(string token, CancellationToken cancellationToken = default)
+            => Task.FromResult<RefreshToken?>(_refreshToken);
     }
 
     private sealed class FakeUnitOfWork : IUnitOfWork

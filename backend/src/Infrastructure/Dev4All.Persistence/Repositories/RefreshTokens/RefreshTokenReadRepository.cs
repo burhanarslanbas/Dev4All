@@ -10,10 +10,7 @@ namespace Dev4All.Persistence.Repositories.RefreshTokens;
 public sealed class RefreshTokenReadRepository(Dev4AllDbContext context) : IRefreshTokenReadRepository
 {
     public async Task<IReadOnlyList<RefreshToken>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        var list = await context.RefreshTokens.AsNoTracking().ToListAsync(cancellationToken);
-        return list;
-    }
+        => await context.RefreshTokens.AsNoTracking().ToListAsync(cancellationToken);
 
     public async Task<RefreshToken?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => await context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -54,6 +51,4 @@ public sealed class RefreshTokenReadRepository(Dev4AllDbContext context) : IRefr
     public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default)
         => await context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
 
-    public async Task<RefreshToken?> GetByTokenForUpdateAsync(string token, CancellationToken cancellationToken = default)
-        => await context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
 }
