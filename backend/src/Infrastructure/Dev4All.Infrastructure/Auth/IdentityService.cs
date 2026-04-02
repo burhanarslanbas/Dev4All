@@ -94,4 +94,69 @@ public sealed class IdentityService(
         var user = await userManager.FindByIdAsync(userId);
         return user?.UserName;
     }
+
+    public async Task<string?> GenerateEmailConfirmationTokenAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+            return null;
+
+        return await userManager.GenerateEmailConfirmationTokenAsync(user);
+    }
+
+    public async Task<(bool Succeeded, IEnumerable<string> Errors)> ConfirmEmailAsync(
+        string userId,
+        string token,
+        CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+            return (false, ["User not found."]);
+
+        var result = await userManager.ConfirmEmailAsync(user, token);
+        return (result.Succeeded, result.Errors.Select(e => e.Description));
+    }
+
+    public async Task<string?> GeneratePasswordResetTokenAsync(string email, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+            return null;
+
+        return await userManager.GeneratePasswordResetTokenAsync(user);
+    }
+
+    public async Task<(bool Succeeded, IEnumerable<string> Errors)> ResetPasswordAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+            return (false, ["User not found."]);
+
+        var result = await userManager.ResetPasswordAsync(user, token, newPassword);
+        return (result.Succeeded, result.Errors.Select(e => e.Description));
+    }
+
+    public async Task<(bool Succeeded, IEnumerable<string> Errors)> ChangePasswordAsync(
+        string userId,
+        string currentPassword,
+        string newPassword,
+        CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+            return (false, ["User not found."]);
+
+        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        return (result.Succeeded, result.Errors.Select(e => e.Description));
+    }
+
+    public async Task<string?> GetEmailByUserIdAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        return user?.Email;
+    }
 }

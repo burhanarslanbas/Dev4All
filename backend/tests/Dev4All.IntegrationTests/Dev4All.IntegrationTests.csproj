@@ -15,4 +15,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core\Dev4All.Domain\Dev4All.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
