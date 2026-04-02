@@ -1,0 +1,40 @@
+name: "Copilot Setup Steps"
+
+# Copilot coding agent bu workflow'u kullanarak dev ortamını kurar.
+# Bu dosya default branch'te (develop) bulunmalıdır.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore & build backend
+        working-directory: backend
+        run: |
+          dotnet restore Dev4All.slnx
+          dotnet build Dev4All.slnx --no-restore
+
+      - name: Restore & build frontend (if exists)
+        run: |
+          if [ -f "frontend/Dev4All.Web/Dev4All.Web.csproj" ]; then
+            dotnet restore frontend/Dev4All.Web/Dev4All.Web.csproj
+            dotnet build frontend/Dev4All.Web/ --no-restore
+            echo "✅ Frontend built successfully"
+          else
+            echo "⏭️ Frontend project not yet created, skipping."
+          fi
