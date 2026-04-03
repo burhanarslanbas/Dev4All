@@ -1,29 +1,34 @@
-<ul class="navbar-nav">
+@using System.Security.Claims
+
+<ul class="navbar-nav align-items-lg-center gap-2">
     @if (User.Identity?.IsAuthenticated == true)
     {
+        var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name ?? "User";
+        var role = User.FindFirstValue(ClaimTypes.Role) ?? "User";
         <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    @User.Identity.Name
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" asp-controller="Auth" asp-action="Profile">Profile</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form asp-controller="Auth" asp-action="Logout" method="post">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="dropdown-item">Logout</button>
-                        </form>
-                    </li>
-                </ul>
-            </li>
-        }
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="small fw-semibold">@email</span>
+                <span class="badge rounded-pill text-bg-light text-primary-emphasis">@role</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><a class="dropdown-item" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
     else
     {
         <li class="nav-item">
-            <a class="nav-link" asp-controller="Auth" asp-action="Login">Login</a>
+            <a class="btn btn-outline-light btn-sm px-3" asp-controller="Auth" asp-action="Login">Login</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" asp-controller="Auth" asp-action="Register">Register</a>
+            <a class="btn btn-light btn-sm px-3 text-primary fw-semibold" asp-controller="Auth" asp-action="Register">Register</a>
         </li>
     }
 </ul>
