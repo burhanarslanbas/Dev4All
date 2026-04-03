@@ -33,10 +33,10 @@ class AuthMapperTest {
             role = "Customer",
         )
 
-        val result = response.toDomain()
+        val result = response.toDomain(name = "Customer Name")
 
         assertEquals("6c6f620f-0e61-4a0a-b6f2-3f6b9d4c22de", result.id)
-        assertEquals("customer@mail.com", result.name)
+        assertEquals("Customer Name", result.name)
         assertEquals("customer@mail.com", result.email)
         assertEquals(UserRole.Customer, result.role)
     }

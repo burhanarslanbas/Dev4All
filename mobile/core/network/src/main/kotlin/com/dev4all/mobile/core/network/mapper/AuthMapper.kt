@@ -13,7 +13,7 @@ fun LoginResponse.toDomain(): AuthToken = AuthToken(
     role = role.toUserRole(),
 )
 
-fun CurrentUserResponse.toDomain(name: String = email): User = User(
+fun CurrentUserResponse.toDomain(name: String): User = User(
     id = userId,
     name = name,
     email = email,
