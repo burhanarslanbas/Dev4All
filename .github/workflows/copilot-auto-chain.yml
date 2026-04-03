@@ -131,13 +131,7 @@ jobs:
           echo "➡️ Next issue: #$NEXT_ISSUE"
 
           # Sonraki issue'yu yorumla Copilot'a tetikleme
-          COMMENT_BODY=$(cat <<EOF
-@copilot Lütfen bu issue'yu çözmeye başla.
-- **Hedef Branch:** \`develop\`
-- **Model:** \`GPT-5.3-Codex\` (veya mümkün olan en iyi model)
-- Gerekli task detayları issue gövdesinde (body) ve \`docs/AGENTS.md\` dosyasında mevcuttur.
-EOF
-)
+          COMMENT_BODY=$'@copilot Lütfen bu issue\'yu çözmeye başla.\n- **Hedef Branch:** `develop`\n- **Model:** `GPT-5.3-Codex` (veya mümkün olan en iyi model)\n- Gerekli task detayları issue gövdesinde (body) ve `docs/AGENTS.md` dosyasında mevcuttur.'
           gh issue comment "$NEXT_ISSUE" -b "$COMMENT_BODY" || echo "⚠️ Failed to add trigger comment to Issue #$NEXT_ISSUE."
 
           echo "✅ Trigger comment left on Issue #$NEXT_ISSUE for Copilot"
