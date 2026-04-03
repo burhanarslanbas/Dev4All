@@ -4,6 +4,4 @@ namespace Dev4All.Application.Abstractions.Services;
 public interface IEmailNotificationService
 {
     Task QueuePasswordResetEmailAsync(string email, string userName, string resetToken, string redirectUrl, CancellationToken ct = default);
-
-    Task QueueForgotPasswordEmailAsync(string email, string userName, string resetToken, CancellationToken ct = default);
 }

@@ -99,12 +99,5 @@ public sealed class ForgotPasswordCommandHandlerTests
             Calls.Add((email, userName, resetToken, redirectUrl));
             return Task.CompletedTask;
         }
-
-        public Task QueueForgotPasswordEmailAsync(
-            string email,
-            string userName,
-            string resetToken,
-            CancellationToken ct = default)
-            => throw new NotSupportedException();
     }
 }
