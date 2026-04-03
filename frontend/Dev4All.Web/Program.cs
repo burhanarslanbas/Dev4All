@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Dev4All.Web.Infrastructure;
+using Dev4All.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthorization();
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -13,7 +16,8 @@ builder.Services
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
     });
 
-builder.Services.AddHttpClient("BackendApi", (serviceProvider, client) =>
+builder.Services.AddTransient<ApiTokenHandler>();
+builder.Services.AddHttpClient<IApiClient, ApiClient>((serviceProvider, client) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
     var baseUrl = configuration["BackendApi:BaseUrl"];
@@ -24,7 +28,8 @@ builder.Services.AddHttpClient("BackendApi", (serviceProvider, client) =>
     }
 
     client.BaseAddress = new Uri(baseUrl);
-});
+})
+.AddHttpMessageHandler<ApiTokenHandler>();
 
 var app = builder.Build();
 
