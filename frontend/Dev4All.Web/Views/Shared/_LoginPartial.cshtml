@@ -3,7 +3,8 @@
 <ul class="navbar-nav align-items-lg-center gap-2">
     @if (User.Identity?.IsAuthenticated == true)
     {
-        var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name ?? "User";
+        const string defaultDisplayName = "Member";
+        var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name ?? defaultDisplayName;
         var role = User.FindFirstValue(ClaimTypes.Role) ?? "User";
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -11,7 +12,7 @@
                 <span class="badge rounded-pill text-bg-light text-primary-emphasis">@role</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><a class="dropdown-item" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                <li><a class="dropdown-item" href="/">Dashboard</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form asp-controller="Auth" asp-action="Logout" method="post">
