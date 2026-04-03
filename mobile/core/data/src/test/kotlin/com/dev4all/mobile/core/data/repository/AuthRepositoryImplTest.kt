@@ -3,6 +3,7 @@ package com.dev4all.mobile.core.data.repository
 import com.dev4all.mobile.core.datastore.TokenDataStore
 import com.dev4all.mobile.core.datastore.UserSessionDataStore
 import com.dev4all.mobile.core.datastore.model.UserSession
+import com.dev4all.mobile.core.domain.exception.FieldError
 import com.dev4all.mobile.core.domain.exception.AppException
 import com.dev4all.mobile.core.domain.result.Result
 import com.dev4all.mobile.core.network.api.AuthApiService
@@ -134,6 +135,60 @@ class AuthRepositoryImplTest {
         val registerRequest = authApi.lastRegisterRequest
         checkNotNull(registerRequest)
         assertEquals(0, registerRequest.role)
+    }
+
+    @Test
+    fun register_developerRole_mapsToRoleCodeOne() = runTest {
+        val authApi = FakeAuthApiService().apply {
+            registerResponse = RegisterResponse(
+                userId = "u-3",
+                email = "developer@mail.com",
+                name = "Developer User",
+            )
+            loginResponse = LoginResponse(
+                token = "jwt-token-3",
+                expiresAt = "2026-05-03T00:00:00Z",
+                email = "developer@mail.com",
+                role = "Developer",
+            )
+        }
+        val repository = AuthRepositoryImpl(authApi, FakeTokenDataStore(), FakeUserSessionDataStore())
+
+        val result = repository.register(
+            fullName = "Developer User",
+            email = "developer@mail.com",
+            password = "Pass1234",
+            role = "Developer",
+        )
+
+        assertTrue(result is Result.Success)
+        val registerRequest = authApi.lastRegisterRequest
+        checkNotNull(registerRequest)
+        assertEquals(1, registerRequest.role)
+    }
+
+    @Test
+    fun register_adminRole_returnsValidationError() = runTest {
+        val repository = AuthRepositoryImpl(
+            authApiService = FakeAuthApiService(),
+            tokenDataStore = FakeTokenDataStore(),
+            userSessionDataStore = FakeUserSessionDataStore(),
+        )
+
+        val result = repository.register(
+            fullName = "Admin User",
+            email = "admin@mail.com",
+            password = "Pass1234",
+            role = "Admin",
+        )
+
+        assertTrue(result is Result.Error)
+        val error = (result as Result.Error).exception
+        assertTrue(error is AppException.Validation)
+        assertEquals(
+            listOf(FieldError(field = "role", message = "Admin role cannot be selected during register")),
+            (error as AppException.Validation).errors,
+        )
     }
 
     private class FakeAuthApiService : AuthApiService {

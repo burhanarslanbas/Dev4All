@@ -3,6 +3,7 @@ package com.dev4all.mobile.core.data.repository
 import com.dev4all.mobile.core.data.mapper.toDomainAuthToken
 import com.dev4all.mobile.core.data.mapper.toDomainUser
 import com.dev4all.mobile.core.data.mapper.toDomainUserRole
+import com.dev4all.mobile.core.data.mapper.toDisplayName
 import com.dev4all.mobile.core.data.mapper.toRegisterRoleCode
 import com.dev4all.mobile.core.data.mapper.toSession
 import com.dev4all.mobile.core.datastore.TokenDataStore
@@ -47,7 +48,7 @@ class AuthRepositoryImpl @Inject constructor(
         userSessionDataStore.saveSession(
             UserSession(
                 userId = currentUser.userId,
-                name = email.substringBefore('@').ifBlank { email },
+                name = email.toDisplayName(),
                 email = currentUser.email,
                 role = currentUser.role.toDomainUserRole().name,
                 isLoggedIn = true,
@@ -85,7 +86,7 @@ class AuthRepositoryImpl @Inject constructor(
         val authToken = loginResponse.toDomainAuthToken()
         tokenDataStore.saveToken(authToken.token)
         userSessionDataStore.saveSession(
-            registerResponse.toSession().copy(role = authToken.role.name)
+            registerResponse.toSession(role = authToken.role.name)
         )
 
         Result.Success(authToken)
@@ -96,7 +97,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun getCurrentUser(): Result<User> = runCatching {
         val currentUserResponse = authApiService.getCurrentUser()
         val sessionName = userSessionDataStore.getSession().first()?.name
-            ?: currentUserResponse.email.substringBefore('@').ifBlank { currentUserResponse.email }
+            ?: currentUserResponse.email.toDisplayName()
 
         Result.Success(currentUserResponse.toDomainUser(sessionName = sessionName))
     }.getOrElse { throwable ->

@@ -17,11 +17,11 @@ fun LoginResponse.toDomainAuthToken(): AuthToken = AuthToken(
     role = role.toDomainUserRole(),
 )
 
-fun RegisterResponse.toSession(): UserSession = UserSession(
+fun RegisterResponse.toSession(role: String): UserSession = UserSession(
     userId = userId,
     name = name,
     email = email,
-    role = UserRole.Customer.name,
+    role = role,
     isLoggedIn = true,
 )
 
@@ -50,3 +50,5 @@ fun String.toDomainUserRole(): UserRole = when (trim().lowercase()) {
     "admin" -> UserRole.Admin
     else -> UserRole.Customer
 }
+
+fun String.toDisplayName(): String = substringBefore('@').ifBlank { this }
