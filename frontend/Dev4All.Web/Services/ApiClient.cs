@@ -67,36 +67,52 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
             return;
         }
 
-        var content = await response.Content.ReadAsStringAsync(ct);
-
-        throw response.StatusCode switch
+        if (response.StatusCode == HttpStatusCode.BadRequest)
         {
-            HttpStatusCode.BadRequest => new HttpRequestException(
-                string.IsNullOrWhiteSpace(content) ? "Validation failed." : content,
+            throw new HttpRequestException(
+                "Validation failed. Please check your input and try again.",
                 null,
-                response.StatusCode),
-            HttpStatusCode.Unauthorized => new HttpRequestException(
+                response.StatusCode);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            throw new HttpRequestException(
                 "Unauthorized. Please login again.",
                 null,
-                response.StatusCode),
-            HttpStatusCode.Forbidden => new HttpRequestException(
+                response.StatusCode);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            throw new HttpRequestException(
                 "Access denied.",
                 null,
-                response.StatusCode),
-            HttpStatusCode.NotFound => new HttpRequestException(
+                response.StatusCode);
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            throw new HttpRequestException(
                 "Requested resource was not found.",
                 null,
-                response.StatusCode),
-            HttpStatusCode.InternalServerError => new HttpRequestException(
+                response.StatusCode);
+        }
+
+        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            throw new HttpRequestException(
                 "An unexpected server error occurred.",
                 null,
-                response.StatusCode),
-            _ => new HttpRequestException(
-                string.IsNullOrWhiteSpace(content)
-                    ? $"API request failed with status code {(int)response.StatusCode}."
-                    : content,
-                null,
-                response.StatusCode)
-        };
+                response.StatusCode);
+        }
+
+        var content = await response.Content.ReadAsStringAsync(ct);
+        throw new HttpRequestException(
+            string.IsNullOrWhiteSpace(content)
+                ? $"API request failed with status code {(int)response.StatusCode}."
+                : content,
+            null,
+            response.StatusCode);
     }
 }

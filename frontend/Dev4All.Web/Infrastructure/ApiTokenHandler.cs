@@ -5,7 +5,7 @@ namespace Dev4All.Web.Infrastructure;
 
 public sealed class ApiTokenHandler(IHttpContextAccessor httpContextAccessor) : DelegatingHandler
 {
-    private static readonly string[] TokenClaimTypes = [ClaimTypes.Hash, "access_token", "token", "jwt"];
+    private static readonly string[] TokenClaimTypes = ["access_token", "token", "jwt"];
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
