@@ -1,6 +1,7 @@
 package com.dev4all.mobile.core.network.di
 
 import com.dev4all.mobile.core.network.BuildConfig
+import com.dev4all.mobile.core.network.api.AuthApiService
 import com.dev4all.mobile.core.network.auth.TokenProvider
 import com.dev4all.mobile.core.network.interceptor.AuthInterceptor
 import com.dev4all.mobile.core.network.interceptor.ErrorInterceptor
@@ -79,6 +80,11 @@ object NetworkModule {
         .client(okHttpClient)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
+
+    @Provides
+    @Singleton
+    fun provideAuthApiService(retrofit: Retrofit): AuthApiService =
+        retrofit.create(AuthApiService::class.java)
 
     private object EmptyTokenProvider : TokenProvider {
         override suspend fun getAccessToken(): String? = null

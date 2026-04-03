@@ -1,6 +1,7 @@
 package com.dev4all.mobile.core.network.interceptor
 
 import com.dev4all.mobile.core.network.exception.BadRequestException
+import com.dev4all.mobile.core.network.exception.ForbiddenException
 import com.dev4all.mobile.core.network.exception.ServerException
 import com.dev4all.mobile.core.network.exception.UnauthorizedException
 import kotlinx.serialization.json.Json
@@ -64,6 +65,24 @@ class ErrorInterceptorTest {
 
         assertTrue(thrown is UnauthorizedException)
         assertEquals("Authentication required", thrown?.message)
+    }
+
+    @Test
+    fun intercept_forbiddenError_throwsForbiddenException() {
+        val interceptor = ErrorInterceptor(json = json)
+        val body = """
+            {
+              "statusCode": 403,
+              "timestamp": "2026-04-03T00:00:00Z",
+              "path": "/api/v1/auth/login",
+              "message": "Geçersiz e-posta veya şifre."
+            }
+        """.trimIndent()
+
+        val thrown = runCatching { interceptor.intercept(FakeChain(code = 403, body = body)) }.exceptionOrNull()
+
+        assertTrue(thrown is ForbiddenException)
+        assertEquals("Geçersiz e-posta veya şifre.", thrown?.message)
     }
 
     @Test
