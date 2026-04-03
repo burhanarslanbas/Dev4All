@@ -1,11 +1,12 @@
+using System.Net;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using Dev4All.Web.Models.Auth;
 using Dev4All.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Dev4All.Web.Controllers;
 
@@ -42,19 +43,31 @@ public sealed class AuthController(IAuthService authService) : Controller
                 return View(model);
             }
 
-            var userId = GetUserIdFromToken(response.Token);
-            if (string.IsNullOrWhiteSpace(userId))
+            var tokenUserId = GetUserIdFromToken(response.Token);
+            if (string.IsNullOrWhiteSpace(tokenUserId))
             {
                 ModelState.AddModelError(string.Empty, "Invalid login token.");
                 return View(model);
             }
 
+            var currentUser = await authService.GetCurrentUserAsync(response.Token, ct);
+            if (currentUser is null || string.IsNullOrWhiteSpace(currentUser.UserId))
+            {
+                ModelState.AddModelError(string.Empty, "Unable to load user profile.");
+                return View(model);
+            }
+            if (!string.Equals(tokenUserId, currentUser.UserId, StringComparison.Ordinal))
+            {
+                ModelState.AddModelError(string.Empty, "Unable to validate login token.");
+                return View(model);
+            }
+
             var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, userId),
-                new(ClaimTypes.Name, response.Email),
-                new(ClaimTypes.Email, response.Email),
-                new(ClaimTypes.Role, response.Role),
+                new(ClaimTypes.NameIdentifier, currentUser.UserId),
+                new(ClaimTypes.Name, currentUser.Email),
+                new(ClaimTypes.Email, currentUser.Email),
+                new(ClaimTypes.Role, currentUser.Role),
                 new("access_token", response.Token)
             };
 
@@ -66,7 +79,7 @@ public sealed class AuthController(IAuthService authService) : Controller
                 principal,
                 new AuthenticationProperties
                 {
-                    IsPersistent = true,
+                    IsPersistent = model.RememberMe,
                     ExpiresUtc = response.ExpiresAt
                 });
 
@@ -77,9 +90,28 @@ public sealed class AuthController(IAuthService authService) : Controller
 
             return RedirectToAction("Index", "Home");
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
             ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            return View(model);
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError(string.Empty, "Unable to connect to authentication service. Please try again.");
+            return View(model);
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError(string.Empty, "Login request timed out. Please try again.");
+            return View(model);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            ModelState.AddModelError(string.Empty, "An unexpected error occurred during login.");
             return View(model);
         }
     }
@@ -95,16 +127,16 @@ public sealed class AuthController(IAuthService authService) : Controller
 
     private static string? GetUserIdFromToken(string token)
     {
+        var segments = token.Split('.');
+        if (segments.Length < 2)
+        {
+            return null;
+        }
+
         try
         {
-            var segments = token.Split('.');
-            if (segments.Length < 2)
-            {
-                return null;
-            }
-
-            var payload = Base64UrlDecode(segments[1]);
-            using var json = JsonDocument.Parse(payload);
+            var payloadBytes = WebEncoders.Base64UrlDecode(segments[1]);
+            using var json = JsonDocument.Parse(payloadBytes);
             return json.RootElement.TryGetProperty("sub", out var subClaim)
                 ? subClaim.GetString()
                 : null;
@@ -117,18 +149,5 @@ public sealed class AuthController(IAuthService authService) : Controller
         {
             return null;
         }
-    }
-
-    private static string Base64UrlDecode(string value)
-    {
-        var normalized = value.Replace('-', '+').Replace('_', '/');
-        var padding = normalized.Length % 4;
-        if (padding > 0)
-        {
-            normalized = normalized.PadRight(normalized.Length + (4 - padding), '=');
-        }
-
-        var bytes = Convert.FromBase64String(normalized);
-        return Encoding.UTF8.GetString(bytes);
     }
 }

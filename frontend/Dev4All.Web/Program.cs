@@ -18,6 +18,18 @@ builder.Services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ApiTokenHandler>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddHttpClient(nameof(AuthService), (serviceProvider, client) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var baseUrl = configuration["BackendApi:BaseUrl"];
+
+    if (string.IsNullOrWhiteSpace(baseUrl))
+    {
+        throw new InvalidOperationException("BackendApi:BaseUrl is not configured.");
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+});
 builder.Services.AddHttpClient<IApiClient, ApiClient>((serviceProvider, client) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
