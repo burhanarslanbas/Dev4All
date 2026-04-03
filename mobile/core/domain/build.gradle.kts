@@ -24,5 +24,5 @@ android {
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.junit)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation(libs.kotlinx.coroutines.test)
 }
