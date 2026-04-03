@@ -1,8 +1,112 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="landing-hero rounded-4 p-4 p-md-5 mb-5 text-white">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+            <p class="text-uppercase fw-semibold small mb-2 opacity-75">Dev4All Marketplace</p>
+            <h1 class="display-5 fw-bold mb-3">Find the perfect developer for your project</h1>
+            <p class="lead mb-4">Publish your project, receive competitive bids, and collaborate with top talent from contract to delivery.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Auth" asp-action="Register" class="btn btn-light btn-lg px-4">Post Project</a>
+                <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-light btn-lg px-4">Browse Projects</a>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="bg-white text-dark rounded-4 shadow-sm p-4">
+                <p class="small text-muted text-uppercase fw-semibold mb-2">Trusted workflow</p>
+                <h2 class="h5 fw-semibold mb-3">From idea to launch</h2>
+                <p class="mb-0">Manage milestones, track GitHub activity, and keep contracts transparent in one place.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <div class="text-center mb-4">
+        <h2 class="h3 fw-bold">How it works</h2>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-badge mx-auto mb-3" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4.5h12zm-1 1H3V14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5.5z" />
+                            <path d="M9.5 1a.5.5 0 0 1 .5.5V3h3a1 1 0 0 1 1 1v.5H2V4a1 1 0 0 1 1-1h3V1.5a.5.5 0 0 1 1 0V3h2V1.5a.5.5 0 0 1 .5-.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="h5 fw-semibold">Post</h3>
+                    <p class="text-muted mb-0">Describe scope, budget, and timeline to attract the right experts.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-badge mx-auto mb-3" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M5.5 0a.5.5 0 0 1 .5.5V2H10V.5a.5.5 0 0 1 1 0V2h1a2 2 0 0 1 2 2v1H2V4a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5z" />
+                            <path d="M2 6h12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm3 2.5a.5.5 0 0 0 0 1h2V11a.5.5 0 0 0 1 0V9.5h2a.5.5 0 0 0 0-1H8V7a.5.5 0 0 0-1 0v1.5H5z" />
+                        </svg>
+                    </div>
+                    <h3 class="h5 fw-semibold">Bid</h3>
+                    <p class="text-muted mb-0">Compare proposals, evaluate profiles, and choose your best match.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-badge mx-auto mb-3" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a7 7 0 1 0 4.95 11.95A7 7 0 0 0 8 1zm0 1a6 6 0 1 1-4.24 10.24A6 6 0 0 1 8 2z" />
+                            <path d="M10.854 5.146a.5.5 0 0 1 0 .708L7.5 9.207 5.646 7.354a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="h5 fw-semibold">Build</h3>
+                    <p class="text-muted mb-0">Track delivery progress and complete projects with confidence.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <div class="text-center mb-4">
+        <h2 class="h3 fw-bold">Everything you need to deliver</h2>
+    </div>
+    <div class="row g-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
+                <h3 class="h6 fw-semibold">Project Management</h3>
+                <p class="text-muted mb-0">Organize scope, milestones, and deadlines in one dashboard.</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
+                <h3 class="h6 fw-semibold">Bid System</h3>
+                <p class="text-muted mb-0">Review transparent offers and choose the right expertise.</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
+                <h3 class="h6 fw-semibold">GitHub Tracking</h3>
+                <p class="text-muted mb-0">Monitor code activity and delivery progress through integrations.</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
+                <h3 class="h6 fw-semibold">Contract Management</h3>
+                <p class="text-muted mb-0">Keep agreements and revisions centralized and secure.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="rounded-4 bg-light border p-4 p-md-5 text-center">
+    <h2 class="h3 fw-bold mb-3">Ready to start your next project?</h2>
+    <p class="text-muted mb-4">Join Dev4All and connect with professionals who can ship high-quality outcomes.</p>
+    <a asp-controller="Auth" asp-action="Register" class="btn btn-primary btn-lg px-4">Register now</a>
+</section>
