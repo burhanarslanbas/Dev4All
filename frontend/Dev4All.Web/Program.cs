@@ -17,6 +17,7 @@ builder.Services
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ApiTokenHandler>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpClient<IApiClient, ApiClient>((serviceProvider, client) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
