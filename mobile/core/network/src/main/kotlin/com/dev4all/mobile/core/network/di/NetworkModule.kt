@@ -75,7 +75,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient,
         json: Json,
     ): Retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.API_BASE_URL)
+        .baseUrl(BuildConfig.API_BASE_URL.ensureTrailingSlash())
         .client(okHttpClient)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
@@ -83,6 +83,9 @@ object NetworkModule {
     private object EmptyTokenProvider : TokenProvider {
         override suspend fun getAccessToken(): String? = null
     }
+
+    private fun String.ensureTrailingSlash(): String =
+        if (endsWith("/")) this else "$this/"
 
     private const val TIMEOUT_SECONDS = 30L
 }
