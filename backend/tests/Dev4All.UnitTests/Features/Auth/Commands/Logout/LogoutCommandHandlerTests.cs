@@ -17,7 +17,8 @@ public class LogoutCommandHandlerTests
 
         var result = await handler.Handle(new LogoutCommand("refresh-token"), CancellationToken.None);
 
-        Assert.Equal(MediatR.Unit.Value, result);
+        Assert.True(result.Success);
+        Assert.Equal("Çıkış işlemi başarılı.", result.Message);
         Assert.True(token.IsRevoked);
         Assert.Equal(1, writeRepository.UpdateCallCount);
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
@@ -32,7 +33,8 @@ public class LogoutCommandHandlerTests
 
         var result = await handler.Handle(new LogoutCommand("missing-token"), CancellationToken.None);
 
-        Assert.Equal(MediatR.Unit.Value, result);
+        Assert.True(result.Success);
+        Assert.Equal("Çıkış işlemi başarılı.", result.Message);
         Assert.Equal(0, writeRepository.UpdateCallCount);
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
@@ -48,7 +50,8 @@ public class LogoutCommandHandlerTests
 
         var result = await handler.Handle(new LogoutCommand("refresh-token"), CancellationToken.None);
 
-        Assert.Equal(MediatR.Unit.Value, result);
+        Assert.True(result.Success);
+        Assert.Equal("Çıkış işlemi başarılı.", result.Message);
         Assert.Equal(0, writeRepository.UpdateCallCount);
         Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
