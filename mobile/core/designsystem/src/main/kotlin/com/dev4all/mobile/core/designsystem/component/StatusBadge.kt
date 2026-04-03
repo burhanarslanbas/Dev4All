@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev4all.mobile.core.designsystem.theme.Dev4AllTheme
 
-enum class ProjectStatus {
+enum class StatusBadgeType {
     Open,
     AwaitingContract,
     Ongoing,
@@ -23,25 +23,25 @@ enum class ProjectStatus {
 
 @Composable
 fun StatusBadge(
-    status: ProjectStatus,
+    status: StatusBadgeType,
     modifier: Modifier = Modifier
 ) {
     val statusLabel = when (status) {
-        ProjectStatus.Open -> "Open"
-        ProjectStatus.AwaitingContract -> "Awaiting Contract"
-        ProjectStatus.Ongoing -> "Ongoing"
-        ProjectStatus.Completed -> "Completed"
-        ProjectStatus.Expired -> "Expired"
-        ProjectStatus.Cancelled -> "Cancelled"
+        StatusBadgeType.Open -> "Open"
+        StatusBadgeType.AwaitingContract -> "Awaiting Contract"
+        StatusBadgeType.Ongoing -> "Ongoing"
+        StatusBadgeType.Completed -> "Completed"
+        StatusBadgeType.Expired -> "Expired"
+        StatusBadgeType.Cancelled -> "Cancelled"
     }
 
     val statusColor = when (status) {
-        ProjectStatus.Open -> Dev4AllTheme.statusColors.open
-        ProjectStatus.AwaitingContract -> Dev4AllTheme.statusColors.awaitingContract
-        ProjectStatus.Ongoing -> Dev4AllTheme.statusColors.ongoing
-        ProjectStatus.Completed -> Dev4AllTheme.statusColors.completed
-        ProjectStatus.Expired -> Dev4AllTheme.statusColors.expired
-        ProjectStatus.Cancelled -> Dev4AllTheme.statusColors.cancelled
+        StatusBadgeType.Open -> Dev4AllTheme.statusColors.open
+        StatusBadgeType.AwaitingContract -> Dev4AllTheme.statusColors.awaitingContract
+        StatusBadgeType.Ongoing -> Dev4AllTheme.statusColors.ongoing
+        StatusBadgeType.Completed -> Dev4AllTheme.statusColors.completed
+        StatusBadgeType.Expired -> Dev4AllTheme.statusColors.expired
+        StatusBadgeType.Cancelled -> Dev4AllTheme.statusColors.cancelled
     }
 
     Surface(
@@ -66,10 +66,10 @@ private fun StatusBadgePreview() {
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StatusBadge(status = ProjectStatus.Open)
-            StatusBadge(status = ProjectStatus.Ongoing)
-            StatusBadge(status = ProjectStatus.Completed)
-            StatusBadge(status = ProjectStatus.Cancelled)
+            StatusBadge(status = StatusBadgeType.Open)
+            StatusBadge(status = StatusBadgeType.Ongoing)
+            StatusBadge(status = StatusBadgeType.Completed)
+            StatusBadge(status = StatusBadgeType.Cancelled)
         }
     }
 }

@@ -47,7 +47,7 @@ fun Dev4AllErrorState(
         Dev4AllButton(
             text = retryButtonText,
             onClick = onRetryClick,
-            variant = Dev4AllButtonVariant.Danger
+            variant = Dev4AllButtonVariant.Primary
         )
     }
 }

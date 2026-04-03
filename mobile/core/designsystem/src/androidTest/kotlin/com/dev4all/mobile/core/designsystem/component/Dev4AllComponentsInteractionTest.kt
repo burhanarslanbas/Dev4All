@@ -15,7 +15,7 @@ class Dev4AllComponentsInteractionTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun dev4AllButton_whenClicked_invokesOnClick() {
+    fun Dev4AllButton_OnClick_InvokesCallback() {
         var clickCount = 0
 
         composeRule.setContent {
@@ -33,7 +33,7 @@ class Dev4AllComponentsInteractionTest {
     }
 
     @Test
-    fun dev4AllErrorState_whenRetryClicked_invokesOnRetry() {
+    fun Dev4AllErrorState_OnRetryClick_InvokesCallback() {
         var retryCount = 0
 
         composeRule.setContent {
@@ -53,10 +53,10 @@ class Dev4AllComponentsInteractionTest {
     }
 
     @Test
-    fun statusBadge_displaysStatusLabel() {
+    fun StatusBadge_AwaitingContractStatus_DisplaysCorrectLabel() {
         composeRule.setContent {
             Dev4AllTheme {
-                StatusBadge(status = ProjectStatus.AwaitingContract)
+                StatusBadge(status = StatusBadgeType.AwaitingContract)
             }
         }
 
