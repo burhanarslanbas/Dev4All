@@ -41,4 +41,8 @@ public interface IIdentityService
         CancellationToken ct = default);
 
     Task<string?> GetEmailByUserIdAsync(string userId, CancellationToken ct = default);
+
+    Task<(string UserId, string Name, bool EmailConfirmed)?> GetUserInfoByEmailAsync(
+        string email,
+        CancellationToken ct = default);
 }

@@ -146,5 +146,10 @@ public class RefreshTokenCommandHandlerTests
 
         public Task<string?> GetEmailByUserIdAsync(string userId, CancellationToken ct = default)
             => Task.FromResult(EmailToReturn);
+
+        public Task<(string UserId, string Name, bool EmailConfirmed)?> GetUserInfoByEmailAsync(
+            string email,
+            CancellationToken ct = default)
+            => throw new NotImplementedException();
     }
 }

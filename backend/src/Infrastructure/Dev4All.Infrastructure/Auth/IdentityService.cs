@@ -159,4 +159,15 @@ public sealed class IdentityService(
         var user = await userManager.FindByIdAsync(userId);
         return user?.Email;
     }
+
+    public async Task<(string UserId, string Name, bool EmailConfirmed)?> GetUserInfoByEmailAsync(
+        string email,
+        CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+            return null;
+
+        return (user.Id, user.Name ?? string.Empty, user.EmailConfirmed);
+    }
 }
