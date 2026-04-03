@@ -28,6 +28,11 @@ builder.Services.AddOptions<SmtpOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddOptions<FrontendOptions>()
+    .Bind(builder.Configuration.GetSection(FrontendOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 // DbContext — reads connection string from DatabaseOptions
 var dbOptions = builder.Configuration
     .GetSection(DatabaseOptions.SectionName)

@@ -1,4 +1,5 @@
 using Dev4All.Application.Features.Auth.Commands.LoginUser;
+using Dev4All.Application.Features.Auth.Commands.ForgotPassword;
 using Dev4All.Application.Features.Auth.Commands.RegisterUser;
 using Dev4All.Application.Features.Auth.Queries.GetCurrentUser;
 using MediatR;
@@ -27,6 +28,16 @@ public sealed class AuthController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(LoginUserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginUserCommand command, CancellationToken ct)
+    {
+        var response = await sender.Send(command, ct);
+        return Ok(response);
+    }
+
+    /// <summary>Triggers forgot-password flow and always returns a generic success message.</summary>
+    [HttpPost("forgot-password")]
+    [ProducesResponseType(typeof(ForgotPasswordResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken ct)
     {
         var response = await sender.Send(command, ct);
         return Ok(response);

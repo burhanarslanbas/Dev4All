@@ -18,4 +18,8 @@ public interface IIdentityService
     Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default);
 
     Task<string?> GetUserNameAsync(string userId, CancellationToken ct = default);
+
+    Task<(bool UserExists, string UserName, string ResetToken)> GeneratePasswordResetTokenAsync(
+        string email,
+        CancellationToken ct = default);
 }

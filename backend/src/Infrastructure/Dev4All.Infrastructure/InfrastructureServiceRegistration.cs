@@ -21,6 +21,7 @@ public static class InfrastructureServiceRegistration
         // Bind options
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
+        services.Configure<FrontendOptions>(configuration.GetSection(FrontendOptions.SectionName));
 
         // JWT Bearer authentication
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
@@ -55,6 +56,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailNotificationService, EmailNotificationService>();
 
         return services;
     }

@@ -94,4 +94,16 @@ public sealed class IdentityService(
         var user = await userManager.FindByIdAsync(userId);
         return user?.UserName;
     }
+
+    public async Task<(bool UserExists, string UserName, string ResetToken)> GeneratePasswordResetTokenAsync(
+        string email,
+        CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+            return (false, string.Empty, string.Empty);
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        return (true, user.UserName ?? user.Email ?? string.Empty, resetToken);
+    }
 }
