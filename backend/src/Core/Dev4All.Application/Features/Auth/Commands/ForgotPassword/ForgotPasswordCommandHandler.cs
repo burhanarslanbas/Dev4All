@@ -10,6 +10,7 @@ public sealed class ForgotPasswordCommandHandler(
 {
     private const string GenericMessage =
         "Eğer bu e-posta sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderilecektir.";
+    private const string ResetPasswordPath = "/reset-password";
 
     public async Task<ForgotPasswordResponse> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
     {
@@ -28,6 +29,6 @@ public sealed class ForgotPasswordCommandHandler(
     {
         var encodedEmail = Uri.EscapeDataString(email);
         var encodedToken = Uri.EscapeDataString(resetToken);
-        return $"/reset-password?email={encodedEmail}&token={encodedToken}";
+        return $"{ResetPasswordPath}?email={encodedEmail}&token={encodedToken}";
     }
 }
