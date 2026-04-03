@@ -12,6 +12,12 @@ namespace Dev4All.Web.Controllers;
 
 public sealed class AuthController(IAuthService authService) : Controller
 {
+    private static readonly HashSet<string> AllowedRoles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Customer",
+        "Developer"
+    };
+
     [HttpGet]
     [Route("auth/login")]
     public IActionResult Login(string? returnUrl = null)
@@ -116,6 +122,71 @@ public sealed class AuthController(IAuthService authService) : Controller
         }
     }
 
+    [HttpGet]
+    [Route("auth/register")]
+    public IActionResult Register()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View(new RegisterViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Route("auth/register")]
+    public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken ct)
+    {
+        if (!AllowedRoles.Contains(model.Role))
+        {
+            ModelState.AddModelError(nameof(model.Role), "Invalid role selection.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            var response = await authService.RegisterAsync(model.Name, model.Email, model.Password, model.Role, ct);
+            if (response is null)
+            {
+                ModelState.AddModelError(string.Empty, "Registration failed. Please try again.");
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Registration successful. Please login.";
+            return RedirectToAction(nameof(Login));
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
+        {
+            AddBackendValidationErrors(ex.Message);
+            return View(model);
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError(string.Empty, "Unable to connect to authentication service. Please try again.");
+            return View(model);
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError(string.Empty, "Registration request timed out. Please try again.");
+            return View(model);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            ModelState.AddModelError(string.Empty, "An unexpected error occurred during registration.");
+            return View(model);
+        }
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Route("auth/logout")]
@@ -150,4 +221,58 @@ public sealed class AuthController(IAuthService authService) : Controller
             return null;
         }
     }
+
+    private void AddBackendValidationErrors(string rawError)
+    {
+        try
+        {
+            using var json = JsonDocument.Parse(rawError);
+            if (!json.RootElement.TryGetProperty("errors", out var errorsElement) || errorsElement.ValueKind != JsonValueKind.Array)
+            {
+                ModelState.AddModelError(string.Empty, "Validation failed. Please check your input and try again.");
+                return;
+            }
+
+            var hasAnyError = false;
+            foreach (var error in errorsElement.EnumerateArray())
+            {
+                if (!error.TryGetProperty("message", out var messageElement))
+                {
+                    continue;
+                }
+
+                var message = messageElement.GetString();
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    continue;
+                }
+
+                var field = error.TryGetProperty("field", out var fieldElement)
+                    ? fieldElement.GetString()
+                    : null;
+
+                ModelState.AddModelError(MapFieldName(field), message);
+                hasAnyError = true;
+            }
+
+            if (!hasAnyError)
+            {
+                ModelState.AddModelError(string.Empty, "Validation failed. Please check your input and try again.");
+            }
+        }
+        catch (JsonException)
+        {
+            ModelState.AddModelError(string.Empty, "Validation failed. Please check your input and try again.");
+        }
+    }
+
+    private static string MapFieldName(string? fieldName) =>
+        fieldName?.Trim().ToLowerInvariant() switch
+        {
+            "name" => nameof(RegisterViewModel.Name),
+            "email" => nameof(RegisterViewModel.Email),
+            "password" => nameof(RegisterViewModel.Password),
+            "role" => nameof(RegisterViewModel.Role),
+            _ => string.Empty
+        };
 }

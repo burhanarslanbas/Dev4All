@@ -10,6 +10,11 @@
             <div class="card-body p-4">
                 <h1 class="h4 mb-3 text-center">Sign in</h1>
 
+                @if (TempData["SuccessMessage"] is string successMessage)
+                {
+                    <div class="alert alert-success" role="alert">@successMessage</div>
+                }
+
                 <form asp-action="Login" asp-controller="Auth" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="ReturnUrl" />

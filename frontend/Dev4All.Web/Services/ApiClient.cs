@@ -69,8 +69,11 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
 
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
+            var badRequestContent = await response.Content.ReadAsStringAsync(ct);
             throw new HttpRequestException(
-                "Validation failed. Please check your input and try again.",
+                string.IsNullOrWhiteSpace(badRequestContent)
+                    ? "Validation failed. Please check your input and try again."
+                    : badRequestContent,
                 null,
                 response.StatusCode);
         }
