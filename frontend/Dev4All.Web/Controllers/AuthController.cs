@@ -154,7 +154,7 @@ public sealed class AuthController(IAuthService authService) : Controller
             var response = await authService.RegisterAsync(model.Name, model.Email, model.Password, model.Role, ct);
             if (response is null)
             {
-                ModelState.AddModelError(string.Empty, "Registration failed. Please try again.");
+                ModelState.AddModelError(string.Empty, "Registration service returned an unexpected response. Please try again later.");
                 return View(model);
             }
 
