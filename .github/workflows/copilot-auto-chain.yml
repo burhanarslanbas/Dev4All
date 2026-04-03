@@ -130,11 +130,14 @@ jobs:
 
           echo "➡️ Next issue: #$NEXT_ISSUE"
 
-          # Sonraki issue'yu Copilot'a ata
-          if ! gh issue edit "$NEXT_ISSUE" --add-assignee "copilot" 2>/dev/null; then
-            echo "⚠️ Could not assign to copilot, trying copilot-swe-agent..."
-            gh issue edit "$NEXT_ISSUE" --add-assignee "copilot-swe-agent" 2>/dev/null || \
-              echo "❌ Failed to assign issue #$NEXT_ISSUE to any Copilot handle"
-          fi
+          # Sonraki issue'yu yorumla Copilot'a tetikleme
+          COMMENT_BODY=$(cat <<EOF
+@copilot Lütfen bu issue'yu çözmeye başla.
+- **Hedef Branch:** \`develop\`
+- **Model:** \`GPT-5.3-Codex\` (veya mümkün olan en iyi model)
+- Gerekli task detayları issue gövdesinde (body) ve \`docs/AGENTS.md\` dosyasında mevcuttur.
+EOF
+)
+          gh issue comment "$NEXT_ISSUE" -b "$COMMENT_BODY" || echo "⚠️ Failed to add trigger comment to Issue #$NEXT_ISSUE."
 
-          echo "✅ Issue #$NEXT_ISSUE assigned to Copilot"
+          echo "✅ Trigger comment left on Issue #$NEXT_ISSUE for Copilot"
