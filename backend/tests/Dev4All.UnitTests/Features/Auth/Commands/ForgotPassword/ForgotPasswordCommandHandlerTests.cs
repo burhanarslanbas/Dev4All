@@ -91,5 +91,8 @@ public class ForgotPasswordCommandHandlerTests
             LastResetUrl = resetUrl;
             return Task.CompletedTask;
         }
+
+        public Task QueueChangePasswordSuccessEmailAsync(string email, string name, CancellationToken ct = default)
+            => Task.CompletedTask;
     }
 }

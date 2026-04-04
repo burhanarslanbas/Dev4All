@@ -84,6 +84,9 @@ public class ChangePasswordCommandHandlerTests
             LastName = name;
             return Task.CompletedTask;
         }
+
+        public Task QueuePasswordResetEmailAsync(string email, string resetUrl, CancellationToken ct = default)
+            => Task.CompletedTask;
     }
 
     private sealed class FakeIdentityService : IIdentityService
