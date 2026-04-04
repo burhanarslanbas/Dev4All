@@ -10,7 +10,7 @@ public sealed class ProjectsController : Controller
     /// <summary>
     /// Displays the projects listing page.
     /// </summary>
-    public IActionResult Index(CancellationToken ct)
+    public IActionResult Index()
     {
         return View();
     }
