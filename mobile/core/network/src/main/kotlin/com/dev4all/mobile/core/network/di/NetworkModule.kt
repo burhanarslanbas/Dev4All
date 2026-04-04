@@ -32,10 +32,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideTokenProvider(): TokenProvider = EmptyTokenProvider
-
-    @Provides
-    @Singleton
     fun provideAuthInterceptor(tokenProvider: TokenProvider): AuthInterceptor =
         AuthInterceptor(tokenProvider = tokenProvider)
 
@@ -85,10 +81,6 @@ object NetworkModule {
     @Singleton
     fun provideAuthApiService(retrofit: Retrofit): AuthApiService =
         retrofit.create(AuthApiService::class.java)
-
-    private object EmptyTokenProvider : TokenProvider {
-        override suspend fun getAccessToken(): String? = null
-    }
 
     private fun String.ensureTrailingSlash(): String =
         if (endsWith("/")) this else "$this/"
