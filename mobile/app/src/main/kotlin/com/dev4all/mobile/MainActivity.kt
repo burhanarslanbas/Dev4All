@@ -86,7 +86,7 @@ private fun LoginScreenPreviewContent(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
+fun LoginScreenPreview() {
     Dev4AllTheme {
         LoginScreenPreviewContent()
     }
