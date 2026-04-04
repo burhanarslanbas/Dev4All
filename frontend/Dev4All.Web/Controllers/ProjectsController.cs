@@ -10,9 +10,8 @@ public sealed class ProjectsController : Controller
     /// <summary>
     /// Displays the projects listing page.
     /// </summary>
-    public Task<IActionResult> Index(CancellationToken ct)
+    public IActionResult Index(CancellationToken ct)
     {
-        ct.ThrowIfCancellationRequested();
-        return Task.FromResult<IActionResult>(View());
+        return View();
     }
 }
