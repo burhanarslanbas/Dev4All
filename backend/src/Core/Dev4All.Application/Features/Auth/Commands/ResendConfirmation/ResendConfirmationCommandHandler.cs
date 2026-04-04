@@ -18,7 +18,10 @@ public sealed class ResendConfirmationCommandHandler(
         {
             var token = await identityService.GenerateEmailConfirmationTokenAsync(userId, cancellationToken);
             if (!string.IsNullOrWhiteSpace(token))
-                await emailNotificationService.QueueConfirmationEmailAsync(request.Email, name ?? request.Email, token, cancellationToken);
+            {
+                var recipientName = string.IsNullOrWhiteSpace(name) ? "User" : name;
+                await emailNotificationService.QueueConfirmationEmailAsync(request.Email, recipientName, token, cancellationToken);
+            }
         }
 
         return new ResendConfirmationResponse(GenericMessage);

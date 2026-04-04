@@ -66,6 +66,24 @@ public class ResendConfirmationCommandHandlerTests
         Assert.Equal(0, emailNotificationService.CallCount);
     }
 
+    [Fact]
+    public async Task Handle_WhenNameIsMissing_ShouldQueueEmailWithDefaultRecipientName()
+    {
+        var identityService = new FakeIdentityService
+        {
+            UserByEmailResult = ("user-1", null, false),
+            GeneratedToken = "token-123"
+        };
+        var emailNotificationService = new FakeEmailNotificationService();
+        var handler = new ResendConfirmationCommandHandler(identityService, emailNotificationService);
+
+        var response = await handler.Handle(new ResendConfirmationCommand("user@example.com"), CancellationToken.None);
+
+        Assert.Equal("Eğer hesap mevcutsa, e-posta doğrulama bağlantısı yeniden gönderilecektir.", response.Message);
+        Assert.Equal(1, emailNotificationService.CallCount);
+        Assert.Equal("User", emailNotificationService.LastName);
+    }
+
     private sealed class FakeIdentityService : IIdentityService
     {
         public (string? UserId, string? Name, bool EmailConfirmed) UserByEmailResult { get; init; }
