@@ -10,11 +10,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.dev4all.mobile.feature.auth.login.LoginRoute
+import com.dev4all.mobile.feature.auth.login.LoginScreen
+import com.dev4all.mobile.feature.auth.login.LoginUiState
+import com.dev4all.mobile.core.domain.model.UserRole
 import com.dev4all.mobile.core.designsystem.theme.Dev4AllTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,27 +32,62 @@ class MainActivity : ComponentActivity() {
         setContent {
             Dev4AllTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(modifier = Modifier.padding(innerPadding))
+                    var destination by rememberSaveable { mutableStateOf(PlaceholderDestination.Login) }
+                    when (destination) {
+                        PlaceholderDestination.Login -> LoginRoute(
+                            onNavigateByRole = { effect ->
+                                destination = when (effect.role) {
+                                    UserRole.Customer -> PlaceholderDestination.CustomerHome
+                                    UserRole.Developer -> PlaceholderDestination.DeveloperHome
+                                    UserRole.Admin -> PlaceholderDestination.AdminHome
+                                }
+                            },
+                            modifier = Modifier.padding(innerPadding),
+                        )
+
+                        PlaceholderDestination.CustomerHome -> RoleHomeScreen("Customer Home", Modifier.padding(innerPadding))
+                        PlaceholderDestination.DeveloperHome -> RoleHomeScreen("Developer Home", Modifier.padding(innerPadding))
+                        PlaceholderDestination.AdminHome -> RoleHomeScreen("Admin Home", Modifier.padding(innerPadding))
+                    }
                 }
             }
         }
     }
 }
 
+private enum class PlaceholderDestination {
+    Login,
+    CustomerHome,
+    DeveloperHome,
+    AdminHome,
+}
+
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+private fun RoleHomeScreen(
+    title: String,
+    modifier: Modifier = Modifier,
+) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-        Text(text = "Dev4All")
+        Text(text = title)
     }
+}
+
+@Composable
+private fun LoginScreenPreviewContent(modifier: Modifier = Modifier) {
+    LoginScreen(
+        uiState = LoginUiState(),
+        onEvent = {},
+        modifier = modifier,
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
+fun LoginScreenPreview() {
     Dev4AllTheme {
-        HomeScreen()
+        LoginScreenPreviewContent()
     }
 }
