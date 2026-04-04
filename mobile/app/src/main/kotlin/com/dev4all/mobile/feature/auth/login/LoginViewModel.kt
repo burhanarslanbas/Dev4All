@@ -107,6 +107,6 @@ class LoginViewModel @Inject constructor(
     private companion object {
         private const val EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         private val EMAIL_REGEX = Regex(EMAIL_PATTERN)
-        const val MIN_PASSWORD_LENGTH = 6
+        private const val MIN_PASSWORD_LENGTH = 6
     }
 }
