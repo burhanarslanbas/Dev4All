@@ -26,4 +26,16 @@ public class ResendConfirmationCommandValidatorTests
 
         Assert.True(result.IsValid);
     }
+
+    [Fact]
+    public void Validate_WhenEmailFormatIsInvalid_ShouldReturnValidationError()
+    {
+        var validator = new ResendConfirmationCommandValidator();
+        var command = new ResendConfirmationCommand("not-an-email");
+
+        var result = validator.Validate(command);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(ResendConfirmationCommand.Email));
+    }
 }
