@@ -76,7 +76,7 @@ private fun RoleHomeScreen(
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+private fun LoginScreenPreviewContent(modifier: Modifier = Modifier) {
     LoginScreen(
         uiState = LoginUiState(),
         onEvent = {},
@@ -88,6 +88,6 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 @Composable
 fun HomeScreenPreview() {
     Dev4AllTheme {
-        HomeScreen()
+        LoginScreenPreviewContent()
     }
 }
