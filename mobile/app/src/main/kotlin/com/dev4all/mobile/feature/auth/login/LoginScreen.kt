@@ -76,6 +76,7 @@ fun LoginScreen(
             label = "Password",
             supportingText = uiState.passwordError,
             isError = uiState.passwordError != null,
+            isPassword = true,
             enabled = !uiState.isLoading,
             modifier = Modifier.fillMaxWidth(),
         )

@@ -14,6 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.dev4all.mobile.core.designsystem.theme.Dev4AllTheme
 
 @Composable
@@ -26,7 +28,8 @@ fun Dev4AllTextField(
     enabled: Boolean = true,
     isError: Boolean = false,
     supportingText: String? = null,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    isPassword: Boolean = false,
 ) {
     OutlinedTextField(
         value = value,
@@ -37,7 +40,12 @@ fun Dev4AllTextField(
         placeholder = placeholder?.let { { Text(text = it) } },
         isError = isError,
         supportingText = supportingText?.let { { Text(text = it) } },
-        singleLine = singleLine
+        singleLine = singleLine,
+        visualTransformation = if (isPassword) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
+        },
     )
 }
 

@@ -32,22 +32,22 @@ class MainActivity : ComponentActivity() {
         setContent {
             Dev4AllTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    var destination by rememberSaveable { mutableStateOf(AppDestination.Login) }
+                    var destination by rememberSaveable { mutableStateOf(PlaceholderDestination.Login) }
                     when (destination) {
-                        AppDestination.Login -> LoginRoute(
+                        PlaceholderDestination.Login -> LoginRoute(
                             onNavigateByRole = { effect ->
                                 destination = when (effect.role) {
-                                    UserRole.Customer -> AppDestination.CustomerHome
-                                    UserRole.Developer -> AppDestination.DeveloperHome
-                                    UserRole.Admin -> AppDestination.AdminHome
+                                    UserRole.Customer -> PlaceholderDestination.CustomerHome
+                                    UserRole.Developer -> PlaceholderDestination.DeveloperHome
+                                    UserRole.Admin -> PlaceholderDestination.AdminHome
                                 }
                             },
                             modifier = Modifier.padding(innerPadding),
                         )
 
-                        AppDestination.CustomerHome -> RoleHomeScreen("Customer Home", Modifier.padding(innerPadding))
-                        AppDestination.DeveloperHome -> RoleHomeScreen("Developer Home", Modifier.padding(innerPadding))
-                        AppDestination.AdminHome -> RoleHomeScreen("Admin Home", Modifier.padding(innerPadding))
+                        PlaceholderDestination.CustomerHome -> RoleHomeScreen("Customer Home", Modifier.padding(innerPadding))
+                        PlaceholderDestination.DeveloperHome -> RoleHomeScreen("Developer Home", Modifier.padding(innerPadding))
+                        PlaceholderDestination.AdminHome -> RoleHomeScreen("Admin Home", Modifier.padding(innerPadding))
                     }
                 }
             }
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class AppDestination {
+private enum class PlaceholderDestination {
     Login,
     CustomerHome,
     DeveloperHome,

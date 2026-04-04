@@ -98,7 +98,7 @@ class LoginViewModel @Inject constructor(
 
     private fun mapError(exception: AppException): String = when (exception) {
         is AppException.Forbidden -> "Invalid email or password"
-        is AppException.Unauthorized -> "Your session is not authorized"
+        is AppException.Unauthorized -> "Authentication failed"
         is AppException.Network -> "Please check your internet connection"
         is AppException.Validation -> exception.errors.firstOrNull()?.message ?: "Validation failed"
         else -> exception.message ?: "Something went wrong"
