@@ -5,4 +5,5 @@ public interface IEmailNotificationService
 {
     Task QueueChangePasswordSuccessEmailAsync(string email, string name, CancellationToken ct = default);
     Task QueuePasswordResetEmailAsync(string email, string resetUrl, CancellationToken ct = default);
+    Task QueueConfirmationEmailAsync(string email, string name, string token, CancellationToken ct = default);
 }

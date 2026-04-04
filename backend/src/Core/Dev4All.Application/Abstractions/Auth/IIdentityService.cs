@@ -19,6 +19,8 @@ public interface IIdentityService
 
     Task<string?> GetUserNameAsync(string userId, CancellationToken ct = default);
 
+    Task<(string? UserId, string? Name, bool EmailConfirmed)> GetUserByEmailAsync(string email, CancellationToken ct = default);
+
     Task<string?> GenerateEmailConfirmationTokenAsync(string userId, CancellationToken ct = default);
 
     Task<(bool Succeeded, IEnumerable<string> Errors)> ConfirmEmailAsync(

@@ -59,6 +59,9 @@ public class ResetPasswordCommandHandlerTests
         public Task<string?> GetUserNameAsync(string userId, CancellationToken ct = default)
             => throw new NotImplementedException();
 
+        public Task<(string? UserId, string? Name, bool EmailConfirmed)> GetUserByEmailAsync(string email, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
         public Task<string?> GenerateEmailConfirmationTokenAsync(string userId, CancellationToken ct = default)
             => throw new NotImplementedException();
 
