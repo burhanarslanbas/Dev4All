@@ -121,5 +121,8 @@ public class ResendConfirmationCommandHandlerTests
             Token = token;
             return Task.CompletedTask;
         }
+
+        public Task QueuePasswordResetEmailAsync(string email, string resetUrl, CancellationToken ct = default)
+            => throw new NotImplementedException();
     }
 }
