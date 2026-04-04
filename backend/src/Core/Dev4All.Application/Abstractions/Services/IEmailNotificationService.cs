@@ -8,4 +8,6 @@ public interface IEmailNotificationService
         string name,
         string token,
         CancellationToken ct = default);
+
+    Task QueuePasswordResetEmailAsync(string email, string resetUrl, CancellationToken ct = default);
 }
