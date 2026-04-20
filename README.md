@@ -1,7 +1,6 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/dotnet/dotnet.png" alt=".NET" width="80" height="80"/>
-  <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/react/react.png" alt="React" width="80" height="80"/>
-  <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/typescript/typescript.png" alt="TypeScript" width="80" height="80"/>
+  <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/csharp/csharp.png" alt="C#" width="80" height="80"/>
   <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/postgresql/postgresql.png" alt="PostgreSQL" width="80" height="80"/>
   <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kotlin/kotlin.png" alt="Kotlin" width="80" height="80"/>
 
@@ -9,8 +8,7 @@
   <p><strong>Yazılım projelerini hayata geçiren güvenilir B2B/B2C eşleşme ve yönetim ekosistemi.</strong></p>
 
   <a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet" alt=".NET" /></a>
-  <a href="https://reactjs.org/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" /></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+  <a href="https://learn.microsoft.com/en-us/aspnet/core/mvc/overview?view=aspnetcore-9.0"><img src="https://img.shields.io/badge/ASP.NET_Core-MVC-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt="ASP.NET Core MVC" /></a>
   <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-15%2B-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
   <a href="https://azure.microsoft.com/"><img src="https://img.shields.io/badge/Azure_App_Service-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white" alt="Azure" /></a>
   <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/Kotlin-Native-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" /></a>
@@ -28,7 +26,7 @@ Bu depo **backend**, **web istemcisi** ve **mobil istemci** için ortak bir kök
 | `backend/tests/` | Backend birim ve entegrasyon testleri |
 | `backend/Dev4All.slnx` | .NET çözüm dosyası |
 | `backend/Directory.Build.props` | Paylaşılan MSBuild ayarları (TFM, nullable, analiz) |
-| `frontend/` | Web uygulaması (React / Vite — henüz scaffold yok) |
+| `frontend/` | Web uygulaması (ASP.NET Core MVC - `frontend/Dev4All.Web`) |
 | `mobile/` | Mobil uygulama (Kotlin / Android — henüz scaffold yok) |
 | `docs/` | Analiz (`docs/analyse/`), plan (`docs/plan/`), [rehberler](docs/guides/README.md), [AGENTS.md](docs/AGENTS.md) |
 
@@ -71,10 +69,10 @@ Proje, modern yazılım mimarisi standartlarına uygun olarak en güncel teknolo
 - **Diğer Bileşenler:** Quartz.NET (Arka plan görevleri), MailKit (SMTP Entegrasyonu), Serilog (Loglama)
 
 ### 💻 Frontend
-- **Kütüphane:** React
-- **Derleyici/Paketleyici:** Vite
-- **Dil:** TypeScript
-- **Stil Yönetimi:** Tailwind CSS
+- **Framework:** ASP.NET Core MVC (.NET 10)
+- **Dil:** C#
+- **Sunucu tarafı render:** Razor Views
+- **Kimlik doğrulama (web):** Cookie Authentication
 
 ### 📱 Mobil
 - **Dil:** Kotlin

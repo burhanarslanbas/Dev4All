@@ -10,7 +10,7 @@ public sealed class AuthService(IApiClient apiClient, IHttpClientFactory httpCli
 
     public Task<LoginApiResponse?> LoginAsync(string email, string password, CancellationToken ct = default) =>
         apiClient.PostAsync<LoginApiResponse>(
-            "auth/login",
+            "Auth/login",
             new
             {
                 email,

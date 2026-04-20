@@ -32,7 +32,7 @@ public sealed class AuthController(IAuthService authService) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Route("auth/login")]
+    [Route("Auth/login")]
     public async Task<IActionResult> Login(LoginViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -123,7 +123,7 @@ public sealed class AuthController(IAuthService authService) : Controller
     }
 
     [HttpGet]
-    [Route("auth/register")]
+    [Route("Auth/register")]
     public IActionResult Register()
     {
         if (User.Identity?.IsAuthenticated == true)
