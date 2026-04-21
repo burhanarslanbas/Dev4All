@@ -18,4 +18,29 @@ public interface IIdentityService
     Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default);
 
     Task<string?> GetUserNameAsync(string userId, CancellationToken ct = default);
+
+    Task<(string? UserId, string? Name, bool EmailConfirmed)> GetUserByEmailAsync(string email, CancellationToken ct = default);
+
+    Task<string?> GenerateEmailConfirmationTokenAsync(string userId, CancellationToken ct = default);
+
+    Task<(bool Succeeded, IEnumerable<string> Errors)> ConfirmEmailAsync(
+        string userId,
+        string token,
+        CancellationToken ct = default);
+
+    Task<string?> GeneratePasswordResetTokenAsync(string email, CancellationToken ct = default);
+
+    Task<(bool Succeeded, IEnumerable<string> Errors)> ResetPasswordAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken ct = default);
+
+    Task<(bool Succeeded, IEnumerable<string> Errors)> ChangePasswordAsync(
+        string userId,
+        string currentPassword,
+        string newPassword,
+        CancellationToken ct = default);
+
+    Task<string?> GetEmailByUserIdAsync(string userId, CancellationToken ct = default);
 }

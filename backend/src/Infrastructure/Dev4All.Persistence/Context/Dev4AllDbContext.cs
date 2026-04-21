@@ -15,6 +15,7 @@ public class Dev4AllDbContext(DbContextOptions<Dev4AllDbContext> options)
     public DbSet<GitHubLog> GitHubLogs => Set<GitHubLog>();
     public DbSet<Contract> Contracts => Set<Contract>();
     public DbSet<ContractRevision> ContractRevisions => Set<ContractRevision>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

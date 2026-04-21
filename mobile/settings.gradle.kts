@@ -21,4 +21,11 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Dev4All"
+
 include(":app")
+include(":core:common")
+include(":core:domain")
+include(":core:data")
+include(":core:network")
+include(":core:datastore")
+include(":core:designsystem")
