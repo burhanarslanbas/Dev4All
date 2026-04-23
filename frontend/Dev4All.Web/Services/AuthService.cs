@@ -10,12 +10,8 @@ public sealed class AuthService(IApiClient apiClient, IHttpClientFactory httpCli
 
     public Task<LoginApiResponse?> LoginAsync(string email, string password, CancellationToken ct = default) =>
         apiClient.PostAsync<LoginApiResponse>(
-            "Auth/login",
-            new
-            {
-                email,
-                password
-            },
+            "auth/login",
+            new { email, password },
             ct);
 
     public Task<RegisterApiResponse?> RegisterAsync(
@@ -60,6 +56,59 @@ public sealed class AuthService(IApiClient apiClient, IHttpClientFactory httpCli
         }
 
         return await response.Content.ReadFromJsonAsync<GetCurrentUserApiResponse>(cancellationToken: ct);
+    }
+
+    public Task<ConfirmEmailApiResponse?> ConfirmEmailAsync(string userId, string token, CancellationToken ct = default) =>
+        apiClient.PostAsync<ConfirmEmailApiResponse>(
+            "auth/confirm-email",
+            new
+            {
+                userId,
+                token
+            },
+            ct);
+
+    public Task<ResetPasswordApiResponse?> ResetPasswordAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken ct = default) =>
+        apiClient.PostAsync<ResetPasswordApiResponse>(
+            "auth/reset-password",
+            new
+            {
+                email,
+                token,
+                newPassword
+            },
+            ct);
+
+    public async Task LogoutAsync(string refreshToken, CancellationToken ct = default)
+    {
+        try
+        {
+            await apiClient.PostAsync<object>("auth/logout", new { refreshToken }, ct);
+        }
+        catch
+        {
+            // Logout best-effort: local session cleared regardless of backend response
+        }
+    }
+
+    public Task<LoginApiResponse?> RefreshTokenAsync(string accessToken, string refreshToken, CancellationToken ct = default) =>
+        apiClient.PostAsync<LoginApiResponse>(
+            "auth/refresh-token",
+            new { accessToken, refreshToken },
+            ct);
+
+    public async Task ResendConfirmationAsync(string email, CancellationToken ct = default)
+    {
+        await apiClient.PostAsync<object>("auth/resend-confirmation", new { email }, ct);
+    }
+
+    public async Task ForgotPasswordAsync(string email, CancellationToken ct = default)
+    {
+        await apiClient.PostAsync<object>("auth/forgot-password", new { email }, ct);
     }
 
     private static int ParseRole(string role) => role.Trim().ToLowerInvariant() switch

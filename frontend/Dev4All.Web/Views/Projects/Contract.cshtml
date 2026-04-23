@@ -1,0 +1,166 @@
+@{
+    ViewData["Title"] = "Proje Sözleşmesi";
+}
+
+<!-- TopAppBar -->
+<header class="bg-[#faf8ff] dark:bg-slate-950 flex justify-between items-center w-full px-6 h-16 docked full-width top-0 z-50 sticky">
+    <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+            <img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTjEzN0_sajfOYWj2jS22n2soPFIlJX-JK1Kn7vS6bMWt1X_K0Mo5GeCt_buyxwwD42hETLve-Sr4zush1Ne5fa62IhiJ1VoaLCIChwmAQizxh90_Kur3BxYru2OdE7DWvAM7zE2NdFDSDY9iKHKdgN4iVBjRq_LN0swQCTDHfS5KrEDJAAk5yfj9r1Dbw_Mn159DydEj8tHwf7KOR4_HveJsSelOCzFlNQ-rAt14eBJT07QFkLSXGqiOFfl0HzwZEgSkUDeT68Uo" />
+        </div>
+        <a asp-controller="Home" asp-action="Index" class="font-['Manrope'] font-bold text-lg tracking-tight text-[#131b2e] dark:text-slate-50">Dev4All</a>
+    </div>
+    <div class="hidden md:flex items-center gap-8">
+        <nav class="flex gap-6">
+            <a asp-action="Explore" class="text-[#434656] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-800 transition-colors duration-200 px-3 py-1 rounded-lg">Explore</a>
+            <a asp-action="Index" class="text-[#0052FF] dark:text-[#0052FF] font-bold px-3 py-1 rounded-lg bg-[#e2e7ff] dark:bg-slate-800">Projects</a>
+            <a href="#" class="text-[#434656] dark:text-slate-400 hover:bg-[#e2e7ff] dark:hover:bg-slate-800 transition-colors duration-200 px-3 py-1 rounded-lg">Alerts</a>
+        </nav>
+    </div>
+    <button class="active:scale-95 transition-transform">
+        <span class="material-symbols-outlined text-[#0052FF] dark:text-[#0052FF]" style="font-variation-settings: 'FILL' 1;">notifications</span>
+    </button>
+</header>
+
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col px-4 md:px-8 py-6 max-w-6xl mx-auto w-full mb-24 md:mb-6">
+    <!-- Breadcrumb / Back Navigation -->
+    <a asp-action="Index" class="flex items-center gap-2 mb-8 text-on-surface-variant hover:text-primary transition-colors w-fit">
+        <span class="material-symbols-outlined text-sm">arrow_back_ios</span>
+        <span class="text-sm font-medium">Projelere Dön</span>
+    </a>
+    
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div>
+            <h1 class="text-4xl md:text-5xl font-headline font-extrabold text-on-surface tracking-tight leading-tight">Proje Sözleşmesi</h1>
+            <p class="text-on-surface-variant mt-2 max-w-xl">Bulut Tabanlı Veri Analitiği Platformu Geliştirme Süreci için hazırlanan yasal mutabakat metni.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="bg-surface-container-high px-4 py-2 rounded-xl flex items-center gap-2">
+                <span class="text-xs font-bold text-secondary uppercase tracking-widest">Revizyon Numarası:</span>
+                <span class="text-sm font-bold text-primary">v1</span>
+            </div>
+            <div class="bg-primary-fixed px-4 py-2 rounded-xl flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-sm font-bold text-on-primary-fixed-variant">Onay Bekleniyor</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Asymmetric Content Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Contract Text Area (Left Heavy) -->
+        <div class="lg:col-span-8">
+            <div class="bg-surface-container-lowest rounded-[2rem] p-8 md:p-12 shadow-[0_4px_32px_rgba(19,27,46,0.04)] relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <span class="material-symbols-outlined text-8xl">verified_user</span>
+                </div>
+                <h2 class="text-2xl font-headline font-bold mb-8 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">description</span>
+                    Sözleşme Maddeleri
+                </h2>
+                <div class="h-[500px] overflow-y-auto pr-6 custom-scrollbar text-on-surface-variant leading-relaxed space-y-6 font-body">
+                    <section>
+                        <h3 class="text-on-surface font-bold mb-2">1. Taraflar</h3>
+                        <p>İşbu sözleşme, bir tarafta <b>Dev4All Teknoloji A.Ş.</b> (bundan böyle "Yüklenici" olarak anılacaktır) ile diğer tarafta <b>Global Data Solutions</b> (bundan böyle "Müşteri" olarak anılacaktır) arasında aşağıdaki şartlar dahilinde akdedilmiştir.</p>
+                    </section>
+                    <section>
+                        <h3 class="text-on-surface font-bold mb-2">2. İşin Konusu</h3>
+                        <p>Müşteri'nin ihtiyaç duyduğu yüksek performanslı bulut tabanlı veri analitiği platformunun, teknik spesifikasyonlarda belirtilen kriterlere uygun olarak Yüklenici tarafından tasarlanması, geliştirilmesi ve yayına alınması sürecini kapsar.</p>
+                    </section>
+                    <section>
+                        <h3 class="text-on-surface font-bold mb-2">3. Teslimat Takvimi</h3>
+                        <p>Proje dört ana fazdan oluşmaktadır:</p>
+                        <ul class="list-disc pl-5 mt-2 space-y-1">
+                            <li>Faz 1: UI/UX Tasarım ve Prototipleme (2 Hafta)</li>
+                            <li>Faz 2: Arka Uç Mimarisi ve Veritabanı Yapılandırması (4 Hafta)</li>
+                            <li>Faz 3: Ön Uç Geliştirme ve API Entegrasyonu (4 Hafta)</li>
+                            <li>Faz 4: Test, Hata Giderme ve Canlıya Geçiş (2 Hafta)</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3 class="text-on-surface font-bold mb-2">4. Gizlilik ve Veri Güvenliği</h3>
+                        <p>Her iki taraf da proje süresince ve sonrasında edindikleri ticari sırları ve müşteri verilerini 6698 sayılı KVKK hükümleri uyarınca gizli tutmayı taahhüt eder. Veri sızıntısı durumunda sorumluluk ilgili tarafa aittir.</p>
+                    </section>
+                    <section>
+                        <h3 class="text-on-surface font-bold mb-2">5. Ödeme Koşulları</h3>
+                        <p>Toplam proje bedeli, her fazın tamamlanmasını müteakip düzenlenen hakediş faturaları üzerinden 7 iş günü içerisinde ödenecektir. Gecikme durumunda yasal faiz oranları uygulanacaktır.</p>
+                    </section>
+                    <section>
+                        <h3 class="text-on-surface font-bold mb-2">6. Fikri Mülkiyet Hakları</h3>
+                        <p>Yazılımın kaynak kodları ve tüm tasarım varlıkları, tam ödemenin gerçekleşmesiyle birlikte Müşteri'ye devredilecektir. Yüklenici, projeyi portfolyosunda gösterme hakkını saklı tutar.</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Side Actions & Summary (Right Light) -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Summary Card -->
+            <div class="bg-surface-container-low rounded-3xl p-6">
+                <h3 class="font-headline font-bold text-lg mb-4">Süreç Özeti</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary mt-0.5">history</span>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Son Güncelleme</p>
+                            <p class="text-xs text-on-surface-variant">24 Ekim 2023, 14:30</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary mt-0.5" style="font-variation-settings: 'FILL' 1;">verified</span>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Onay Bekleyenler</p>
+                            <p class="text-xs text-on-surface-variant">Genel Müdür, Proje Yöneticisi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Panel -->
+            <div class="glass-panel rounded-3xl p-6 space-y-4 border border-outline-variant/20">
+                <button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-primary/20 hover:brightness-110">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">ink_pen</span>
+                    Sözleşmeyi Onayla
+                </button>
+                <button class="w-full bg-surface-container-highest text-on-surface-variant py-4 px-6 rounded-xl font-headline font-bold flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors active:scale-95">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+                    Revize Et
+                </button>
+                <button class="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-error hover:bg-error-container/20 transition-colors text-sm active:scale-95">
+                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">cancel</span>
+                    İptal Et
+                </button>
+            </div>
+            
+            <!-- Preview Image -->
+            <div class="rounded-3xl overflow-hidden h-48 relative shadow-inner">
+                <img alt="Modern Office" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANEgffaVtUZUtLRw_coymcH4yrlsC9IjQZb6PjMwA0x7FUKVhzPDRAWMHUi9JVMXJk9RRCCCuQ4p7yI95iRP-5ViISgsLl95QbgTz6kFRgm_wAl8p1sju0n8Ixwe_34ERqvhPlDPXaG11SkIviRrxmm9wks9PFAS_K6IgUhxlvEW9L1sPnKIUFNAQ_gAK0vNd1hZgx0miMsVJ2JiYVUtZvH4XDAoUHc2UeH04QIqfhBEy_LsHaKKfTpzb-u_XlY8T-Zr8Q_E7gKQ8" />
+                <div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent flex items-end p-4">
+                    <p class="text-xs font-medium text-on-surface">Dev4All HQ - İstanbul</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-safe h-20 bg-[#faf8ff]/80 dark:bg-slate-950/80 backdrop-blur-xl z-50 border-t border-[#c3c5d9]/20 shadow-[0_-4px_32px_rgba(19,27,46,0.04)]" style="padding-bottom: env(safe-area-inset-bottom);">
+    <a asp-action="Explore" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined">explore</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Explore</span>
+    </a>
+    <a asp-action="Index" class="flex flex-col items-center justify-center bg-[#dde1ff] dark:bg-[#0052FF]/20 text-[#003ec7] dark:text-[#0052FF] rounded-xl px-3 py-1.5 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Projects</span>
+    </a>
+    <a href="#" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Alerts</span>
+    </a>
+    <a href="#" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined">person</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Profile</span>
+    </a>
+</nav>

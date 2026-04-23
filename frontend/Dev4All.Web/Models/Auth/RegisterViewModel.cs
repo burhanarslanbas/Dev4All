@@ -18,9 +18,11 @@ public sealed class RegisterViewModel
 
     [Required]
     [DataType(DataType.Password)]
-    [Compare(nameof(Password), ErrorMessage = "Password and confirmation password do not match.")]
+    [Compare(nameof(Password), ErrorMessage = "Şifre ve şifre tekrarı eşleşmiyor.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
     [Required]
     public string Role { get; set; } = "Customer";
+
+    public bool TermsAccepted { get; set; }
 }

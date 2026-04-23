@@ -1,34 +1,39 @@
 @using System.Security.Claims
 
-<ul class="navbar-nav align-items-lg-center gap-2">
+<div class="flex items-center gap-4">
     @if (User.Identity?.IsAuthenticated == true)
     {
         var displayName = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name ?? "Member";
         var role = User.FindFirstValue(ClaimTypes.Role) ?? "User";
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="small fw-semibold">@displayName</span>
-                <span class="badge rounded-pill text-bg-light text-primary-emphasis">@role</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                <li><a class="dropdown-item" asp-controller="Home" asp-action="Index">Dashboard</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <form asp-controller="Auth" asp-action="Logout" method="post">
+        
+        <div class="relative group">
+            <button class="flex items-center gap-2 text-on-surface hover:text-primary transition-colors text-sm font-semibold">
+                <span>@displayName</span>
+                <span class="px-2 py-0.5 bg-primary-container text-on-primary-container rounded-full text-[10px]">@role</span>
+                <span class="material-symbols-outlined text-sm">expand_more</span>
+            </button>
+            <div class="absolute right-0 top-full mt-2 w-48 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/10 opacity-0 invisible group-focus-within:opacity-100 group-focus-within:visible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div class="py-2">
+                    @if (User.IsInRole("Developer"))
+                    {
+                        <a asp-controller="Projects" asp-action="Explore" class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors">Dashboard</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Projects" asp-action="Index" class="block px-4 py-2 text-sm text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors">Dashboard</a>
+                    }
+                    <hr class="my-2 border-outline-variant/10" />
+                    <form asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="dropdown-item">Logout</button>
+                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container hover:text-on-error-container transition-colors">Çıkış Yap</button>
                     </form>
-                </li>
-            </ul>
-        </li>
+                </div>
+            </div>
+        </div>
     }
     else
     {
-        <li class="nav-item">
-            <a class="btn btn-outline-light btn-sm px-3" asp-controller="Auth" asp-action="Login">Login</a>
-        </li>
-        <li class="nav-item">
-            <a class="btn btn-light btn-sm px-3 text-primary fw-semibold" asp-controller="Auth" asp-action="Register">Register</a>
-        </li>
+        <a asp-controller="Auth" asp-action="Login" class="text-on-surface hover:text-primary font-bold text-xs transition-colors">Giriş Yap</a>
+        <a asp-controller="Auth" asp-action="Register" class="text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg font-bold text-xs transition-colors border border-transparent">Kayıt Ol</a>
     }
-</ul>
+</div>
