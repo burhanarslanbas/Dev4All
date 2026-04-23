@@ -35,6 +35,9 @@ public partial class GlobalExceptionMiddleware(RequestDelegate next, ILogger<Glo
             case ResourceNotFoundException:
                 LogNotFound(logger, exception.Message, exception);
                 break;
+            case AuthenticationFailedException:
+                LogAuthenticationFailed(logger, exception.Message, exception);
+                break;
             default:
                 LogUnhandledError(logger, exception.Message, exception);
                 break;
@@ -66,6 +69,13 @@ public partial class GlobalExceptionMiddleware(RequestDelegate next, ILogger<Glo
                 path = context.Request.Path.ToString(),
                 message = exception.Message
             }),
+            AuthenticationFailedException => (HttpStatusCode.Unauthorized, (object)new
+            {
+                statusCode = 401,
+                timestamp = DateTime.UtcNow,
+                path = context.Request.Path.ToString(),
+                message = exception.Message
+            }),
             UnauthorizedDomainException => (HttpStatusCode.Forbidden, (object)new
             {
                 statusCode = 403,
@@ -91,6 +101,9 @@ public partial class GlobalExceptionMiddleware(RequestDelegate next, ILogger<Glo
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Not found: {Message}")]
     private static partial void LogNotFound(ILogger logger, string message, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Authentication failed: {Message}")]
+    private static partial void LogAuthenticationFailed(ILogger logger, string message, Exception ex);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled exception: {Message}")]
     private static partial void LogUnhandledError(ILogger logger, string message, Exception ex);

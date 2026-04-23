@@ -1,50 +1,88 @@
+using Dev4All.Application.Abstractions.Persistence;
+using Dev4All.Application.Abstractions.Persistence.Repositories.Emails;
 using Dev4All.Application.Abstractions.Services;
+using Dev4All.Application.Options;
+using Dev4All.Domain.Entities;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace Dev4All.Infrastructure.Email;
 
 /// <summary>
-/// Default implementation for <see cref="IEmailNotificationService"/> that sends transactional emails immediately.
+/// Default <see cref="IEmailNotificationService"/> implementation backed by the
+/// durable <c>EmailQueue</c> outbox. All methods enqueue a pending row and
+/// delegate actual delivery to the background dispatch job.
 /// </summary>
-public sealed class EmailNotificationService(IEmailService emailService) : IEmailNotificationService
+public sealed class EmailNotificationService(
+    IEmailQueueRepository emailQueueRepository,
+    IUnitOfWork unitOfWork,
+    IOptions<AuthOptions> authOptions) : IEmailNotificationService
 {
-    public Task QueueChangePasswordSuccessEmailAsync(string email, string name, CancellationToken ct = default)
+    private static readonly JsonSerializerOptions SerializerOptions = new()
     {
-        var safeName = string.IsNullOrWhiteSpace(name) ? "there" : name.Trim();
-        var subject = "Your password was changed";
-        var body = $"""
-            <p>Hi {System.Net.WebUtility.HtmlEncode(safeName)},</p>
-            <p>This is a confirmation that your password has been changed successfully.</p>
-            <p>If you did not perform this action, please reset your password immediately and contact support.</p>
-            """;
+        PropertyNamingPolicy = null
+    };
 
-        return emailService.SendAsync(email, subject, body, ct);
+    public Task QueueWelcomeEmailAsync(string email, string name, CancellationToken ct = default)
+    {
+        var payload = new Dictionary<string, string>
+        {
+            ["Name"] = NormalizeName(name)
+        };
+
+        return EnqueueAsync(email, "Dev4All'a Hoş Geldin", EmailTemplateKeys.Welcome, payload, ct);
+    }
+
+    public Task QueueConfirmationEmailAsync(string userId, string email, string name, string token, CancellationToken ct = default)
+    {
+        var confirmationUrl = authOptions.Value.EmailConfirmationUrlTemplate
+            .Replace("{userId}", Uri.EscapeDataString(userId), StringComparison.Ordinal)
+            .Replace("{token}", Uri.EscapeDataString(token ?? string.Empty), StringComparison.Ordinal);
+
+        var payload = new Dictionary<string, string>
+        {
+            ["Name"] = NormalizeName(name),
+            ["ConfirmationUrl"] = confirmationUrl,
+            ["Token"] = token ?? string.Empty
+        };
+
+        return EnqueueAsync(email, "E-posta Adresini Doğrula", EmailTemplateKeys.VerifyEmail, payload, ct);
     }
 
     public Task QueuePasswordResetEmailAsync(string email, string resetUrl, CancellationToken ct = default)
     {
-        var subject = "Reset your password";
-        var safeUrl = System.Net.WebUtility.HtmlEncode(resetUrl);
-        var body = $"""
-            <p>We received a request to reset your password.</p>
-            <p><a href="{safeUrl}">Click here to reset your password</a></p>
-            <p>If you did not request a password reset, you can safely ignore this email.</p>
-            """;
+        var payload = new Dictionary<string, string>
+        {
+            ["ResetUrl"] = resetUrl ?? string.Empty
+        };
 
-        return emailService.SendAsync(email, subject, body, ct);
+        return EnqueueAsync(email, "Şifreni Sıfırla", EmailTemplateKeys.ResetPassword, payload, ct);
     }
 
-    public Task QueueConfirmationEmailAsync(string email, string name, string token, CancellationToken ct = default)
+    public Task QueueChangePasswordSuccessEmailAsync(string email, string name, CancellationToken ct = default)
     {
-        var safeName = string.IsNullOrWhiteSpace(name) ? "there" : name.Trim();
-        var subject = "Confirm your email";
-        var body = $"""
-            <p>Hi {System.Net.WebUtility.HtmlEncode(safeName)},</p>
-            <p>Please confirm your email using the following token:</p>
-            <p><strong>{System.Net.WebUtility.HtmlEncode(token)}</strong></p>
-            <p>If you did not create an account, you can ignore this email.</p>
-            """;
+        var payload = new Dictionary<string, string>
+        {
+            ["Name"] = NormalizeName(name)
+        };
 
-        return emailService.SendAsync(email, subject, body, ct);
+        return EnqueueAsync(email, "Şifren Başarıyla Değiştirildi", EmailTemplateKeys.PasswordChanged, payload, ct);
     }
-}
 
+    private async Task EnqueueAsync(
+        string email,
+        string subject,
+        string templateKey,
+        Dictionary<string, string> payload,
+        CancellationToken ct)
+    {
+        var payloadJson = JsonSerializer.Serialize(payload, SerializerOptions);
+        var entry = EmailQueue.Create(email, subject, templateKey, payloadJson);
+
+        await emailQueueRepository.AddAsync(entry, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+    }
+
+    private static string NormalizeName(string? name)
+        => string.IsNullOrWhiteSpace(name) ? "değerli kullanıcımız" : name.Trim();
+}

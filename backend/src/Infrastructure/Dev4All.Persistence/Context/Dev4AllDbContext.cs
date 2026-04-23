@@ -16,6 +16,7 @@ public class Dev4AllDbContext(DbContextOptions<Dev4AllDbContext> options)
     public DbSet<Contract> Contracts => Set<Contract>();
     public DbSet<ContractRevision> ContractRevisions => Set<ContractRevision>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<EmailQueue> EmailQueue => Set<EmailQueue>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

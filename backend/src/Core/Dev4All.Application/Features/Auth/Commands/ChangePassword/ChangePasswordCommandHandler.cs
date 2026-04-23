@@ -13,11 +13,11 @@ public sealed class ChangePasswordCommandHandler(
     public async Task<ChangePasswordResponse> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
         if (!currentUser.IsAuthenticated || string.IsNullOrWhiteSpace(currentUser.UserId))
-            throw new UnauthorizedDomainException("Kullanıcı doğrulaması gereklidir.");
+            throw new AuthenticationFailedException("Kullanıcı doğrulaması gereklidir.");
 
         var email = await identityService.GetEmailByUserIdAsync(currentUser.UserId, cancellationToken);
         if (string.IsNullOrWhiteSpace(email))
-            throw new UnauthorizedDomainException("Kullanıcı bilgileri doğrulanamadı.");
+            throw new AuthenticationFailedException("Kullanıcı bilgileri doğrulanamadı.");
 
         var (succeeded, errors) = await identityService.ChangePasswordAsync(
             currentUser.UserId,

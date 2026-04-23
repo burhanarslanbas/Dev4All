@@ -28,4 +28,9 @@ public sealed class RefreshTokenWriteRepository(Dev4AllDbContext context) : IRef
 
     public async Task<RefreshToken?> GetByTokenForUpdateAsync(string token, CancellationToken cancellationToken = default)
         => await context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+    public Task<int> DeleteExpiredAndRevokedAsync(DateTime cutoff, CancellationToken cancellationToken = default)
+        => context.RefreshTokens
+            .Where(t => t.ExpiresAt < cutoff)
+            .ExecuteDeleteAsync(cancellationToken);
 }
