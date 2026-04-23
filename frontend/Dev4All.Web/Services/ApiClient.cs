@@ -6,7 +6,7 @@ namespace Dev4All.Web.Services;
 
 public sealed class ApiClient(HttpClient httpClient) : IApiClient
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
@@ -40,7 +40,7 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
 
     private static StringContent CreateJsonContent(object body)
     {
-        var json = JsonSerializer.Serialize(body, JsonOptions);
+        var json = JsonSerializer.Serialize(body, _jsonOptions);
         return new StringContent(json, Encoding.UTF8, "application/json");
     }
 
@@ -57,7 +57,7 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
             return default;
         }
 
-        return JsonSerializer.Deserialize<T>(content, JsonOptions);
+        return JsonSerializer.Deserialize<T>(content, _jsonOptions);
     }
 
     private static async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response, CancellationToken ct)
@@ -72,7 +72,7 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
             var badRequestContent = await response.Content.ReadAsStringAsync(ct);
             throw new HttpRequestException(
                 string.IsNullOrWhiteSpace(badRequestContent)
-                    ? "Validation failed. Please check your input and try again."
+                    ? "Doğrulama hatası. Lütfen girdilerinizi kontrol edip tekrar deneyin."
                     : badRequestContent,
                 null,
                 response.StatusCode);
@@ -81,7 +81,7 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             throw new HttpRequestException(
-                "Unauthorized. Please login again.",
+                "Yetkisiz istek. Lütfen tekrar giriş yapın.",
                 null,
                 response.StatusCode);
         }
@@ -89,7 +89,7 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
         if (response.StatusCode == HttpStatusCode.Forbidden)
         {
             throw new HttpRequestException(
-                "Access denied.",
+                "Erişim reddedildi.",
                 null,
                 response.StatusCode);
         }
@@ -97,7 +97,7 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             throw new HttpRequestException(
-                "Requested resource was not found.",
+                "İstenen kaynak bulunamadı.",
                 null,
                 response.StatusCode);
         }
@@ -105,7 +105,7 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
         if (response.StatusCode == HttpStatusCode.InternalServerError)
         {
             throw new HttpRequestException(
-                "An unexpected server error occurred.",
+                "Sunucuda beklenmeyen bir hata oluştu.",
                 null,
                 response.StatusCode);
         }

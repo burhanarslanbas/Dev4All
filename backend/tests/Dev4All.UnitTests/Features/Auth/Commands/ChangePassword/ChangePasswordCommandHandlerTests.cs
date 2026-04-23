@@ -15,7 +15,7 @@ public class ChangePasswordCommandHandlerTests
         var emailNotificationService = new FakeEmailNotificationService();
         var handler = new ChangePasswordCommandHandler(currentUser, identityService, emailNotificationService);
 
-        await Assert.ThrowsAsync<UnauthorizedDomainException>(() =>
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() =>
             handler.Handle(new ChangePasswordCommand("Current123", "NewPassword1"), CancellationToken.None));
 
         Assert.Equal(0, emailNotificationService.QueueCallCount);
@@ -88,7 +88,10 @@ public class ChangePasswordCommandHandlerTests
         public Task QueuePasswordResetEmailAsync(string email, string resetUrl, CancellationToken ct = default)
             => Task.CompletedTask;
 
-        public Task QueueConfirmationEmailAsync(string email, string name, string token, CancellationToken ct = default)
+        public Task QueueConfirmationEmailAsync(string userId, string email, string name, string token, CancellationToken ct = default)
+            => Task.CompletedTask;
+
+        public Task QueueWelcomeEmailAsync(string email, string name, CancellationToken ct = default)
             => Task.CompletedTask;
     }
 
@@ -102,7 +105,7 @@ public class ChangePasswordCommandHandlerTests
         public Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(string name, string email, string password, string role, CancellationToken ct = default)
             => throw new NotImplementedException();
 
-        public Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
+        public Task<(bool Succeeded, string UserId, string Email, string Role, bool EmailConfirmed)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
             => throw new NotImplementedException();
 
         public Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default)

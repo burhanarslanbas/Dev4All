@@ -1,54 +1,127 @@
 @model Dev4All.Web.Models.Auth.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Giriş Yap";
 }
 
-<div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-5">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-3 text-center">Sign in</h1>
+<div class="min-h-screen flex items-center justify-center p-6 bg-background selection:bg-primary-fixed selection:text-on-primary-fixed w-full">
+    <main class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-low rounded-3xl overflow-hidden ambient-shadow">
+        <!-- Left Side: Visual/Branding Section -->
+        <section class="hidden lg:flex flex-col justify-between p-16 relative overflow-hidden bg-on-surface">
+            <div class="absolute inset-0 opacity-20">
+                <img alt="Digital architecture" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY2p-hwzaL3rK1Zw3gQUYokct1WTjdNV_2WecrBVBOAdyrtjaYcF0YGSkhf2CDtbV-fVSnI5tX_ASCNFSsz6VxvQpM-ExJ_osYVfvhGypyqIQywi57lLxfMjwmj_v9U4-Djw9FOm52WHTfKbsFiyAy16SzY5NNEcT-YTjkEdMaQgoQNRTfI0UB50QWSlCcjM-sxoyg6bUWi7Fhoi543TLY7SJBkLtUB1FuBBQQV61LiZE7iBJR8PvCN1A2161WtTJuZXJ3Rp2LpV8" />
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-12">
+                    <span class="material-symbols-outlined text-primary-fixed text-4xl" style="font-variation-settings: 'FILL' 1;">terminal</span>
+                    <span class="font-headline font-extrabold text-2xl text-white tracking-tight">Dev4All</span>
+                </div>
+                <h1 class="font-headline font-extrabold text-5xl text-white leading-tight mb-6">
+                    Geleceğin Kodunu <br />
+                    <span class="text-primary-fixed">Birlikte</span> Yazalım.
+                </h1>
+                <p class="text-surface-variant text-lg max-w-md">
+                    Dünya standartlarında mühendislik çözümleri ve geliştirici ekosistemi için en doğru yerdesiniz.
+                </p>
+            </div>
+            <div class="relative z-10 flex gap-4">
+                <div class="p-4 rounded-xl glass-panel border border-white/10">
+                    <p class="text-white font-bold text-2xl">500+</p>
+                    <p class="text-surface-variant text-xs uppercase tracking-widest font-semibold">Aktif Proje</p>
+                </div>
+                <div class="p-4 rounded-xl glass-panel border border-white/10">
+                    <p class="text-white font-bold text-2xl">12k</p>
+                    <p class="text-surface-variant text-xs uppercase tracking-widest font-semibold">Geliştirici</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Side: Login Form Section -->
+        <section class="flex flex-col justify-center p-8 md:p-16 bg-surface-container-lowest">
+            <div class="max-w-md mx-auto w-full">
+                <div class="mb-10 text-center lg:text-left">
+                    <h2 class="font-headline font-bold text-on-surface text-sm uppercase tracking-[0.2em] mb-3">Giriş Yap</h2>
+                    <h3 class="font-headline font-extrabold text-4xl text-on-surface mb-4 tracking-tight">Tekrar Hoş Geldiniz</h3>
+                    <p class="text-on-surface-variant">Dev4All dünyasına adım atın</p>
+                </div>
 
                 @if (TempData["SuccessMessage"] is string successMessage)
                 {
-                    <div class="alert alert-success" role="alert">@successMessage</div>
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4 text-sm" role="alert">
+                        <span class="block">@successMessage</span>
+                    </div>
                 }
 
-                <form asp-action="Login" asp-controller="Auth" method="post">
+                @if (TempData["PendingConfirmationEmail"] is string pendingEmail)
+                {
+                    <div class="bg-primary/5 border border-primary/20 text-on-surface px-4 py-3 rounded-xl mb-4 text-sm">
+                        <span class="block mb-2"><strong>@pendingEmail</strong> adresine doğrulama linki gönderildi. E-posta gelmedi mi?</span>
+                        <form asp-action="ResendConfirmation" asp-controller="Auth" method="post" class="inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="email" value="@pendingEmail" />
+                            <button type="submit" class="text-primary font-bold hover:underline text-sm">Tekrar Gönder</button>
+                        </form>
+                    </div>
+                }
+
+                <form asp-action="Login" asp-controller="Auth" method="post" class="space-y-6">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="ReturnUrl" />
+                    <div asp-validation-summary="ModelOnly" class="text-error mb-3 text-sm font-semibold"></div>
 
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" autocomplete="email" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
+                    <div class="space-y-2">
+                        <label asp-for="Email" class="block text-sm font-semibold text-on-surface-variant ml-1">E-posta Adresi</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
+                            <input asp-for="Email" class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/40 transition-all text-on-surface placeholder:text-outline/60 outline-none" placeholder="ornek@dev4all.com" autocomplete="email" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-error text-xs ml-1 font-semibold"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center px-1">
+                            <label asp-for="Password" class="block text-sm font-semibold text-on-surface-variant">Şifre</label>
+                            <a asp-controller="Auth" asp-action="ForgotPassword" class="text-sm font-semibold text-primary hover:text-primary-container transition-colors">Şifremi Unuttum</a>
+                        </div>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
+                            <input asp-for="Password" type="password" class="w-full pl-12 pr-12 py-4 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/40 transition-all text-on-surface placeholder:text-outline/60 outline-none" placeholder="••••••••" autocomplete="current-password" />
+                            <button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button" onclick="const p = document.getElementById('Password'); p.type = p.type === 'password' ? 'text' : 'password';">
+                                <span class="material-symbols-outlined text-xl">visibility</span>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-error text-xs ml-1 font-semibold"></span>
                     </div>
 
-                    <div class="form-check mb-3">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label">
-                            Remember me
-                        </label>
+                    <div class="flex items-center gap-3 px-1">
+                        <input asp-for="RememberMe" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary transition-all" />
+                        <label asp-for="RememberMe" class="text-sm text-on-surface-variant select-none">Beni hatırla</label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                    <button type="submit" class="w-full gradient-text text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/20 transform active:scale-[0.98] transition-all duration-300" style="background: linear-gradient(135deg, #003ec7, #0052ff); -webkit-text-fill-color: white;">
+                        Giriş Yap
+                    </button>
                 </form>
+
+                <p class="mt-8 text-center text-on-surface-variant font-medium text-sm">
+                    Hesabın yok mu?
+                    <a asp-controller="Auth" asp-action="Register" class="text-primary font-bold hover:underline ml-1">Kayıt Ol</a>
+                </p>
             </div>
-            <div class="card-footer text-center">
-                <span>Don't have an account?</span>
-                <a asp-controller="Auth" asp-action="Register">Register</a>
-            </div>
-        </div>
-    </div>
+
+            <!-- Footer area within transactional screen (Simplified) -->
+            <footer class="mt-16 text-center lg:text-left">
+                <p class="text-xs text-outline font-medium">
+                    © 2024 Dev4All Platform. Precision Engineered.
+                </p>
+                <div class="flex flex-wrap justify-center lg:justify-start gap-4 mt-4">
+                    <a class="text-xs text-outline hover:text-primary transition-colors" href="#">Documentation</a>
+                    <a class="text-xs text-outline hover:text-primary transition-colors" href="#">Privacy Policy</a>
+                    <a class="text-xs text-outline hover:text-primary transition-colors" href="#">Contact</a>
+                </div>
+            </footer>
+        </section>
+    </main>
 </div>
 
 @section Scripts {

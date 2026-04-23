@@ -20,7 +20,7 @@ public sealed class ResendConfirmationCommandHandler(
             if (!string.IsNullOrWhiteSpace(token))
             {
                 var recipientName = string.IsNullOrWhiteSpace(name) ? "User" : name;
-                await emailNotificationService.QueueConfirmationEmailAsync(request.Email, recipientName, token, cancellationToken);
+                await emailNotificationService.QueueConfirmationEmailAsync(userId, request.Email, recipientName, token, cancellationToken);
             }
         }
 

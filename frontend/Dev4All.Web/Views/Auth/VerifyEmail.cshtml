@@ -1,0 +1,32 @@
+@model Dev4All.Web.Models.Auth.VerifyEmailViewModel
+
+@{
+    ViewData["Title"] = "E-posta Doğrulama";
+}
+
+<div class="min-h-screen flex items-center justify-center p-6 bg-background">
+    <main class="w-full max-w-xl bg-surface-container-lowest rounded-3xl p-10 shadow-[0_8px_40px_rgba(19,27,46,0.06)] border border-outline-variant/30 text-center">
+        @if (Model.IsSuccess)
+        {
+            <div class="mx-auto mb-5 w-16 h-16 rounded-full bg-green-100 text-green-700 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            </div>
+            <h1 class="text-3xl font-headline font-extrabold text-on-surface mb-3">E-posta Doğrulandı</h1>
+            <p class="text-on-surface-variant mb-8">@Model.Message</p>
+            <a asp-controller="Auth" asp-action="Login" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-opacity">
+                Girişe Devam Et
+            </a>
+        }
+        else
+        {
+            <div class="mx-auto mb-5 w-16 h-16 rounded-full bg-red-100 text-red-700 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">error</span>
+            </div>
+            <h1 class="text-3xl font-headline font-extrabold text-on-surface mb-3">Doğrulama Başarısız</h1>
+            <p class="text-on-surface-variant mb-8">@Model.Message</p>
+            <a asp-controller="Auth" asp-action="Login" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-surface-container-high text-on-surface font-bold hover:opacity-90 transition-opacity">
+                Girişe Dön
+            </a>
+        }
+    </main>
+</div>

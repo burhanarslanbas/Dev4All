@@ -23,6 +23,7 @@ public class ResendConfirmationCommandHandlerTests
         Assert.Equal("user@example.com", identityService.LastEmail);
         Assert.Equal("user-1", identityService.LastTokenUserId);
         Assert.Equal(1, emailNotificationService.CallCount);
+        Assert.Equal("user-1", emailNotificationService.LastUserId);
         Assert.Equal("user@example.com", emailNotificationService.LastEmail);
         Assert.Equal("User One", emailNotificationService.LastName);
         Assert.Equal("token-123", emailNotificationService.LastToken);
@@ -94,7 +95,7 @@ public class ResendConfirmationCommandHandlerTests
         public Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(string name, string email, string password, string role, CancellationToken ct = default)
             => throw new NotImplementedException();
 
-        public Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
+        public Task<(bool Succeeded, string UserId, string Email, string Role, bool EmailConfirmed)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
             => throw new NotImplementedException();
 
         public Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default)
@@ -134,6 +135,7 @@ public class ResendConfirmationCommandHandlerTests
     private sealed class FakeEmailNotificationService : IEmailNotificationService
     {
         public int CallCount { get; private set; }
+        public string? LastUserId { get; private set; }
         public string? LastEmail { get; private set; }
         public string? LastName { get; private set; }
         public string? LastToken { get; private set; }
@@ -144,13 +146,17 @@ public class ResendConfirmationCommandHandlerTests
         public Task QueuePasswordResetEmailAsync(string email, string resetUrl, CancellationToken ct = default)
             => Task.CompletedTask;
 
-        public Task QueueConfirmationEmailAsync(string email, string name, string token, CancellationToken ct = default)
+        public Task QueueConfirmationEmailAsync(string userId, string email, string name, string token, CancellationToken ct = default)
         {
             CallCount++;
+            LastUserId = userId;
             LastEmail = email;
             LastName = name;
             LastToken = token;
             return Task.CompletedTask;
         }
+
+        public Task QueueWelcomeEmailAsync(string email, string name, CancellationToken ct = default)
+            => Task.CompletedTask;
     }
 }

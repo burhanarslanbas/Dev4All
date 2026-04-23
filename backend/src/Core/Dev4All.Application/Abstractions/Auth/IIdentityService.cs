@@ -10,7 +10,7 @@ public interface IIdentityService
         string role,
         CancellationToken ct = default);
 
-    Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(
+    Task<(bool Succeeded, string UserId, string Email, string Role, bool EmailConfirmed)> AuthenticateAsync(
         string email,
         string password,
         CancellationToken ct = default);

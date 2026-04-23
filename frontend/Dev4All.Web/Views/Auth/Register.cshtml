@@ -1,64 +1,197 @@
 @model Dev4All.Web.Models.Auth.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Kayıt Ol";
 }
 
-<div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-5">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-3 text-center">Create account</h1>
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-4 h-14 bg-surface/80 backdrop-blur-md sticky top-0 z-50 flex-shrink-0">
+    <div class="flex items-center gap-2">
+        <a asp-controller="Home" asp-action="Index" class="text-xl font-extrabold text-[#131b2e] font-headline tracking-tight">Dev4All</a>
+    </div>
+    <partial name="_LoginPartial" />
+</header>
 
-                <form asp-action="Register" asp-controller="Auth" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label"></label>
-                        <input asp-for="Name" class="form-control" autocomplete="name" />
-                        <span asp-validation-for="Name" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" autocomplete="email" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="ConfirmPassword" class="form-label"></label>
-                        <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" />
-                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Role" class="form-label"></label>
-                        <select asp-for="Role" class="form-select">
-                            <option value="Customer">Customer</option>
-                            <option value="Developer">Developer</option>
-                        </select>
-                        <span asp-validation-for="Role" class="text-danger"></span>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100">Register</button>
-                </form>
+<main class="flex-grow flex flex-col items-center justify-start py-8 px-4">
+    <div class="max-w-md w-full space-y-6">
+        <!-- Narrative Section -->
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl font-extrabold font-headline leading-tight tracking-tight text-on-surface">
+                Geleceği <span class="text-primary">Birlikte İnşa Edelim.</span>
+            </h1>
+            <p class="text-on-surface-variant text-sm max-w-xs mx-auto">
+                Türkiye'nin en seçkin geliştirici topluluğuna katılarak projenizi başlatın veya yeteneklerinizi sergileyin.
+            </p>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 shadow-[0_8px_40px_rgba(19,27,46,0.06)] border border-outline-variant/30">
+            <div class="mb-6 text-center">
+                <h2 class="text-xl font-bold font-headline text-on-surface">Hesabınızı Oluşturun</h2>
+                <p class="text-xs text-on-surface-variant mt-1">Önce devam etmek istediğiniz rolü seçin</p>
             </div>
-            <div class="card-footer text-center">
-                <span>Already have an account?</span>
-                <a asp-controller="Auth" asp-action="Login">Login</a>
+            
+            <!-- Role Selection -->
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <button type="button" onclick="selectRole('Customer')" id="btnCustomer" class="group relative p-4 rounded-2xl bg-surface-container-high border-2 border-primary hover:border-primary/20 focus:border-primary focus:bg-surface-container-high transition-all duration-300 text-center outline-none ring-0">
+                    <div class="mx-auto mb-2 w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary group-focus:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-2xl">work</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-on-surface">Müşteri</h3>
+                    <div id="checkCustomer" class="absolute top-2 right-2 opacity-100 group-focus:opacity-100 transition-opacity">
+                        <span class="material-symbols-outlined text-primary text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </div>
+                </button>
+                <button type="button" onclick="selectRole('Developer')" id="btnDeveloper" class="group relative p-4 rounded-2xl bg-surface-container-low border-2 border-transparent hover:border-primary/20 focus:border-primary focus:bg-surface-container-high transition-all duration-300 text-center outline-none ring-0">
+                    <div class="mx-auto mb-2 w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary group-focus:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-2xl">code</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-on-surface">Geliştirici</h3>
+                    <div id="checkDeveloper" class="absolute top-2 right-2 opacity-0 group-focus:opacity-100 transition-opacity">
+                        <span class="material-symbols-outlined text-primary text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </div>
+                </button>
+            </div>
+            
+            <!-- Signup Form and Social -->
+            <div class="space-y-6">
+                <form asp-action="Register" asp-controller="Auth" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Role" id="Role" value="Customer" />
+                    <div asp-validation-summary="ModelOnly" class="text-error text-sm font-semibold mb-3"></div>
+
+                    <div class="floating-label-group relative">
+                        <input asp-for="Name" class="block w-full px-4 py-3.5 text-sm text-on-surface bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/40 peer transition-all" placeholder=" " autocomplete="name" />
+                        <label asp-for="Name" class="absolute text-on-surface-variant text-sm duration-300 transform -translate-y-0 scale-100 top-3.5 left-4 z-10 origin-[0] peer-focus:left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-5 pointer-events-none transition-all">Ad Soyad</label>
+                    </div>
+                    <span asp-validation-for="Name" class="text-error text-[10px] block mt-1"></span>
+
+                    <div class="floating-label-group relative">
+                        <input asp-for="Email" class="block w-full px-4 py-3.5 text-sm text-on-surface bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/40 peer transition-all" placeholder=" " autocomplete="email" />
+                        <label asp-for="Email" class="absolute text-on-surface-variant text-sm duration-300 transform -translate-y-0 scale-100 top-3.5 left-4 z-10 origin-[0] peer-focus:left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-5 pointer-events-none transition-all">E-posta Adresi</label>
+                    </div>
+                    <span asp-validation-for="Email" class="text-error text-[10px] block mt-1"></span>
+
+                    <div class="floating-label-group relative">
+                        <input asp-for="Password" type="password" class="block w-full px-4 py-3.5 text-sm text-on-surface bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/40 peer transition-all" placeholder=" " autocomplete="new-password" />
+                        <label asp-for="Password" class="absolute text-on-surface-variant text-sm duration-300 transform -translate-y-0 scale-100 top-3.5 left-4 z-10 origin-[0] peer-focus:left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-5 pointer-events-none transition-all">Şifre</label>
+                    </div>
+                    <span asp-validation-for="Password" class="text-error text-[10px] block mt-1"></span>
+
+                    <div class="floating-label-group relative">
+                        <input asp-for="ConfirmPassword" type="password" class="block w-full px-4 py-3.5 text-sm text-on-surface bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/40 peer transition-all" placeholder=" " autocomplete="new-password" />
+                        <label asp-for="ConfirmPassword" class="absolute text-on-surface-variant text-sm duration-300 transform -translate-y-0 scale-100 top-3.5 left-4 z-10 origin-[0] peer-focus:left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-5 pointer-events-none transition-all">Şifre (Tekrar)</label>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-error text-[10px] block mt-1"></span>
+
+                    <div class="flex items-start gap-3 py-1">
+                        <input asp-for="TermsAccepted" id="terms" type="checkbox" required class="w-4 h-4 mt-0.5 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-low flex-shrink-0 cursor-pointer" />
+                        <label for="terms" class="text-[11px] text-on-surface-variant leading-tight">
+                            <a class="text-primary font-semibold hover:underline" href="#">Kullanım Koşulları</a> ve <a class="text-primary font-semibold hover:underline" href="#">Gizlilik Politikası</a>'nı okudum ve kabul ediyorum.
+                        </label>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 px-6 bg-primary text-on-primary text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-on-primary-fixed-variant active:scale-[0.98] transition-all duration-200 opacity-50 cursor-not-allowed" disabled>
+                        Kayıt Ol
+                    </button>
+                </form>
+                
+                <!-- Divider -->
+                <div class="relative flex items-center py-2">
+                    <div class="flex-grow border-t border-outline-variant/40"></div>
+                    <span class="flex-shrink mx-4 text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">veya şununla devam et</span>
+                    <div class="flex-grow border-t border-outline-variant/40"></div>
+                </div>
+                
+                <!-- Social Logins -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant/50 hover:bg-surface-container-low transition-colors duration-200 group">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"></path>
+                        </svg>
+                        <span class="text-sm font-semibold text-on-surface">Google</span>
+                    </button>
+                    <button class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant/50 hover:bg-surface-container-low transition-colors duration-200 group">
+                        <svg class="w-5 h-5 fill-on-surface" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+                        </svg>
+                        <span class="text-sm font-semibold text-on-surface">GitHub</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-outline-variant/30 text-center">
+                <p class="text-on-surface-variant text-sm">
+                    Zaten hesabın var mı? <a asp-controller="Auth" asp-action="Login" class="text-primary font-bold hover:underline ml-1">Giriş Yap</a>
+                </p>
             </div>
         </div>
     </div>
-</div>
+</main>
+
+<!-- Simple Transactional Footer -->
+<footer class="w-full p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-outline-variant/10 text-on-surface-variant text-[11px] font-medium flex-shrink-0 mt-auto">
+    <p>© 2024 Dev4All. Tüm hakları saklıdır.</p>
+    <div class="flex gap-6">
+        <a class="hover:text-primary transition-colors" href="#">Güvenlik</a>
+        <a class="hover:text-primary transition-colors" href="#">KVKK</a>
+        <a class="hover:text-primary transition-colors" href="#">Kullanım Şartları</a>
+        <a class="hover:text-primary transition-colors" href="#">İletişim</a>
+    </div>
+</footer>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function selectRole(role) {
+            document.getElementById('Role').value = role;
+            
+            const btnCustomer = document.getElementById('btnCustomer');
+            const btnDeveloper = document.getElementById('btnDeveloper');
+            const checkCustomer = document.getElementById('checkCustomer');
+            const checkDeveloper = document.getElementById('checkDeveloper');
+
+            if (role === 'Customer') {
+                btnCustomer.classList.replace('bg-surface-container-low', 'bg-surface-container-high');
+                btnCustomer.classList.replace('border-transparent', 'border-primary');
+                checkCustomer.classList.replace('opacity-0', 'opacity-100');
+                
+                btnDeveloper.classList.replace('bg-surface-container-high', 'bg-surface-container-low');
+                btnDeveloper.classList.replace('border-primary', 'border-transparent');
+                checkDeveloper.classList.replace('opacity-100', 'opacity-0');
+            } else {
+                btnDeveloper.classList.replace('bg-surface-container-low', 'bg-surface-container-high');
+                btnDeveloper.classList.replace('border-transparent', 'border-primary');
+                checkDeveloper.classList.replace('opacity-0', 'opacity-100');
+                
+                btnCustomer.classList.replace('bg-surface-container-high', 'bg-surface-container-low');
+                btnCustomer.classList.replace('border-primary', 'border-transparent');
+                checkCustomer.classList.replace('opacity-100', 'opacity-0');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle submit button based on terms acceptance
+            var termsCheck = document.getElementById('terms');
+            var submitBtn = document.getElementById('submitBtn');
+            
+            function updateBtnState() {
+                if(termsCheck.checked) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            
+            if(termsCheck && submitBtn) {
+                termsCheck.addEventListener('change', updateBtnState);
+                updateBtnState(); // Initial component check
+            }
+        });
+    </script>
 }

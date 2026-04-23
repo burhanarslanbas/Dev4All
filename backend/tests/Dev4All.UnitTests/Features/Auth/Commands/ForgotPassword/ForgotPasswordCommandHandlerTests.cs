@@ -1,6 +1,8 @@
 using Dev4All.Application.Abstractions.Auth;
 using Dev4All.Application.Abstractions.Services;
 using Dev4All.Application.Features.Auth.Commands.ForgotPassword;
+using Dev4All.Application.Options;
+using Microsoft.Extensions.Options;
 
 namespace Dev4All.UnitTests.Features.Auth.Commands.ForgotPassword;
 
@@ -11,7 +13,13 @@ public class ForgotPasswordCommandHandlerTests
     {
         var identityService = new FakeIdentityService { ResetTokenToReturn = "token-value" };
         var emailNotificationService = new FakeEmailNotificationService();
-        var handler = new ForgotPasswordCommandHandler(identityService, emailNotificationService);
+        var handler = new ForgotPasswordCommandHandler(
+            identityService,
+            emailNotificationService,
+            Options.Create(new AuthOptions
+            {
+                PasswordResetUrlTemplate = "http://localhost:5019/auth/reset-password?email={email}&token={token}"
+            }));
         var command = new ForgotPasswordCommand("user@example.com");
 
         var response = await handler.Handle(command, CancellationToken.None);
@@ -29,7 +37,13 @@ public class ForgotPasswordCommandHandlerTests
     {
         var identityService = new FakeIdentityService { ResetTokenToReturn = null };
         var emailNotificationService = new FakeEmailNotificationService();
-        var handler = new ForgotPasswordCommandHandler(identityService, emailNotificationService);
+        var handler = new ForgotPasswordCommandHandler(
+            identityService,
+            emailNotificationService,
+            Options.Create(new AuthOptions
+            {
+                PasswordResetUrlTemplate = "http://localhost:5019/auth/reset-password?email={email}&token={token}"
+            }));
         var command = new ForgotPasswordCommand("missing@example.com");
 
         var response = await handler.Handle(command, CancellationToken.None);
@@ -47,7 +61,7 @@ public class ForgotPasswordCommandHandlerTests
         public Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(string name, string email, string password, string role, CancellationToken ct = default)
             => throw new NotImplementedException();
 
-        public Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
+        public Task<(bool Succeeded, string UserId, string Email, string Role, bool EmailConfirmed)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
             => throw new NotImplementedException();
 
         public Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default)
@@ -98,7 +112,10 @@ public class ForgotPasswordCommandHandlerTests
         public Task QueueChangePasswordSuccessEmailAsync(string email, string name, CancellationToken ct = default)
             => Task.CompletedTask;
 
-        public Task QueueConfirmationEmailAsync(string email, string name, string token, CancellationToken ct = default)
+        public Task QueueConfirmationEmailAsync(string userId, string email, string name, string token, CancellationToken ct = default)
+            => Task.CompletedTask;
+
+        public Task QueueWelcomeEmailAsync(string email, string name, CancellationToken ct = default)
             => Task.CompletedTask;
     }
 }

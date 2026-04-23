@@ -1,113 +1,291 @@
-﻿@{
-    ViewData["Title"] = "Home";
+@{
+    ViewData["Title"] = "Platform";
 }
 
-<section class="landing-hero rounded-4 p-4 p-md-5 mb-5 text-white">
-    <div class="row align-items-center g-4">
-        <div class="col-lg-8">
-            <p class="text-uppercase fw-semibold small mb-2 opacity-75">Dev4All Marketplace</p>
-            <h1 class="display-5 fw-bold mb-3">Find the perfect developer for your project</h1>
-            <p class="lead mb-4">Publish your project, receive competitive bids, and collaborate with top talent from contract to delivery.</p>
-            <div class="d-flex flex-wrap gap-2">
-                <a asp-controller="Auth" asp-action="Register" class="btn btn-light btn-lg px-4">Sign Up to Post</a>
-                <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-light btn-lg px-4">Browse Projects</a>
+<!-- TopAppBar -->
+<nav class="bg-[#faf8ff]/80 dark:bg-slate-950/80 backdrop-blur-xl font-['Manrope'] font-medium text-sm tracking-wide fixed top-0 w-full z-50 shadow-[0_16px_32px_-12px_rgba(19,27,46,0.04)] border-b border-outline-variant/10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-8 py-4">
+        <div class="flex items-center gap-2 group cursor-pointer">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">integration_instructions</span>
+            </div>
+            <div class="text-2xl font-black tracking-tighter text-[#131b2e] dark:text-slate-50 group-hover:text-primary transition-colors">
+                Dev4All
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="bg-white text-dark rounded-4 shadow-sm p-4">
-                <p class="small text-muted text-uppercase fw-semibold mb-2">Trusted workflow</p>
-                <h2 class="h5 fw-semibold mb-3">From idea to launch</h2>
-                <p class="mb-0">Manage milestones, track GitHub activity, and keep contracts transparent in one place.</p>
-            </div>
+        <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <a class="text-[#0052ff] dark:text-blue-400 font-bold border-b-2 border-[#0052ff] pb-1 hover:text-[#003ec7] dark:hover:text-blue-300 transition-all duration-300 active:scale-95 transform transition-transform" href="#">Platform</a>
+            <a class="text-[#434656] dark:text-slate-400 hover:text-[#003ec7] dark:hover:text-blue-300 transition-all duration-300 active:scale-95 transform transition-transform flex items-center gap-1" href="#">
+                <span class="material-symbols-outlined text-[18px]">psychology</span>
+                AI Kod Analizi
+            </a>
+            <a class="text-[#434656] dark:text-slate-400 hover:text-[#003ec7] dark:hover:text-blue-300 transition-all duration-300 active:scale-95 transform transition-transform flex items-center gap-1" href="#">
+                <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                Güvenli Ödeme
+            </a>
+            <a class="text-[#434656] dark:text-slate-400 hover:text-[#003ec7] dark:hover:text-blue-300 transition-all duration-300 active:scale-95 transform transition-transform flex items-center gap-1" href="#">
+                <span class="material-symbols-outlined text-[18px]">request_quote</span>
+                Teklif Yönetimi
+            </a>
+        </div>
+        <div class="flex items-center space-x-4">
+            <a asp-controller="Auth" asp-action="Login" class="hidden md:flex items-center gap-2 text-[#434656] hover:text-[#003ec7] transition-all duration-300 active:scale-95 font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">login</span>
+                Giriş Yap
+            </a>
+            <a asp-controller="Auth" asp-action="Register" class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2.5 rounded-lg font-medium text-sm hover:brightness-110 active:scale-95 transition-all duration-300 shadow-md flex items-center gap-2">
+                Başlayın
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
         </div>
     </div>
-</section>
-
-<section class="mb-5">
-    <div class="text-center mb-4">
-        <h2 class="h3 fw-bold">How it works</h2>
-    </div>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="icon-badge mx-auto mb-3" role="img" aria-label="Post project icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                            <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4.5h12zm-1 1H3V14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5.5z" />
-                            <path d="M9.5 1a.5.5 0 0 1 .5.5V3h3a1 1 0 0 1 1 1v.5H2V4a1 1 0 0 1 1-1h3V1.5a.5.5 0 0 1 1 0V3h2V1.5a.5.5 0 0 1 .5-.5z" />
-                        </svg>
+</nav>
+<main class="flex-grow pt-24">
+    <!-- Hero Section -->
+    <section class="relative pt-20 pb-32 overflow-hidden bg-surface">
+        <div class="max-w-7xl mx-auto px-8 relative z-10 flex flex-col lg:flex-row items-center gap-16">
+            <div class="flex-1 text-left space-y-8">
+                <h1 class="font-headline text-5xl lg:text-6xl font-extrabold text-on-surface leading-tight tracking-tight">
+                    Yazılım Dünyasının Devlerini <span class="gradient-text">Projelerinizle Buluşturun</span>
+                </h1>
+                <p class="font-body text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+                    Dev4All, karmaşık B2B yazılım ihtiyaçlarınızı, dünyanın en yetenekli geliştiricileriyle güvenli, şeffaf ve uçtan uca yönetilebilir bir platformda çözer. Doğru yetenek, doğru proje, sıfır risk.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <a asp-controller="Auth" asp-action="Register" class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-4 rounded-xl font-headline font-semibold text-base hover:brightness-110 active:scale-95 transition-all duration-300 shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                        Projeye Başla
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">arrow_forward</span>
+                    </a>
+                    <button class="bg-surface-container-highest text-on-secondary-container px-8 py-4 rounded-xl font-headline font-semibold text-base hover:bg-surface-variant active:scale-95 transition-all duration-300">
+                        Demo Talebi
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 relative w-full aspect-square lg:aspect-auto lg:h-[600px] rounded-[2rem] overflow-hidden ambient-shadow">
+                <img alt="Modern office workspace" class="object-cover w-full h-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCayX3iDhHgaakhAZL628Jz2OxUy_BprHk7d4NUXbtExrfbO0FcdRsVb_oD2Jz0bjw5hBhE4KPXfcmqk2hgU6im8ls70Eg68UyXfanVJOvw5COEQEU2k6bmYHL3yqlo3RuuZR9PpEDN8_afs-m-EUCX39-bdjIM8GGfLv9iGJHAt-wb8dvRNoTNUblwsLFW6NICiLG7L0-dU7bx0AAoeVVr--Qu4K5j0yizST0xt-F5Y5FQ6Ba8CjSi3Ju6xlDwz_CSRhaLfKf5V10" />
+                <!-- Floating Abstract UI Elements -->
+                <div class="absolute top-10 right-10 glass-panel p-4 rounded-xl ambient-shadow flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
                     </div>
-                    <h3 class="h5 fw-semibold">Post</h3>
-                    <p class="text-muted mb-0">Describe scope, budget, and timeline to attract the right experts.</p>
+                    <div>
+                        <p class="text-xs font-semibold text-on-surface">Senior Developer</p>
+                        <p class="text-[10px] text-on-surface-variant">Eşleşme Sağlandı</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="icon-badge mx-auto mb-3" role="img" aria-label="Bid on project icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                            <path d="M5.5 0a.5.5 0 0 1 .5.5V2H10V.5a.5.5 0 0 1 1 0V2h1a2 2 0 0 1 2 2v1H2V4a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5z" />
-                            <path d="M2 6h12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm3 2.5a.5.5 0 0 0 0 1h2V11a.5.5 0 0 0 1 0V9.5h2a.5.5 0 0 0 0-1H8V7a.5.5 0 0 0-1 0v1.5H5z" />
-                        </svg>
+        <!-- Abstract Background Shapes -->
+        <div class="absolute top-0 right-0 -mr-40 -mt-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-40 -mb-40 w-[500px] h-[500px] bg-tertiary/5 rounded-full blur-3xl"></div>
+    </section>
+    <!-- Social Proof -->
+    <section class="bg-surface-container-low py-12">
+        <div class="max-w-7xl mx-auto px-8">
+            <p class="text-center text-sm font-semibold text-on-surface-variant mb-8 uppercase tracking-wider">Sektör Liderleri Tarafından Güveniliyor</p>
+            <div class="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                <!-- Placeholder Logos -->
+                <span class="font-headline font-bold text-2xl text-on-surface">TechCorp</span>
+                <span class="font-headline font-bold text-2xl text-on-surface">InnovateOS</span>
+                <span class="font-headline font-bold text-2xl text-on-surface">CloudSync</span>
+                <span class="font-headline font-bold text-2xl text-on-surface">DataFlow</span>
+                <span class="font-headline font-bold text-2xl text-on-surface">NextGen UI</span>
+            </div>
+        </div>
+    </section>
+    <!-- How it Works -->
+    <section class="py-32 bg-surface">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="text-center max-w-3xl mx-auto mb-20">
+                <h2 class="font-headline text-4xl font-extrabold text-on-surface mb-6">Uçtan Uca Eşleştirme</h2>
+                <p class="font-body text-on-surface-variant text-lg">Projenizin ihtiyaçlarından teslimat anına kadar her adımda şeffaflık ve güvenlik sağlıyoruz.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                <!-- Connecting Line -->
+                <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-surface-container-high via-primary-container/30 to-surface-container-high z-0"></div>
+                <!-- Step 1 -->
+                <div class="relative z-10 flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-2xl bg-surface-container-lowest ambient-shadow flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300">
+                        <div class="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings: 'FILL' 1;">person_search</span>
+                        </div>
                     </div>
-                    <h3 class="h5 fw-semibold">Bid</h3>
-                    <p class="text-muted mb-0">Compare proposals, evaluate profiles, and choose your best match.</p>
+                    <h3 class="font-headline text-xl font-bold text-on-surface mb-3">1. Eşleştirme</h3>
+                    <p class="text-on-surface-variant text-sm leading-relaxed px-4">Proje gereksinimlerinizi analiz eder, global havuzumuzdaki en uygun yetenekleri yapay zeka destekli algoritmamızla size sunarız.</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="relative z-10 flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-2xl bg-surface-container-lowest ambient-shadow flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300">
+                        <div class="w-16 h-16 rounded-xl bg-tertiary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-3xl text-tertiary" style="font-variation-settings: 'FILL' 1;">contract</span>
+                        </div>
+                    </div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface mb-3">2. Sözleşme</h3>
+                    <p class="text-on-surface-variant text-sm leading-relaxed px-4">Taraflar arası güvenliği sağlayan standart veya özel NDA/Sözleşme süreçlerini dijital ortamda hızla tamamlarız.</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="relative z-10 flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-2xl bg-surface-container-lowest ambient-shadow flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-300">
+                        <div class="w-16 h-16 rounded-xl bg-secondary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-3xl text-secondary" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+                        </div>
+                    </div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface mb-3">3. Takip & Teslimat</h3>
+                    <p class="text-on-surface-variant text-sm leading-relaxed px-4">Entegre proje yönetim araçları ile süreçleri izler, kilometre taşlarına bağlı güvenli ödeme sistemi ile riskleri sıfırlarız.</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="icon-badge mx-auto mb-3" role="img" aria-label="Build project icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                            <path d="M8 1a7 7 0 1 0 4.95 11.95A7 7 0 0 0 8 1zm0 1a6 6 0 1 1-4.24 10.24A6 6 0 0 1 8 2z" />
-                            <path d="M10.854 5.146a.5.5 0 0 1 0 .708L7.5 9.207 5.646 7.354a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z" />
-                        </svg>
+    </section>
+    <!-- Feature Showcase - Interactive Code Tracking -->
+    <section class="py-24 bg-surface-container-low">
+        <div class="max-w-7xl mx-auto px-8 flex flex-col lg:flex-row items-center gap-16">
+            <div class="flex-1 order-2 lg:order-1">
+                <div class="bg-inverse-surface rounded-[2rem] p-8 ambient-shadow relative overflow-hidden h-full min-h-[400px] flex flex-col justify-center">
+                    <!-- Interactive Timeline Flow -->
+                    <div class="space-y-8 relative z-10 w-full max-w-md mx-auto">
+                        <!-- Step 1 -->
+                        <div class="relative pl-8">
+                            <div class="absolute left-0 top-1 w-4 h-4 rounded-full bg-primary ring-4 ring-primary/20 z-10 flex items-center justify-center">
+                                <div class="w-2 h-2 rounded-full bg-white"></div>
+                            </div>
+                            <div class="absolute left-[7px] top-5 bottom-[-32px] w-[2px] bg-primary/30 z-0"></div>
+                            <div class="bg-surface-container/10 backdrop-blur-md rounded-xl p-4 border border-outline-variant/20 hover:bg-surface-container/20 transition-colors">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-primary text-sm">terminal</span>
+                                    <p class="text-sm font-semibold text-on-tertiary">Developer Action</p>
+                                </div>
+                                <p class="text-sm text-on-tertiary/90">User Auth Module added</p>
+                                <p class="text-xs text-on-tertiary/60 mt-2">Commit by <span class="text-primary-fixed-dim">@@alex_dev</span> • Just now</p>
+                            </div>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="relative pl-8">
+                            <div class="absolute left-0 top-1 w-4 h-4 rounded-full bg-tertiary ring-4 ring-tertiary/20 z-10 flex items-center justify-center">
+                                <div class="w-2 h-2 rounded-full bg-white"></div>
+                            </div>
+                            <div class="absolute left-[7px] top-5 bottom-[-32px] w-[2px] bg-tertiary/30 z-0"></div>
+                            <div class="bg-surface-container/10 backdrop-blur-md rounded-xl p-4 border border-outline-variant/20 hover:bg-surface-container/20 transition-colors">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-tertiary text-sm">hub</span>
+                                    <p class="text-sm font-semibold text-on-tertiary">System Integration</p>
+                                </div>
+                                <p class="text-sm text-on-tertiary/90">Automated tests passed & merged</p>
+                            </div>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="relative pl-8">
+                            <div class="absolute left-0 top-1 w-4 h-4 rounded-full bg-secondary-container ring-4 ring-secondary-container/20 z-10 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-secondary text-[10px] font-bold">psychology</span>
+                            </div>
+                            <div class="bg-secondary/10 backdrop-blur-md rounded-xl p-4 border border-secondary/30 relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-gradient-to-r from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-secondary-container text-sm">smart_toy</span>
+                                    <p class="text-sm font-semibold text-secondary-container">Dev4All AI Analizi</p>
+                                </div>
+                                <p class="text-sm text-on-tertiary/90 italic">"Bu özellik, uygulamanızın güvenliğini artırır ve kullanıcı girişlerini optimize eder."</p>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="h5 fw-semibold">Build</h3>
-                    <p class="text-muted mb-0">Track delivery progress and complete projects with confidence.</p>
+                    <!-- Decorative gradient -->
+                    <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+                    <div class="absolute top-10 -left-10 w-40 h-40 bg-tertiary/20 rounded-full blur-3xl"></div>
+                </div>
+            </div>
+            <div class="flex-1 order-1 lg:order-2 space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-tertiary/10 text-tertiary text-sm font-semibold">
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">integration_instructions</span>
+                    Akıllı Takip
+                </div>
+                <h2 class="font-headline text-3xl lg:text-4xl font-extrabold text-on-surface">Kodunuzun Her Satırını İzleyin ve Anlayın</h2>
+                <p class="text-lg text-on-surface-variant leading-relaxed">
+                    Geliştirme sürecini platformumuz üzerinden anlık olarak takip edin. Sadece commit'leri görmekle kalmayın, yapay zeka destekli analizlerimiz sayesinde teknik terminolojiye boğulmadan projenizin nasıl ilerlediğini iş dilinde anlayın.
+                </p>
+                <ul class="space-y-4 mt-8">
+                    <li class="flex items-center gap-3 text-on-surface-variant">
+                        <span class="material-symbols-outlined text-primary">check</span>
+                        Gerçek zamanlı repository senkronizasyonu
+                    </li>
+                    <li class="flex items-center gap-3 text-on-surface-variant">
+                        <span class="material-symbols-outlined text-primary">check</span>
+                        Yapay zeka ile müşteri dostu teknik çeviri
+                    </li>
+                    <li class="flex items-center gap-3 text-on-surface-variant">
+                        <span class="material-symbols-outlined text-primary">check</span>
+                        Anlık bildirimler ve onay mekanizmaları
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    <!-- ... skipped some repetitive static sections to keep view concise ... -->
+
+    <!-- API and Features -> Similar content -> Adding just the essential blocks -->
+    <!-- Final CTA -->
+    <section class="py-24 px-8">
+        <div class="max-w-5xl mx-auto bg-inverse-surface rounded-[2.5rem] p-12 lg:p-20 text-center relative overflow-hidden ambient-shadow">
+            <!-- Abstract Glow -->
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent z-0"></div>
+            <div class="relative z-10 space-y-8">
+                <h2 class="font-headline text-4xl lg:text-5xl font-extrabold text-on-tertiary">Bir Sonraki Büyük Projenizi Birlikte İnşa Edelim</h2>
+                <p class="text-lg text-on-tertiary/80 max-w-2xl mx-auto">
+                    Dev4All'a bugün katılın, doğru yeteneği bulma stresini geride bırakın. İşinize odaklanın, teknik detayları bize bırakın.
+                </p>
+                <div class="pt-6">
+                    <a asp-controller="Auth" asp-action="Register" class="inline-block bg-primary-container text-on-primary-container px-10 py-5 rounded-xl font-headline font-bold text-lg hover:bg-primary transition-colors duration-300 shadow-xl shadow-primary/20 active:scale-95">
+                        Hemen Ücretsiz Hesap Oluşturun
+                    </a>
                 </div>
             </div>
         </div>
+    </section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#f2f3ff] dark:bg-slate-900 font-['Inter'] text-sm leading-relaxed w-full rounded-t-[2rem] mt-20 bg-surface-container-low-tonal-break border-t border-outline-variant/20">
+    <div class="max-w-7xl mx-auto px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div class="col-span-1 md:col-span-1 space-y-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'FILL' 1;">integration_instructions</span>
+                </div>
+                <div class="text-xl font-bold text-[#131b2e] dark:text-white font-headline">
+                    Dev4All
+                </div>
+            </div>
+            <p class="text-[#434656] dark:text-slate-400 max-w-xs">
+                Dünyanın en iyi geliştiricilerini, vizyoner projelerle buluşturan güvenilir B2B platformu.
+            </p>
+        </div>
+        <div class="col-span-1">
+            <h4 class="text-[#131b2e] dark:text-white font-semibold mb-4 font-headline">Platform</h4>
+            <ul class="space-y-3">
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Nasıl Çalışır?</a></li>
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">AI Kod Analizi</a></li>
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Güvenli Ödeme</a></li>
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Geliştirici Ağı</a></li>
+            </ul>
+        </div>
+        <div class="col-span-1">
+            <h4 class="text-[#131b2e] dark:text-white font-semibold mb-4 font-headline">Şirket</h4>
+            <ul class="space-y-3">
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Hakkımızda</a></li>
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Blog</a></li>
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Kariyer</a></li>
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">İletişim</a></li>
+            </ul>
+        </div>
+        <div class="col-span-1">
+            <h4 class="text-[#131b2e] dark:text-white font-semibold mb-4 font-headline">Yasal</h4>
+            <ul class="space-y-3">
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Gizlilik Politikası</a></li>
+                <li><a class="text-[#434656] dark:text-slate-400 hover:text-[#0052ff] dark:hover:text-blue-300 underline-offset-4 hover:underline focus:ring-2 focus:ring-[#0052ff] focus:outline-none" href="#">Kullanım Koşulları</a></li>
+            </ul>
+        </div>
     </div>
-</section>
-
-<section class="mb-5">
-    <div class="text-center mb-4">
-        <h2 class="h3 fw-bold">Everything you need to deliver</h2>
-    </div>
-    <div class="row g-4">
-        <div class="col-sm-6 col-lg-3">
-            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
-                <h3 class="h6 fw-semibold">Project Management</h3>
-                <p class="text-muted mb-0">Organize scope, milestones, and deadlines in one dashboard.</p>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
-                <h3 class="h6 fw-semibold">Bid System</h3>
-                <p class="text-muted mb-0">Review transparent offers and choose the right expertise.</p>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
-                <h3 class="h6 fw-semibold">GitHub Tracking</h3>
-                <p class="text-muted mb-0">Monitor code activity and delivery progress through integrations.</p>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="feature-box h-100 p-4 rounded-4 border bg-white">
-                <h3 class="h6 fw-semibold">Contract Management</h3>
-                <p class="text-muted mb-0">Keep agreements and revisions centralized and secure.</p>
-            </div>
+    <div class="max-w-7xl mx-auto px-8 py-6 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center text-xs text-[#434656] dark:text-slate-500">
+        <p>© 2024 Dev4All B2B Platformu. Tüm hakları saklıdır.</p>
+        <div class="flex space-x-4 mt-4 md:mt-0">
+            <span class="material-symbols-outlined hover:text-primary cursor-pointer transition-colors" style="font-variation-settings: 'FILL' 1;">language</span>
         </div>
     </div>
-</section>
-
-<section class="rounded-4 bg-light border p-4 p-md-5 text-center">
-    <h2 class="h3 fw-bold mb-3">Ready to start your next project?</h2>
-    <p class="text-muted mb-4">Join Dev4All and connect with professionals who can ship high-quality outcomes.</p>
-    <a asp-controller="Auth" asp-action="Register" class="btn btn-primary btn-lg px-4">Register now</a>
-    <p class="mt-3 mb-0 text-muted">Already have an account? <a asp-controller="Auth" asp-action="Login">Sign in to your account</a></p>
-</section>
+</footer>

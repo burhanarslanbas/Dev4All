@@ -1,0 +1,27 @@
+@{
+    var statusCode = ViewData["StatusCode"] as int? ?? 500;
+    var title = statusCode switch
+    {
+        403 => "Erişim Reddedildi",
+        404 => "Sayfa Bulunamadı",
+        _ => "Bir Hata Oluştu"
+    };
+
+    var message = statusCode switch
+    {
+        403 => "Bu alana erişim yetkiniz bulunmuyor.",
+        404 => "Aradığınız sayfa mevcut değil veya taşınmış olabilir.",
+        _ => "İstek işlenirken beklenmeyen bir hata oluştu."
+    };
+}
+
+<div class="min-h-screen flex items-center justify-center bg-background p-6">
+    <div class="max-w-xl w-full bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-10 text-center shadow-[0_8px_40px_rgba(19,27,46,0.06)]">
+        <p class="text-primary text-sm font-bold mb-3">Hata Kodu: @statusCode</p>
+        <h1 class="text-3xl font-headline font-extrabold text-on-surface mb-3">@title</h1>
+        <p class="text-on-surface-variant mb-8">@message</p>
+        <a asp-controller="Home" asp-action="Index" class="inline-flex px-6 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-opacity">
+            Ana Sayfaya Dön
+        </a>
+    </div>
+</div>

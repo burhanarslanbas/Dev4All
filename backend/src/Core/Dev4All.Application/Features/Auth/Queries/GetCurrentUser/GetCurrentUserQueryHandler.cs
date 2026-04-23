@@ -11,7 +11,7 @@ public sealed class GetCurrentUserQueryHandler(
     public Task<GetCurrentUserResponse> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
         if (!currentUser.IsAuthenticated)
-            throw new UnauthorizedDomainException("Kullanıcı doğrulaması gereklidir.");
+            throw new AuthenticationFailedException("Kullanıcı doğrulaması gereklidir.");
 
         return Task.FromResult(
             new GetCurrentUserResponse(currentUser.UserId, currentUser.Email, currentUser.Role));

@@ -5,7 +5,13 @@ using Dev4All.Web.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AppPolicies.CustomerOrAdmin, policy =>
+        policy.RequireRole(AppRoles.Customer, AppRoles.Admin));
+    options.AddPolicy(AppPolicies.DeveloperOrAdmin, policy =>
+        policy.RequireRole(AppRoles.Developer, AppRoles.Admin));
+});
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -13,6 +19,10 @@ builder.Services
         options.LoginPath = "/auth/login";
         options.AccessDeniedPath = "/auth/access-denied";
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.Name = ".Dev4All.Auth";
     });
 
 builder.Services.AddHttpContextAccessor();
@@ -47,6 +57,15 @@ builder.Services.AddHttpClient<IApiClient, ApiClient>((serviceProvider, client) 
 var app = builder.Build();
 
 app.UseExceptionHandler("/Home/Error");
+app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    await next();
+});
 
 if (!app.Environment.IsDevelopment())
 {

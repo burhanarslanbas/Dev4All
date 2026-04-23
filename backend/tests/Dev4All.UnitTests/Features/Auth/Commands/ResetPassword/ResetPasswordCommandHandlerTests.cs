@@ -50,7 +50,7 @@ public class ResetPasswordCommandHandlerTests
         public Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(string name, string email, string password, string role, CancellationToken ct = default)
             => throw new NotImplementedException();
 
-        public Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
+        public Task<(bool Succeeded, string UserId, string Email, string Role, bool EmailConfirmed)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
             => throw new NotImplementedException();
 
         public Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default)

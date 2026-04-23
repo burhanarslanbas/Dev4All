@@ -15,4 +15,5 @@
     <Project Path="tests/Dev4All.IntegrationTests/Dev4All.IntegrationTests.csproj" />
     <Project Path="tests/Dev4All.UnitTests/Dev4All.UnitTests.csproj" />
   </Folder>
+  <Project Path="../frontend/Dev4All.Web/Dev4All.Web.csproj" />
 </Solution>

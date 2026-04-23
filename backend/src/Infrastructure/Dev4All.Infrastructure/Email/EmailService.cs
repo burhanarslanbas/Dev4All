@@ -15,7 +15,7 @@ public sealed class EmailService(IOptions<SmtpOptions> options) : IEmailService
     public async Task SendAsync(string recipient, string subject, string htmlBody, CancellationToken ct = default)
     {
         var message = new MimeMessage();
-        message.From.Add(MailboxAddress.Parse(_smtp.SenderEmail));
+        message.From.Add(new MailboxAddress("Dev4All", _smtp.SenderEmail));
         message.To.Add(MailboxAddress.Parse(recipient));
         message.Subject = subject;
         message.Body = new TextPart("html") { Text = htmlBody };

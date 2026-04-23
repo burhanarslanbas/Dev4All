@@ -2,12 +2,14 @@ using Dev4All.Application.Abstractions.Persistence;
 using Dev4All.Application.Abstractions.Persistence.Repositories.Bids;
 using Dev4All.Application.Abstractions.Persistence.Repositories.ContractRevisions;
 using Dev4All.Application.Abstractions.Persistence.Repositories.Contracts;
+using Dev4All.Application.Abstractions.Persistence.Repositories.Emails;
 using Dev4All.Application.Abstractions.Persistence.Repositories.GitHubLogs;
 using Dev4All.Application.Abstractions.Persistence.Repositories.Projects;
 using Dev4All.Application.Abstractions.Persistence.Repositories.RefreshTokens;
 using Dev4All.Persistence.Repositories.Bids;
 using Dev4All.Persistence.Repositories.ContractRevisions;
 using Dev4All.Persistence.Repositories.Contracts;
+using Dev4All.Persistence.Repositories.Emails;
 using Dev4All.Persistence.Repositories.GitHubLogs;
 using Dev4All.Persistence.Repositories.Projects;
 using Dev4All.Persistence.Repositories.RefreshTokens;
@@ -41,6 +43,8 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IContractRevisionWriteRepository, ContractRevisionWriteRepository>();
 
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+        services.AddScoped<IEmailQueueRepository, EmailQueueRepository>();
 
         return services;
     }

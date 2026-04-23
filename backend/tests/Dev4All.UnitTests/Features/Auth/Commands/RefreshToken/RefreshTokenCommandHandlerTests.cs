@@ -3,7 +3,6 @@ using Dev4All.Application.Abstractions.Persistence;
 using Dev4All.Application.Abstractions.Persistence.Repositories.RefreshTokens;
 using Dev4All.Application.Features.Auth.Commands.RefreshToken;
 using Dev4All.Application.Options;
-using Dev4All.Domain.Entities;
 using Dev4All.Domain.Exceptions;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -26,13 +25,16 @@ public class RefreshTokenCommandHandlerTests
         var identityService = new FakeIdentityService { EmailToReturn = "user1@example.com" };
         var repository = new FakeRefreshTokenRepository { ExistingToken = existingToken };
         var unitOfWork = new FakeUnitOfWork();
-        var options = Options.Create(new JwtOptions { ExpiryInMinutes = 60 });
-        var handler = new RefreshTokenCommandHandler(jwtService, identityService, repository, unitOfWork, options);
+        var jwtOptions = Options.Create(new JwtOptions { ExpiryInMinutes = 60 });
+        var authOptions = Options.Create(new AuthOptions { RefreshTokenLifetimeInDays = 7 });
+        var handler = new RefreshTokenCommandHandler(jwtService, identityService, repository, unitOfWork, jwtOptions, authOptions);
 
         var response = await handler.Handle(new RefreshTokenCommand("expired-access", "old-refresh-token"), CancellationToken.None);
 
-        Assert.Equal("new-access-token", response.Token);
+        Assert.Equal("new-access-token", response.AccessToken);
         Assert.Equal("new-refresh-token", response.RefreshToken);
+        Assert.Equal("user1@example.com", response.Email);
+        Assert.Equal("Customer", response.Role);
         Assert.True(response.ExpiresAt > DateTime.UtcNow);
         Assert.True(existingToken.IsRevoked);
         Assert.NotNull(repository.AddedToken);
@@ -42,7 +44,7 @@ public class RefreshTokenCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenRefreshTokenIsInvalid_ShouldThrowUnauthorizedException()
+    public async Task Handle_WhenRefreshTokenIsInvalid_ShouldThrowAuthenticationFailedException()
     {
         var jwtService = new FakeJwtService
         {
@@ -51,10 +53,11 @@ public class RefreshTokenCommandHandlerTests
         var identityService = new FakeIdentityService { EmailToReturn = "user1@example.com" };
         var repository = new FakeRefreshTokenRepository { ExistingToken = null };
         var unitOfWork = new FakeUnitOfWork();
-        var options = Options.Create(new JwtOptions { ExpiryInMinutes = 60 });
-        var handler = new RefreshTokenCommandHandler(jwtService, identityService, repository, unitOfWork, options);
+        var jwtOptions = Options.Create(new JwtOptions { ExpiryInMinutes = 60 });
+        var authOptions = Options.Create(new AuthOptions { RefreshTokenLifetimeInDays = 7 });
+        var handler = new RefreshTokenCommandHandler(jwtService, identityService, repository, unitOfWork, jwtOptions, authOptions);
 
-        await Assert.ThrowsAsync<UnauthorizedDomainException>(() =>
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() =>
             handler.Handle(new RefreshTokenCommand("expired-access", "missing-token"), CancellationToken.None));
 
         Assert.Null(repository.AddedToken);
@@ -120,7 +123,7 @@ public class RefreshTokenCommandHandlerTests
         public Task<(bool Succeeded, string UserId, IEnumerable<string> Errors)> CreateUserAsync(string name, string email, string password, string role, CancellationToken ct = default)
             => throw new NotImplementedException();
 
-        public Task<(bool Succeeded, string UserId, string Email, string Role)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
+        public Task<(bool Succeeded, string UserId, string Email, string Role, bool EmailConfirmed)> AuthenticateAsync(string email, string password, CancellationToken ct = default)
             => throw new NotImplementedException();
 
         public Task<bool> IsInRoleAsync(string userId, string role, CancellationToken ct = default)

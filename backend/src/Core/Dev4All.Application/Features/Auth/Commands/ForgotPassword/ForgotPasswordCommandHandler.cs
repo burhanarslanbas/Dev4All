@@ -1,16 +1,18 @@
 using Dev4All.Application.Abstractions.Auth;
 using Dev4All.Application.Abstractions.Services;
+using Dev4All.Application.Options;
 using MediatR;
+using Microsoft.Extensions.Options;
 
 namespace Dev4All.Application.Features.Auth.Commands.ForgotPassword;
 
 public sealed class ForgotPasswordCommandHandler(
     IIdentityService identityService,
-    IEmailNotificationService emailNotificationService) : IRequestHandler<ForgotPasswordCommand, ForgotPasswordResponse>
+    IEmailNotificationService emailNotificationService,
+    IOptions<AuthOptions> authOptions) : IRequestHandler<ForgotPasswordCommand, ForgotPasswordResponse>
 {
     private const string GenericMessage =
         "Eğer bu e-posta sistemde kayıtlıysa, şifre sıfırlama bağlantısı gönderilecektir.";
-    private const string ResetPasswordPath = "/reset-password";
 
     public async Task<ForgotPasswordResponse> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
     {
@@ -18,17 +20,17 @@ public sealed class ForgotPasswordCommandHandler(
 
         if (!string.IsNullOrWhiteSpace(resetToken))
         {
-            var resetUrl = BuildResetUrl(request.Email, resetToken);
+            var resetUrl = BuildResetUrl(request.Email, resetToken, authOptions.Value.PasswordResetUrlTemplate);
             await emailNotificationService.QueuePasswordResetEmailAsync(request.Email, resetUrl, cancellationToken);
         }
 
         return new ForgotPasswordResponse(GenericMessage);
     }
 
-    private static string BuildResetUrl(string email, string resetToken)
+    private static string BuildResetUrl(string email, string resetToken, string template)
     {
-        var encodedEmail = Uri.EscapeDataString(email);
-        var encodedToken = Uri.EscapeDataString(resetToken);
-        return $"{ResetPasswordPath}?email={encodedEmail}&token={encodedToken}";
+        return template
+            .Replace("{email}", Uri.EscapeDataString(email), StringComparison.Ordinal)
+            .Replace("{token}", Uri.EscapeDataString(resetToken), StringComparison.Ordinal);
     }
 }

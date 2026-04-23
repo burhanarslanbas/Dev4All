@@ -1,8 +1,166 @@
-﻿@{
-    ViewData["Title"] = "Projects";
+@{
+    ViewData["Title"] = "Dashboard";
+    var isDeveloper = User.IsInRole("Developer");
+    var isAdmin = User.IsInRole("Admin");
+    var canExplore = isDeveloper || isAdmin;
+    var canCreate = !isDeveloper || isAdmin;
 }
 
-<section class="py-4">
-    <h1 class="h3 fw-bold mb-3">Browse Projects</h1>
-    <p class="text-muted mb-0">Project browsing will be available here soon.</p>
-</section>
+<!-- TopAppBar -->
+<header class="bg-[#faf8ff] dark:bg-slate-950 flex justify-between items-center w-full px-6 h-16 sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+        <a asp-controller="Home" asp-action="Index" class="font-['Manrope'] font-bold text-lg tracking-tight text-[#131b2e] dark:text-slate-50">Dev4All</a>
+    </div>
+    <partial name="_LoginPartial" />
+</header>
+
+<main class="max-w-5xl mx-auto px-6 pt-8 pb-32 space-y-12">
+    <!-- Welcome Section -->
+    <section class="space-y-2">
+        <h1 class="text-3xl font-extrabold text-on-surface tracking-tight">Merhaba, Ahmet</h1>
+        <p class="text-on-surface-variant text-lg">Projelerindeki güncel durumu buradan takip edebilirsin.</p>
+    </section>
+
+    <!-- Summary Cards -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-primary-container p-8 rounded-xl text-on-primary shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+            <div class="z-10">
+                <p class="font-medium opacity-90 text-on-primary-container">Aktif Projeler</p>
+                <h2 class="text-5xl font-extrabold mt-2">2</h2>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-10">
+                <span class="material-symbols-outlined text-[120px]">rocket_launch</span>
+            </div>
+            <button class="z-10 mt-4 text-sm font-semibold flex items-center gap-1 hover:underline w-fit">
+                Detayları Görüntüle <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+        </div>
+        
+        <div class="bg-surface-container-low p-8 rounded-xl border-none shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+            <div class="z-10">
+                <p class="font-medium text-on-secondary-container">Bekleyen Teklifler</p>
+                <h2 class="text-5xl font-extrabold mt-2 text-primary">5</h2>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-5 text-on-background">
+                <span class="material-symbols-outlined text-[120px]">request_quote</span>
+            </div>
+            @if (canExplore)
+            {
+                <a asp-action="Explore" class="z-10 mt-4 text-sm font-semibold flex items-center gap-1 text-primary hover:text-primary-container w-fit">
+                    Teklifleri İncele <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            }
+        </div>
+    </section>
+
+    <!-- Recent Projects Section -->
+    <section class="space-y-6">
+        <div class="flex justify-between items-end">
+            <h3 class="text-2xl font-bold tracking-tight">Son Projelerin</h3>
+            <a class="text-primary font-semibold text-sm hover:underline" href="#">Tümünü Gör</a>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- Project Card 1 -->
+            <a asp-action="Contract" class="block group bg-surface-container-lowest p-5 rounded-xl flex items-center gap-6 hover:bg-surface-container-low transition-colors duration-200">
+                <div class="w-16 h-16 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-center gap-3 mb-1">
+                        <h4 class="font-bold text-lg text-on-surface">E-Ticaret Mobil Uygulama</h4>
+                        <span class="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Geliştirmede</span>
+                    </div>
+                    <p class="text-on-surface-variant text-sm line-clamp-1">React Native ve Node.js altyapılı modern alışveriş deneyimi.</p>
+                </div>
+                <div class="hidden md:flex flex-col items-end gap-1">
+                    <span class="text-xs text-outline font-medium">Son Güncelleme</span>
+                    <span class="text-sm font-semibold text-on-surface">2 saat önce</span>
+                </div>
+                <div class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </div>
+            </a>
+
+            <!-- Project Card 2 -->
+            <a href="#" class="block group bg-surface-container-lowest p-5 rounded-xl flex items-center gap-6 hover:bg-surface-container-low transition-colors duration-200">
+                <div class="w-16 h-16 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-3xl">monitoring</span>
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-center gap-3 mb-1">
+                        <h4 class="font-bold text-lg text-on-surface">Veri Analiz Dashboard</h4>
+                        <span class="bg-secondary-fixed text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">İncelemede</span>
+                    </div>
+                    <p class="text-on-surface-variant text-sm line-clamp-1">Büyük veri setlerinin görselleştirilmesi ve raporlanması projesi.</p>
+                </div>
+                <div class="hidden md:flex flex-col items-end gap-1">
+                    <span class="text-xs text-outline font-medium">Son Güncelleme</span>
+                    <span class="text-sm font-semibold text-on-surface">Dün</span>
+                </div>
+                <div class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </div>
+            </a>
+
+            <!-- Project Card 3 -->
+            <a href="#" class="block group bg-surface-container-lowest p-5 rounded-xl flex items-center gap-6 hover:bg-surface-container-low transition-colors duration-200">
+                <div class="w-16 h-16 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-primary text-3xl">language</span>
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-center gap-3 mb-1">
+                        <h4 class="font-bold text-lg text-on-surface">Kurumsal Web Sitesi</h4>
+                        <span class="bg-tertiary-fixed text-on-tertiary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Tamamlandı</span>
+                    </div>
+                    <p class="text-on-surface-variant text-sm line-clamp-1">Global pazar için çok dilli ve SEO odaklı kurumsal kimlik çalışması.</p>
+                </div>
+                <div class="hidden md:flex flex-col items-end gap-1">
+                    <span class="text-xs text-outline font-medium">Tamamlanma</span>
+                    <span class="text-sm font-semibold text-on-surface">15 Haz 2023</span>
+                </div>
+                <div class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </div>
+            </a>
+        </div>
+    </section>
+</main>
+
+<!-- FAB -->
+@if (canCreate)
+{
+    <a asp-action="Create" class="fixed right-6 bottom-24 w-16 h-16 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-200 z-40 group">
+        <span class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform duration-300">add</span>
+    </a>
+}
+
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 h-20 bg-[#faf8ff]/80 dark:bg-slate-950/80 backdrop-blur-xl z-50 shadow-[0_-4px_32px_rgba(19,27,46,0.04)] border-t border-[#c3c5d9]/20" style="padding-bottom: env(safe-area-inset-bottom);">
+    <!-- Explore -->
+    @if (canExplore)
+    {
+        <a asp-action="Explore" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 hover:text-[#0052FF] dark:hover:text-[#0052FF] active:scale-90 transition-all duration-150">
+            <span class="material-symbols-outlined mb-1">explore</span>
+            <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider">Explore</span>
+        </a>
+    }
+    
+    <!-- Projects (Active) -->
+    <a asp-action="Index" class="flex flex-col items-center justify-center bg-[#dde1ff] dark:bg-[#0052FF]/20 text-[#003ec7] dark:text-[#0052FF] rounded-xl px-3 py-1.5 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">assignment</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider">Projects</span>
+    </a>
+    
+    <!-- Alerts -->
+    <a href="#" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 hover:text-[#0052FF] dark:hover:text-[#0052FF] active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">notifications</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider">Alerts</span>
+    </a>
+    
+    <!-- Profile -->
+    <a href="#" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 hover:text-[#0052FF] dark:hover:text-[#0052FF] active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">person</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider">Profile</span>
+    </a>
+</nav>

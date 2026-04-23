@@ -1,0 +1,199 @@
+@{
+    ViewData["Title"] = "Keşfet";
+}
+
+<!-- TopAppBar Component -->
+<header class="bg-[#faf8ff] dark:bg-slate-950 docked full-width top-0 z-50 flex justify-between items-center w-full px-6 h-16 sticky">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden">
+            <img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1V41IERFTFAVjldWl68lTmBIiuY_N9K1DGf7aW1kOjmotc7DxacjYnXfQB7bglZzGmUi_GduMMZGRzowaix7D4JdJBF5a392MEdak3PlSpsu1vhD0kqHwjcBEAMoN8PqFzb9vLRtWE2SSx1IGqCu2vKxssG0CZNQoPe51txrNj7dl_rKaQOqR0lwf3zlTrGcl5_4cPRLMsVWcYYQPgfAQg3kEgBQXMj8dTXDiI9zRkhS1tGo98MFHUUieImmTPWXjMY3H2vQIDQ0" />
+        </div>
+        <a asp-controller="Home" asp-action="Index" class="font-['Manrope'] font-bold text-lg tracking-tight text-[#131b2e] dark:text-slate-50">Dev4All</a>
+    </div>
+    <div class="flex items-center gap-4">
+        <button class="text-[#0052FF] dark:text-[#0052FF] hover:bg-[#e2e7ff] dark:hover:bg-slate-800 transition-colors duration-200 p-2 rounded-full active:scale-95 transition-transform">
+            <span class="material-symbols-outlined">notifications</span>
+        </button>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pt-8 pb-32 space-y-10">
+    <!-- Search & Filter Section -->
+    <section class="space-y-6">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="relative flex-grow">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+                <input class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/40 text-on-surface placeholder:text-outline transition-all" placeholder="Proje veya teknoloji ara..." type="text" />
+            </div>
+            <button class="flex items-center justify-center gap-2 px-6 py-4 bg-surface-container-high text-on-surface-variant rounded-xl hover:bg-surface-variant transition-colors font-semibold">
+                <span class="material-symbols-outlined">tune</span>
+                <span>Filtrele</span>
+            </button>
+        </div>
+        <!-- Bento Category Chips -->
+        <div class="flex flex-wrap gap-3">
+            <span class="px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-medium hover:brightness-110 cursor-pointer">Hepsi</span>
+            <span class="px-4 py-2 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container-high transition-colors cursor-pointer">Web Geliştirme</span>
+            <span class="px-4 py-2 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container-high transition-colors cursor-pointer">Mobil Uygulama</span>
+            <span class="px-4 py-2 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container-high transition-colors cursor-pointer">Yapay Zeka</span>
+            <span class="px-4 py-2 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container-high transition-colors cursor-pointer">Blockchain</span>
+        </div>
+    </section>
+    
+    <!-- Project Grid -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Project Card 1 -->
+        <div class="group bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex justify-between items-start">
+                    <div class="bg-primary-fixed px-3 py-1 rounded-lg text-on-primary-fixed text-xs font-bold uppercase tracking-wider">Acil</div>
+                    <div class="flex items-center text-error gap-1">
+                        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">timer</span>
+                        <span class="text-xs font-bold">Son 2 Gün</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">E-Ticaret Platformu UI/UX Modernizasyonu</h3>
+                    <p class="text-on-surface-variant text-sm mt-2 line-clamp-2">Mevcut React tabanlı e-ticaret sitemizin tasarımını modern trendlere uygun olarak yenileyecek uzman aranıyor.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">REACT</span>
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">TAILWIND</span>
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">FIGMA</span>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] text-outline uppercase font-bold tracking-widest">Bütçe</p>
+                    <p class="text-lg font-extrabold text-on-surface">₺45,000 - ₺60,000</p>
+                </div>
+                <a asp-action="Bid" class="bg-gradient-to-br from-primary to-primary-container text-on-primary p-3 rounded-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all w-fit">
+                    <span class="text-sm font-bold mr-2">Teklif Ver</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Project Card 2 -->
+        <div class="group bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex justify-between items-start">
+                    <div class="bg-tertiary-fixed px-3 py-1 rounded-lg text-on-tertiary-fixed text-xs font-bold uppercase tracking-wider">Orta Seviye</div>
+                    <div class="flex items-center text-on-surface-variant gap-1">
+                        <span class="material-symbols-outlined text-sm">timer</span>
+                        <span class="text-xs font-bold">5 Gün Kaldı</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">Fintech Uygulaması Mikroservis Mimarisi</h3>
+                    <p class="text-on-surface-variant text-sm mt-2 line-clamp-2">C# ve .NET Core ile backend servislerinin yeniden yapılandırılması ve performans iyileştirmesi.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">C#</span>
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">.NET CORE</span>
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">AZURE</span>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] text-outline uppercase font-bold tracking-widest">Bütçe</p>
+                    <p class="text-lg font-extrabold text-on-surface">₺85,000+</p>
+                </div>
+                <a asp-action="Bid" class="bg-gradient-to-br from-primary to-primary-container text-on-primary p-3 rounded-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all w-fit">
+                    <span class="text-sm font-bold mr-2">Teklif Ver</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Project Card 3 -->
+        <div class="group bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex justify-between items-start">
+                    <div class="bg-secondary-fixed px-3 py-1 rounded-lg text-on-secondary-fixed text-xs font-bold uppercase tracking-wider">Uzun Dönem</div>
+                    <div class="flex items-center text-on-surface-variant gap-1">
+                        <span class="material-symbols-outlined text-sm">timer</span>
+                        <span class="text-xs font-bold">1 Hafta Kaldı</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">Yapay Zeka Destekli CRM Dashboard</h3>
+                    <p class="text-on-surface-variant text-sm mt-2 line-clamp-2">Python ve Next.js kullanarak verileri analiz eden ve öngörü sunan kurumsal panel geliştirilmesi.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">PYTHON</span>
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">NEXT.JS</span>
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">OPENAI</span>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] text-outline uppercase font-bold tracking-widest">Bütçe</p>
+                    <p class="text-lg font-extrabold text-on-surface">₺120,000</p>
+                </div>
+                <a asp-action="Bid" class="bg-gradient-to-br from-primary to-primary-container text-on-primary p-3 rounded-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all w-fit">
+                    <span class="text-sm font-bold mr-2">Teklif Ver</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Project Card 4 -->
+        <div class="group bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex justify-between items-start">
+                    <div class="bg-primary-fixed px-3 py-1 rounded-lg text-on-primary-fixed text-xs font-bold uppercase tracking-wider">Acil</div>
+                    <div class="flex items-center text-error gap-1">
+                        <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">timer</span>
+                        <span class="text-xs font-bold">Son 12 Saat</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">Flutter ile Kurye Takip Uygulaması</h3>
+                    <p class="text-on-surface-variant text-sm mt-2 line-clamp-2">Canlı konum takibi ve bildirim entegrasyonu içeren mobil uygulama geliştirme projesi.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">FLUTTER</span>
+                    <span class="bg-surface-container-low px-2 py-1 rounded text-[11px] font-semibold text-secondary">FIREBASE</span>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] text-outline uppercase font-bold tracking-widest">Bütçe</p>
+                    <p class="text-lg font-extrabold text-on-surface">₺35,000</p>
+                </div>
+                <a asp-action="Bid" class="bg-gradient-to-br from-primary to-primary-container text-on-primary p-3 rounded-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all w-fit">
+                    <span class="text-sm font-bold mr-2">Teklif Ver</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- BottomNavBar Component -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-safe h-20 bg-[#faf8ff]/80 dark:bg-slate-950/80 backdrop-blur-xl z-50 shadow-[0_-4px_32px_rgba(19,27,46,0.04)]" style="padding-bottom: env(safe-area-inset-bottom);">
+    <!-- Explore (Active) -->
+    <a asp-action="Explore" class="flex flex-col items-center justify-center bg-[#dde1ff] dark:bg-[#0052FF]/20 text-[#003ec7] dark:text-[#0052FF] rounded-xl px-3 py-1.5 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">explore</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Explore</span>
+    </a>
+    
+    <!-- Projects -->
+    <a asp-action="Index" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 hover:text-[#0052FF] active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">assignment</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Projects</span>
+    </a>
+    
+    <!-- Alerts -->
+    <a href="#" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 hover:text-[#0052FF] active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">notifications</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Alerts</span>
+    </a>
+    
+    <!-- Profile -->
+    <a href="#" class="flex flex-col items-center justify-center text-[#434656] dark:text-slate-400 px-3 py-1.5 hover:text-[#0052FF] active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">person</span>
+        <span class="font-['Inter'] font-medium text-[10px] uppercase tracking-wider mt-1">Profile</span>
+    </a>
+</nav>

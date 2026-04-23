@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Erişim Reddedildi";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-background p-6">
+    <div class="max-w-xl w-full bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-10 text-center shadow-[0_8px_40px_rgba(19,27,46,0.06)]">
+        <h1 class="text-3xl font-headline font-extrabold text-on-surface mb-3">Bu alana erişemezsiniz</h1>
+        <p class="text-on-surface-variant mb-8">
+            Rolünüz bu sayfayı görüntülemek için yeterli değil. Gerekli izin için yetkili bir kullanıcıyla iletişime geçin.
+        </p>
+        <a asp-controller="Home" asp-action="Index" class="inline-flex px-6 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-opacity">
+            Ana Sayfaya Dön
+        </a>
+    </div>
+</div>
